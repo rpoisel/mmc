@@ -11,14 +11,18 @@ import optparse
 import magic
 
 # import only if necessary
-#import frag_mm_meta_context
+import contexts.media.frag_mm_meta_context
+import contexts.tsk.tsk
+import lib.datatypes
+import block
 
 
 class CContext():
     default_imagefile = 'image.img'
-    default_fragmentsize = 16384
+    default_fragmentsize = 4096
     default_incrementsize = 4096
     default_offset = 0
+    default_preprocessing = False
 
     def __init__(self):
         self.__mMagic = magic.open(magic.MAGIC_NONE)
@@ -48,39 +52,60 @@ class CContext():
                 " (default:" + str(CContext.default_offset) + ")",
                 default=CContext.default_offset,
                 type="int")
+        lParser.add_option("-p", "--preprocess", action="store_true",
+                dest="preprocess",
+                help="Turn preprocessing on or off" +
+                " (default:" + str(CContext.default_preprocessing) + ")",
+                default=CContext.default_preprocessing)
         (lOptions, lArgs) = lParser.parse_args()
 
         try:
-            lH264Files = []
+            lH264Headers = []
+            lMapOfBlocks = []
 
             # open imagefile
             lImage = open(lOptions.imagefile, "rb")
-            lOffset = 0
+            lOffset = lOptions.offset
+            lIncrementSize = lOptions.incrementsize
             
             # TODO pre-processing: check where to start carving
             # use TSK (http://www.sleuthkit.org/) for that purpose
-            lImage.seek(lOptions.offset, os.SEEK_SET)
+            if lOptions.preprocess == True:
+                #lTSK = tsk.CTSK(lImage)
+                #lH264Headers = lTSK.parseH264Headers()
+                #lH264Fragments = lTSK.parseH264Fragments()
+                lTSK = tsk.CTSK(lMapOfBlocks)
+                lOffset = lTSK.getOffset()
+                lIncrementSize = lTSK.getIncrementSize()
 
-            # collating: walk through fragments of the file 
-            while True:
-                lBuffer = lImage.read(lOptions.fragmentsize)
-                if lBuffer == "":
-                    break;
+            # work directly on the image
+            else:
+                #lPlain = plain.CPlain(lImage)
+                #lH264Headers = lTSK.parseH264Headers()
+                #lH264Fragments = lTSK.parseH264Fragments()
 
-                # check for beginning of files using libmagic(3)
-                lType = self.__mMagic.buffer(lBuffer)
-                if lType.find("H.264") >= 0 and lType.find("video") >= 0:
-                    lH264Files.append(lOffset)
-                # generate a map of filetypes of fragments
+                lImage.seek(lOptions.offset, os.SEEK_SET)
 
-                # position internal file pointer
-                lOffset += lOptions.incrementsize
-                lImage.seek(lOffset, os.SEEK_SET)
+                # collating: walk through fragments of the file 
+                while True:
+                    lBuffer = lImage.read(lOptions.fragmentsize)
+                    if lBuffer == "":
+                        break;
+
+                    # check for beginning of files using libmagic(3)
+                    lType = self.__mMagic.buffer(lBuffer)
+                    if lType.find("H.264") >= 0 and lType.find("video") >= 0:
+                        lH264Headers.append(lOffset)
+                    # generate a map of filetypes of fragments
+
+                    # position internal file pointer
+                    lOffset += lIncrementSize
+                    lImage.seek(lOffset, os.SEEK_SET)
+
+            print(lH264Headers)
 
             # close file
             lImage.close()
-
-            print(lH264Files)
             
             # TODO reassembly: 
             
