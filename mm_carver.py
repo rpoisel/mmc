@@ -8,13 +8,12 @@ import os.path
 import subprocess
 import optparse
 
-import magic
-
 # import only if necessary
-import contexts.media.frag_mm_meta_context
-import contexts.tsk.tsk
+from contexts.media import frag_mm_meta_context
+from contexts.tsk import tsk_context
+from contexts.plain import plain_context
+from contexts.magic import magic_context
 import lib.datatypes
-import block
 
 
 class CContext():
@@ -25,8 +24,7 @@ class CContext():
     default_preprocessing = False
 
     def __init__(self):
-        self.__mMagic = magic.open(magic.MAGIC_NONE)
-        self.__mMagic.load()
+        pass
 
     def run(self):
         lParser = optparse.OptionParser(add_help_option=False)
@@ -34,7 +32,7 @@ class CContext():
         lParser.add_option("-v", action="store_true", dest="verbose",
                 help="Be moderately verbose")
         lParser.add_option("-f", "--file", dest="imagefile",
-                help="The imagefile (default:" + 
+                help="The imagefile (default:" +
                 CContext.default_imagefile + ")",
                 default=CContext.default_imagefile)
         lParser.add_option("-s", "--fragmentsize", dest="fragmentsize",
@@ -61,54 +59,29 @@ class CContext():
 
         try:
             lH264Headers = []
-            lMapOfBlocks = []
+            lH264Fragments = []
 
             # open imagefile
             lImage = open(lOptions.imagefile, "rb")
             lOffset = lOptions.offset
             lIncrementSize = lOptions.incrementsize
-            
-            # TODO pre-processing: check where to start carving
-            # use TSK (http://www.sleuthkit.org/) for that purpose
+            lFragmentSize = lOptions.fragmentsize
+
             if lOptions.preprocess == True:
-                #lTSK = tsk.CTSK(lImage)
-                #lH264Headers = lTSK.parseH264Headers()
-                #lH264Fragments = lTSK.parseH264Fragments()
-                lTSK = tsk.CTSK(lMapOfBlocks)
-                lOffset = lTSK.getOffset()
-                lIncrementSize = lTSK.getIncrementSize()
-
-            # work directly on the image
+                lProcessor = tsk_context.CTSK(lImage)
             else:
-                #lPlain = plain.CPlain(lImage)
-                #lH264Headers = lTSK.parseH264Headers()
-                #lH264Fragments = lTSK.parseH264Fragments()
+                lProcessor = plain_context.CPlain(lImage)
 
-                lImage.seek(lOptions.offset, os.SEEK_SET)
-
-                # collating: walk through fragments of the file 
-                while True:
-                    lBuffer = lImage.read(lOptions.fragmentsize)
-                    if lBuffer == "":
-                        break;
-
-                    # check for beginning of files using libmagic(3)
-                    lType = self.__mMagic.buffer(lBuffer)
-                    if lType.find("H.264") >= 0 and lType.find("video") >= 0:
-                        lH264Headers.append(lOffset)
-                    # generate a map of filetypes of fragments
-
-                    # position internal file pointer
-                    lOffset += lIncrementSize
-                    lImage.seek(lOffset, os.SEEK_SET)
+            lProcessor.parseH264(lH264Headers, lH264Fragments,
+                    lOffset, lIncrementSize, lFragmentSize)
 
             print(lH264Headers)
 
             # close file
             lImage.close()
-            
-            # TODO reassembly: 
-            
+
+            # TODO reassembly:
+
         except LookupError, pExc:
             print("Error: " + str(pExc))
             sys.exit(-1)
