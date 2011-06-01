@@ -63,21 +63,21 @@ class CContext():
 
             # open imagefile
             lImage = open(lOptions.imagefile, "rb")
-            lOffset = lOptions.offset
-            lIncrementSize = lOptions.incrementsize
-            lFragmentSize = lOptions.fragmentsize
 
+            # initialize preprocessor
             if lOptions.preprocess == True:
                 lProcessor = tsk_context.CTSK(lImage)
             else:
                 lProcessor = plain_context.CPlain(lImage)
 
+            # determine H.264 headers and fragments
             lProcessor.parseH264(lH264Headers, lH264Fragments,
-                    lOffset, lIncrementSize, lFragmentSize)
+                    lOptions.offset, lOptions.incrementsize,
+                    lOptions.fragmentsize)
 
             print(lH264Headers)
 
-            # close file
+            # close imagefile
             lImage.close()
 
             # TODO reassembly:

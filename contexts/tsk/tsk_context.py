@@ -1,3 +1,7 @@
+import os
+
+from ..magic import magic_context
+
 class CTSK:
     def __init__(self, pMapOfBlocks):
         self.__mMapOfBlocks = pMapOfBlocks
