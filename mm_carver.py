@@ -26,7 +26,7 @@ class CContext():
     def __init__(self):
         pass
 
-    def run(self):
+    def parseOptions(self):
         lParser = optparse.OptionParser(add_help_option=False)
         lParser.add_option("-h", "--help", action="help")
         lParser.add_option("-v", action="store_true", dest="verbose",
@@ -56,6 +56,11 @@ class CContext():
                 " (default:" + str(CContext.default_preprocessing) + ")",
                 default=CContext.default_preprocessing)
         (lOptions, lArgs) = lParser.parse_args()
+
+        return lOptions
+
+    def run(self):
+        lOptions = self.parseOptions()
 
         try:
             lH264Headers = []
