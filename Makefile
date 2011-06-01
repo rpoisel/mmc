@@ -12,7 +12,7 @@ RMFLAGS=-rf
 SRC_DIR=src
 BUILD_DIR=build
 OUT_DIR=contexts
-BIN_FRAGMENT_CONTEXT=$(OUT_DIR)/fragment/fragment_context.so
+BIN_FRAGMENT_CONTEXT=$(OUT_DIR)/fragment/libfragment_context.so
 SRC_FRAGMENT_CONTEXT=fragment_context.c
 OBJ_FRAGMENT_CONTEXT=$(SRC_FRAGMENT_CONTEXT:%.c=%.o)
 CFLAGS_FRAGMENT_CONTEXT=-fPIC

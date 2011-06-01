@@ -17,11 +17,11 @@ import lib.datatypes
 
 
 class CContext():
-    default_imagefile = 'image.img'
-    default_fragmentsize = 4096
-    default_incrementsize = 4096
-    default_offset = 0
-    default_preprocessing = False
+    sDefaultImagefile = 'image.img'
+    sDefaultFragmentsize = 4096
+    sDefaultIncrementsize = 4096
+    sDefaultOffset = 0
+    sDefaultPreprocessing = False
 
     def __init__(self):
         pass
@@ -33,28 +33,28 @@ class CContext():
                 help="Be moderately verbose")
         lParser.add_option("-f", "--file", dest="imagefile",
                 help="The imagefile (default:" +
-                CContext.default_imagefile + ")",
-                default=CContext.default_imagefile)
+                CContext.sDefaultImagefile + ")",
+                default=CContext.sDefaultImagefile)
         lParser.add_option("-s", "--fragmentsize", dest="fragmentsize",
                 help="Size of fragments to investigate (default:" +
-                str(CContext.default_fragmentsize) + ")",
-                default=CContext.default_fragmentsize,
+                str(CContext.sDefaultFragmentsize) + ")",
+                default=CContext.sDefaultFragmentsize,
                 type="int")
         lParser.add_option("-i", "--incrementsize", dest="incrementsize",
                 help="Number of bytes from possible start of fragments" +
-                "(default:" + str(CContext.default_incrementsize) + ")",
-                default=CContext.default_incrementsize,
+                "(default:" + str(CContext.sDefaultIncrementsize) + ")",
+                default=CContext.sDefaultIncrementsize,
                 type="int")
         lParser.add_option("-o", "--offset", dest="offset",
                 help="Number of bytes to skip at the beginning" +
-                " (default:" + str(CContext.default_offset) + ")",
-                default=CContext.default_offset,
+                " (default:" + str(CContext.sDefaultOffset) + ")",
+                default=CContext.sDefaultOffset,
                 type="int")
         lParser.add_option("-p", "--preprocess", action="store_true",
                 dest="preprocess",
                 help="Turn preprocessing on or off" +
-                " (default:" + str(CContext.default_preprocessing) + ")",
-                default=CContext.default_preprocessing)
+                " (default:" + str(CContext.sDefaultPreprocessing) + ")",
+                default=CContext.sDefaultPreprocessing)
         (lOptions, lArgs) = lParser.parse_args()
 
         return lOptions
@@ -80,7 +80,7 @@ class CContext():
                     lOptions.offset, lOptions.incrementsize,
                     lOptions.fragmentsize)
 
-            print(lH264Headers)
+            print(len(lH264Fragments))
 
             # close imagefile
             lImage.close()
