@@ -7,12 +7,15 @@ import os
 import os.path
 import subprocess
 import optparse
+import traceback
 
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
 from contexts.tsk import tsk_context
 from contexts.plain import plain_context
 from contexts.magic import magic_context
+from contexts.reassembly import reassembly
+from contexts.reassembly import fragmentizer
 import lib.datatypes
 
 
@@ -22,6 +25,7 @@ class CContext():
     sDefaultIncrementsize = 4096
     sDefaultOffset = 0
     sDefaultPreprocessing = False
+    sDefaultOutput = '/tmp/clever-output'
 
     def __init__(self):
         pass
@@ -45,7 +49,7 @@ class CContext():
                 "(default:" + str(CContext.sDefaultIncrementsize) + ")",
                 default=CContext.sDefaultIncrementsize,
                 type="int")
-        lParser.add_option("-o", "--offset", dest="offset",
+        lParser.add_option("-e", "--offset", dest="offset",
                 help="Number of bytes to skip at the beginning" +
                 " (default:" + str(CContext.sDefaultOffset) + ")",
                 default=CContext.sDefaultOffset,
@@ -55,6 +59,10 @@ class CContext():
                 help="Turn preprocessing on or off" +
                 " (default:" + str(CContext.sDefaultPreprocessing) + ")",
                 default=CContext.sDefaultPreprocessing)
+        lParser.add_option("-o", "--output", dest="output",
+                help="The output directory for extracted information" +
+                " (default:" + str(CContext.sDefaultOutput) + ")",
+                default=CContext.sDefaultOutput)
         (lOptions, lArgs) = lParser.parse_args()
 
         return lOptions
@@ -64,6 +72,7 @@ class CContext():
 
         try:
             lH264Headers = []
+            lH264Blocks = []
             lH264Fragments = []
 
             # open imagefile
@@ -76,27 +85,38 @@ class CContext():
                 lProcessor = plain_context.CPlain(lImage)
 
             # determine H.264 headers and fragments
-            lProcessor.parseH264(lH264Headers, lH264Fragments,
+            lProcessor.parseH264(lH264Headers, lH264Blocks,
                     lOptions.offset, lOptions.incrementsize,
                     lOptions.fragmentsize)
 
-            print(len(lH264Fragments))
-
-            # TODO reassembly:
+            # TODO reassembly (process map of fragments)
+            lFFMpeg = CFFMpegContext()
+            # initialize fragmentizer with parameters that describe
+            # the most important properties for blocks => fragments
+            # conversions
+            lFragmentizer = CFragmentizer()
+            lFragmentizer.defrag(lH264Headers, lH264Blocks, lH264Fragments)
+            lReassmebly = CReassembly(lOptions.output)
+            lReassembly.assemble(lH264Fragments, lFFMpeg)
 
             # close imagefile
             lImage.close()
 
         except LookupError, pExc:
-            print("Error: " + str(pExc))
+            print("LookupError: " + str(pExc))
+            traceback.print_exc()
             sys.exit(-1)
         except NameError, pExc:
-            print("Error: " + str(pExc))
+            print("NameError: " + str(pExc))
+            traceback.print_exc()
             sys.exit(-2)
         except EOFError, pExc:
+            print("EOFError: " + str(pExc))
+            traceback.print_exc()
             sys.exit(-3)
         except Exception, pExc:
             print("Error: " + str(pExc))
+            traceback.print_exc()
             sys.exit(-4)
 
 if __name__ == "__main__":

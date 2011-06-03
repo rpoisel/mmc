@@ -1,4 +1,4 @@
 #!/bin/sh
 
-LD_LIBRARY_PATH="./contexts/fragment" env python mm_carver.py $*
+PYTHONPATH="./contexts/fragment" LD_LIBRARY_PATH="./contexts/fragment" env python mm_carver.py $*
 
