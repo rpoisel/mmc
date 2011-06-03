@@ -4,7 +4,20 @@
 
 #include "fragment_context.h"
 
-int classify(const uint8_t* pBuf, int pBufLength)
+struct _FragmentContext
+{
+};
+
+FragmentContext* fragment_classify_new(const char* pFilename)
+{
+    return NULL;
+}
+
+void fragment_classify_free(FragmentContext* pFragmentContext)
+{
+}
+
+int fragment_classify(FragmentContext* pFragmentContext, const uint8_t* pBuf, int pBufLength)
 {
     int lCnt = 0;
 #if 0
