@@ -1,6 +1,6 @@
 import os
 
-#from contexts.fragment import fragment_context
+from contexts.fragment import fragment_context
 from contexts.magic import magic_context
 
 
@@ -8,7 +8,7 @@ class CPlain:
     def __init__(self, pImage):
         self.__mImage = pImage
         self.__mMagic = magic_context.CMagic()
-        #self.__mFragmentClassifier = fragment_context.CFragmentClassifier()
+        self.__mH264FC = fragment_context.CFragmentClassifier("bla")
 
     def parseH264(self, pH264HeadersList, pH264FragmentsList,
             pOffset, pIncrementSize, pFragmentSize):
@@ -26,8 +26,8 @@ class CPlain:
                 #pH264FragmentsList.append(pOffset)
 
             # generate a map of filetypes of fragments
-            #if self.__mFragmentClassifier.determineH264(lBuffer) == True:
-                #pH264FragmentsList.append(pOffset)
+            if self.__mH264FC.classify(lBuffer) == True:
+                pH264FragmentsList.append(pOffset)
 
             # position internal file pointer
             pOffset += pIncrementSize

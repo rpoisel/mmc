@@ -9,8 +9,7 @@ struct _FragmentClassifier
     int mSomething;
 };
 
-/* FragmentClassifier* fragment_classifier_new(const char* pFilename) */
-FragmentClassifier* fragment_classifier_new()
+FragmentClassifier* fragment_classifier_new(const char* pFilename)
 {
     struct _FragmentClassifier* lHandle = 
         (struct _FragmentClassifier*)malloc(sizeof(struct _FragmentClassifier));
@@ -22,11 +21,11 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
     free(pFragmentClassifier);
 }
 
-/* int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, const uint8_t* pBuf, int pBufLength) */
-int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, int pBufLength)
+int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
+        const unsigned char* pBuf, int pBufLength)
 {
+#if 1
     int lCnt = 0;
-#if 0
     printf("Length: %d\n", pBufLength);
     for (lCnt = 0; lCnt < pBufLength; lCnt++)
     {
@@ -36,6 +35,7 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, int pB
             printf("\n");
         }
     }
+    printf("\n");
 #endif
 
     /* success */
