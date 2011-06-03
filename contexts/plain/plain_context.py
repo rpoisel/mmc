@@ -26,7 +26,7 @@ class CPlain:
                 #pH264FragmentsList.append(pOffset)
 
             # generate a map of filetypes of fragments
-            if self.__mH264FC.classify(lBuffer) == True:
+            if self.__mH264FC.classify(lBuffer) > 0:
                 pH264FragmentsList.append(pOffset)
 
             # position internal file pointer

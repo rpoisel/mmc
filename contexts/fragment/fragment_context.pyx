@@ -15,7 +15,7 @@ cdef class CFragmentClassifier:
     def classify(self, pBuf):
         if self._c_fragment_context is NULL:
             raise MemoryError()
-        cfragment_context.fragment_classifier_classify(
+        return cfragment_context.fragment_classifier_classify(
                 self._c_fragment_context,
                 pBuf,
                 len(pBuf))

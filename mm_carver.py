@@ -80,7 +80,7 @@ class CContext():
                     lOptions.offset, lOptions.incrementsize,
                     lOptions.fragmentsize)
 
-            print(lH264Headers)
+            print(len(lH264Fragments))
 
             # close imagefile
             lImage.close()

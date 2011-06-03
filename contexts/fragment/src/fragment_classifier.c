@@ -24,7 +24,7 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pBuf, int pBufLength)
 {
-#if 1
+#if 0
     int lCnt = 0;
     printf("Length: %d\n", pBufLength);
     for (lCnt = 0; lCnt < pBufLength; lCnt++)
