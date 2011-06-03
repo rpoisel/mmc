@@ -1,0 +1,29 @@
+### MM Carver Framework Installation Procedure ###
+# Rainer Poisel (rainer.poisel@fhstp.ac.at), 03062011
+
+# Preamble
+
+This framework has been tested with Debian GNU/Linux only. But it
+should also work with Ubuntu Linux and other .deb based distributions. 
+
+# Starting the framework
+
+As the python script requires some external libraries (and wrappers which are
+also available as shared objects) running the framework requires some
+environmental variables to be set. The following line has to be executed in
+order to start the framework:
+
+$ ./mm_carver --help
+
+Here is a short execution example:
+
+$ ./mm_carver -f /tmp/practical.floppy.dd
+
+# Caveats
+
+Starting the framework without compilation (see INSTALL) results in the
+following error message:
+
+$ ./mm_carver -f /tmp/practical.floppy.dd
+Error: __init__() takes exactly 1 argument (2 given)
+
