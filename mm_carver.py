@@ -82,10 +82,10 @@ class CContext():
 
             print(len(lH264Fragments))
 
+            # TODO reassembly:
+
             # close imagefile
             lImage.close()
-
-            # TODO reassembly:
 
         except LookupError, pExc:
             print("Error: " + str(pExc))
