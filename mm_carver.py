@@ -9,7 +9,7 @@ import subprocess
 import optparse
 
 # import only if necessary
-from contexts.media import frag_mm_meta_context
+#from contexts.media import frag_mm_meta_context
 from contexts.tsk import tsk_context
 from contexts.plain import plain_context
 from contexts.magic import magic_context
@@ -80,7 +80,7 @@ class CContext():
                     lOptions.offset, lOptions.incrementsize,
                     lOptions.fragmentsize)
 
-            print(len(lH264Fragments))
+            print(lH264Headers)
 
             # close imagefile
             lImage.close()
