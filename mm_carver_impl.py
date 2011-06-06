@@ -91,7 +91,7 @@ class CContext():
                     lOptions.fragmentsize)
 
             if lOptions.verbose is True:
-                print("Number of H.264 headers: %d" + len(lH264Headers))
+                print("Number of H.264 headers: %d" % len(lH264Headers))
                 for lH264Header in lH264Headers:
                     print("Header offset: " + str(lH264Header))
 
@@ -103,7 +103,7 @@ class CContext():
             lFragmentizer = fragmentizer_context.CFragmentizer()
             lFragmentizer.defrag(lH264Headers, lH264Blocks, lH264Fragments)
             lReassembly = reassembly_context.CReassembly(lOptions.output)
-            lReassembly.assemble(lH264Fragments, lFFMpeg)
+            lReassembly.assemble(lH264Fragments, lFFMpeg, lOptions.output)
 
             # close imagefile
             lImage.close()
