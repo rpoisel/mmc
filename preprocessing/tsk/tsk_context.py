@@ -1,6 +1,6 @@
 import os
 
-from ..magic import magic_context
+from collating.magic import magic_context
 
 
 class CTSK:

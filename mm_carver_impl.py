@@ -11,11 +11,12 @@ import traceback
 
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
-from contexts.tsk import tsk_context
-from contexts.plain import plain_context
-from contexts.magic import magic_context
-from contexts.reassembly import reassembly
-from contexts.reassembly import fragmentizer
+from preprocessing.tsk import tsk_context
+from preprocessing.plain import plain_context
+from collating.magic import magic_context
+from reassembly.reassembly import reassembly_context
+from reassembly.fragmentizer import fragmentizer_context
+from reassembly.ffmpeg import ffmpeg_context
 import lib.datatypes
 
 
@@ -90,13 +91,13 @@ class CContext():
                     lOptions.fragmentsize)
 
             # TODO reassembly (process map of fragments)
-            lFFMpeg = CFFMpegContext()
+            lFFMpeg = ffmpeg_context.CFFMpegContext()
             # initialize fragmentizer with parameters that describe
             # the most important properties for blocks => fragments
             # conversions
-            lFragmentizer = CFragmentizer()
+            lFragmentizer = fragmentizer_context.CFragmentizer()
             lFragmentizer.defrag(lH264Headers, lH264Blocks, lH264Fragments)
-            lReassmebly = CReassembly(lOptions.output)
+            lReassembly = reassembly_context.CReassembly(lOptions.output)
             lReassembly.assemble(lH264Fragments, lFFMpeg)
 
             # close imagefile

@@ -1,7 +1,7 @@
 import os
 
-from contexts.fragment import fragment_context
-from contexts.magic import magic_context
+from collating.fragment import fragment_context
+from collating.magic import magic_context
 
 
 class CPlain:
