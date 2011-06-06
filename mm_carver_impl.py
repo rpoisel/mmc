@@ -90,6 +90,11 @@ class CContext():
                     lOptions.offset, lOptions.incrementsize,
                     lOptions.fragmentsize)
 
+            if lOptions.verbose is True:
+                print("Number of H.264 headers: %d" + len(lH264Headers))
+                for lH264Header in lH264Headers:
+                    print("Header offset: " + str(lH264Header))
+
             # TODO reassembly (process map of fragments)
             lFFMpeg = ffmpeg_context.CFFMpegContext()
             # initialize fragmentizer with parameters that describe
