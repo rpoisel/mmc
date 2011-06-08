@@ -6,7 +6,7 @@ class CVideoFrags:
         self.__mFragments = []
 
     def getHeaderIterator(self):
-        return CHeaderIterator(self.__mHeaders)
+        return CVideoFrags.CHeaderIterator(self.__mHeaders, self.__mFragments)
 
     def getFragmentIterator(self):
         return self.__mFragments
@@ -16,23 +16,38 @@ class CVideoFrags:
             lIndex = self.__mFragments.index(pHeaderOffset)
             self.__mHeaders.append(lIndex)
         except ValueError:
-            self.__mFragments.add(pHeaderOffset)
+            self.__mFragments.append(pHeaderOffset)
             lIndex = self.__mFragments.index(pHeaderOffset)
-            self.__mHeaders.append(lIndex)
+            try:
+                lHeaderIdx = self.__mHeaders.index(lIndex)
+                return False
+            except ValueError:
+                self.__mHeaders.append(lIndex)
+                return True
 
     def addFragment(self, pFragmentOffset):
         # TODO check if fragment has already been added
         try:
             lIndex = self.__mFragments.index(pFragmentOffset)
-            return
+            return False
         except ValueError:
-            self.__mFragments.add(pFragmentOffset)
+            self.__mFragments.append(pFragmentOffset)
+            return True
 
     class CHeaderIterator:
         # iterate through offsets that contain video headers
         # resolve indeces in headers to offsets in fragments
-        def __init__(self, pHeaders):
-           pass
+        def __init__(self, pHeaders, pFragments):
+            self.__mHeaders = pHeaders
+            self.__mFrags = pFragments
+            self.__mIdx = 0
 
-       def next(self):
-           pass
+        def __iter__(self):
+            return self
+
+        def next(self):
+            if self.__mIdx >= len(self.__mHeaders):
+                raise StopIteration
+            lOffset = self.__mFrags[self.__mHeaders[self.__mIdx]]
+            self.__mIdx += 1
+            return lOffset
