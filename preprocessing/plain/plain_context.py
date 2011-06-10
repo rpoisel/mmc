@@ -2,13 +2,14 @@ import os
 
 from collating.fragment import fragment_context
 from collating.magic import magic_context
+from lib import videofrags
 
 
 class CPlain:
     def __init__(self, pImage):
         self.__mImage = pImage
         self.__mMagic = magic_context.CMagic()
-        self.__mH264FC = fragment_context.CFragmentClassifier("bla")
+        self.__mH264FC = fragment_context.CFragmentClassifier("<path>")
 
     def parseH264(self, pH264HeadersList, pH264BlocksList,
             pOffset, pIncrementSize, pFragmentSize):
