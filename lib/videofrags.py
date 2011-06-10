@@ -22,8 +22,6 @@ class CVideoFrags:
         except ValueError:
             self.__mFragments.append(pHeaderOffset)
             lIndex = self.__mFragments.index(pHeaderOffset)
-            self.__mHeaders.append(lIndex)
-            return True
         # determine if index in headers exists
         try:
             lHdrIdx = self.__mHeaders.index(lIndex)
