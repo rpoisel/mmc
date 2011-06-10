@@ -17,13 +17,14 @@ from collating.magic import magic_context
 from reassembly.reassembly import reassembly_context
 from reassembly.fragmentizer import fragmentizer_context
 from reassembly.ffmpeg import ffmpeg_context
-import lib.datatypes
+from lib import datatypes
+from lib import frags
 
 
 class CContext():
     sDefaultImagefile = 'image.img'
-    sDefaultFragmentsize = 4096
-    sDefaultIncrementsize = 4096
+    sDefaultFragmentsize = 512
+    sDefaultIncrementsize = 512
     sDefaultOffset = 0
     sDefaultPreprocessing = False
     sDefaultOutput = '/tmp/clever-output'
@@ -72,27 +73,23 @@ class CContext():
         lOptions = self.parseOptions()
 
         try:
-            lH264Headers = []
-            lH264Blocks = []
+            lVideoFrags = frags.CFrags()
             lH264Fragments = []
-
-            # open imagefile
-            lImage = open(lOptions.imagefile, "rb")
 
             # initialize preprocessor
             if lOptions.preprocess == True:
-                lProcessor = tsk_context.CTSK(lImage)
+                lProcessor = tsk_context.CTSK(lOptions.imagefile)
             else:
-                lProcessor = plain_context.CPlain(lImage)
+                lProcessor = plain_context.CPlain(lOptions.imagefile)
 
             # determine H.264 headers and fragments
-            lProcessor.parseH264(lH264Headers, lH264Blocks,
+            lProcessor.parseH264(lVideoFrags,
                     lOptions.offset, lOptions.incrementsize,
                     lOptions.fragmentsize)
 
             if lOptions.verbose is True:
-                print("Number of H.264 headers: %d" % len(lH264Headers))
-                for lH264Header in lH264Headers:
+                print("Number of H.264 headers: %d" % len(lVideoFrags.getHeaders()))
+                for lH264Header in lVideoFrags.getHeaders():
                     print("Header offset: " + str(lH264Header))
 
             # TODO reassembly (process map of fragments)
@@ -101,12 +98,9 @@ class CContext():
             # the most important properties for blocks => fragments
             # conversions
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            lFragmentizer.defrag(lH264Headers, lH264Blocks, lH264Fragments)
+            lFragmentizer.defrag(lVideoFrags, lH264Fragments)
             lReassembly = reassembly_context.CReassembly(lOptions.output)
             lReassembly.assemble(lH264Fragments, lFFMpeg, lOptions.output)
-
-            # close imagefile
-            lImage.close()
 
         except LookupError, pExc:
             print("LookupError: " + str(pExc))
