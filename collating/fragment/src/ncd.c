@@ -5,6 +5,9 @@
 
 #define LEVEL 9
 
+static int deflate_zlib(unsigned char* bufInput, unsigned char* bufOutput, 
+        unsigned int pSizeInput, unsigned int pSizeOutput);
+
 int ncd(unsigned char* pFragment1, unsigned char* pFragment2, 
         unsigned int pSizeInput, unsigned int pSizeOutput)
 {
@@ -12,7 +15,7 @@ int ncd(unsigned char* pFragment1, unsigned char* pFragment2,
     return -1;
 }
 
-static int def(unsigned char* bufInput, unsigned char* bufOutput, 
+static int deflate_zlib(unsigned char* bufInput, unsigned char* bufOutput, 
         unsigned int pSizeInput, unsigned int pSizeOutput)
 {
     int lRet;

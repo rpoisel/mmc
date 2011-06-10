@@ -3,7 +3,12 @@
 #include <stdint.h>
 
 #include "fragment_classifier.h"
+
+#define TEST_NCD 1
+
+#if TEST_NCD == 1
 #include "ncd.h"
+#endif
 
 #define NUM_FILE_TYPES 3
 #define NUM_FRAGS_PER_FILE_TYPE 10
@@ -14,8 +19,10 @@ struct _FragmentClassifier
     unsigned char* mReferenceFrags[NUM_FILE_TYPES][NUM_FRAGS_PER_FILE_TYPE];
 };
 
+#if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
     const unsigned char* pFragment);
+#endif
 
 FragmentClassifier* fragment_classifier_new(const char* pFilename, 
         unsigned int pFragmentSize)
@@ -65,14 +72,16 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     {
         /* check for signatures */
     }
+#if TEST_NCD == 1
     else if (check_ncd(pFragmentClassifier, pFragment) == 0)
     {
         /* not relevant fragment */
         return 0;
     }
-    else
+#endif
+    else if (1 == 0 /* check statistics */)
     {
-        /* check statistics */
+        return 0;
     }
     /* do further tests here */
 
@@ -88,6 +97,8 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
 
     for (lCntFT = 0; lCntFT < NUM_FILE_TYPES; lCntFT++)
     {
+        /* determine first nearest neighbor */
+        /* depending on a threshold we decide if the fragment is of certain type or not */
     }
 
     /* keep on processing this fragment */
