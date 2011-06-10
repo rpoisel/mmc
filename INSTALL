@@ -11,7 +11,7 @@ should also work with Ubuntu Linux and other .deb based distributions.
 The following line has to be executed in order to meet the package requirements
 
 $ aptitude install python cython python-magic ffmpeg libmediainfo-dev \
-    sleuthkit build-essential
+    sleuthkit build-essential zlib1g-dev
 
 # Compilation
 
