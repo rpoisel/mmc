@@ -1,10 +1,11 @@
 RM=rm
 GCC=gcc
-LDFLAGS=-g -Wall -lz
+LDFLAGS=-lz
+CFLAGS=-g -Wall
 
-OBJ=zpipe.o \
+OBJ=zbuf.o \
 
-BIN = zpipe
+BIN = zbuf
 
 all: $(BIN)
 
