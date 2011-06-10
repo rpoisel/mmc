@@ -5,7 +5,14 @@
 
 #define LEVEL 9
 
-int def(unsigned char* bufInput, unsigned char* bufOutput, 
+int ncd(unsigned char* pFragment1, unsigned char* pFragment2, 
+        unsigned int pSizeInput, unsigned int pSizeOutput)
+{
+    /* TODO change the return value */
+    return -1;
+}
+
+static int def(unsigned char* bufInput, unsigned char* bufOutput, 
         unsigned int pSizeInput, unsigned int pSizeOutput)
 {
     int lRet;

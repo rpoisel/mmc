@@ -31,6 +31,9 @@ class CPlain:
             # check for beginning of files using libmagic(3)
             if self.__mMagic.determineMagicH264(lBuffer) == True:
                 pH264Fragments.addHeader(lOffset)
+                continue
+
+            # TODO ignore header fragments from other identifiable file types
 
             # generate a map of filetypes of fragments
             if self.__mH264FC.classify(lBuffer) > 0:

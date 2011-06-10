@@ -5,44 +5,92 @@
 #include "fragment_classifier.h"
 #include "ncd.h"
 
+#define NUM_FILE_TYPES 3
+#define NUM_FRAGS_PER_FILE_TYPE 10
+
 struct _FragmentClassifier
 {
-    int mSomething;
+    unsigned int mFragmentSize;
+    unsigned char* mReferenceFrags[NUM_FILE_TYPES][NUM_FRAGS_PER_FILE_TYPE];
 };
+
+static int check_ncd(FragmentClassifier* pFragmentClassifier, 
+    const unsigned char* pFragment);
 
 FragmentClassifier* fragment_classifier_new(const char* pFilename, 
         unsigned int pFragmentSize)
 {
-    fprintf(stderr, "Initialized fragment classifier with: %s | %d\n",
-            pFilename, pFragmentSize);
+    int lCntX = 0, lCntY = 0;
+
+    /* initialize handle structure */
     struct _FragmentClassifier* lHandle = 
         (struct _FragmentClassifier*)malloc(sizeof(struct _FragmentClassifier));
+
+    lHandle->mFragmentSize = pFragmentSize;
+    for (lCntX = 0; lCntX < NUM_FILE_TYPES; lCntX++)
+    {
+        for (lCntY = 0; lCntY < NUM_FRAGS_PER_FILE_TYPE; lCntY++)
+        {
+            lHandle->mReferenceFrags[lCntX][lCntY] = 
+                (unsigned char*)malloc(sizeof(unsigned char) * pFragmentSize);
+        }
+    }
+
+    /* randomly read reference fragments */
+    /* TODO check that the reference fragments do not contain 
+     * header or footer material */
+
     return lHandle;
 }
 
 void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 {
+    int lCntX = 0, lCntY = 0;
+
+    /* free resources from the structure */
+    for (lCntX = 0; lCntX < NUM_FILE_TYPES; lCntX++)
+    {
+        for (lCntY = 0; lCntY < NUM_FRAGS_PER_FILE_TYPE; lCntY++)
+        {
+            free(pFragmentClassifier->mReferenceFrags[lCntX][lCntY]);
+        }
+    }
     free(pFragmentClassifier);
 }
 
 int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
-        const unsigned char* pBuf, int pBufLength)
+        const unsigned char* pFragment)
 {
-#if 0
-    int lCnt = 0;
-    printf("Length: %d\n", pBufLength);
-    for (lCnt = 0; lCnt < pBufLength; lCnt++)
+    if (1)
     {
-        printf("%02X ", pBuf[lCnt]);
-        if ((lCnt % 16) == 15)
-        {
-            printf("\n");
-        }
+        /* check for signatures */
     }
-    printf("\n");
-#endif
+    else if (check_ncd(pFragmentClassifier, pFragment) == 0)
+    {
+        /* not relevant fragment */
+        return 0;
+    }
+    else
+    {
+        /* check statistics */
+    }
+    /* do further tests here */
 
-    /* success */
+    /* relevant fragment */
+    return 1;
+}
+
+static int check_ncd(FragmentClassifier* pFragmentClassifier, 
+    const unsigned char* pFragment)
+{
+    /* FileType counter */
+    int lCntFT = 0;
+
+    for (lCntFT = 0; lCntFT < NUM_FILE_TYPES; lCntFT++)
+    {
+    }
+
+    /* keep on processing this fragment */
     return 1;
 }
 

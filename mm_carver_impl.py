@@ -90,8 +90,9 @@ class CContext():
             lProcessor.parseH264(lVideoFrags)
 
             if lOptions.verbose is True:
-                print("Number of H.264 headers: %d" % len(lVideoFrags.getHeaders()))
-                for lH264Header in lVideoFrags.getHeaders():
+                lFragments = lVideoFrags.getBlocks()
+                print("Number of H.264 headers: %d" % len(lFragments))
+                for lH264Header in lFragments:
                     print("Header offset: " + str(lH264Header))
 
             # TODO reassembly (process map of fragments)

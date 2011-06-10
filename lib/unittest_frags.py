@@ -4,6 +4,7 @@ import unittest
 
 import frags
 
+
 class CTestFrags(unittest.TestCase):
     def test_frags_and_headers(self):
         lNumHeaders = 1000
@@ -15,5 +16,5 @@ class CTestFrags(unittest.TestCase):
         self.assertEquals(len(lFrags.getHeaders()), len(lFrags.getBlocks()))
         self.assertEquals(lFrags.getHeaders()[20], lFrags.getBlocks()[20])
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
