@@ -3,14 +3,18 @@
 #include <stdint.h>
 
 #include "fragment_classifier.h"
+#include "ncd.h"
 
 struct _FragmentClassifier
 {
     int mSomething;
 };
 
-FragmentClassifier* fragment_classifier_new(const char* pFilename)
+FragmentClassifier* fragment_classifier_new(const char* pFilename, 
+        unsigned int pFragmentSize)
 {
+    fprintf(stderr, "Initialized fragment classifier with: %s | %d\n",
+            pFilename, pFragmentSize);
     struct _FragmentClassifier* lHandle = 
         (struct _FragmentClassifier*)malloc(sizeof(struct _FragmentClassifier));
     return lHandle;
@@ -41,3 +45,4 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     /* success */
     return 1;
 }
+

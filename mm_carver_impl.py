@@ -78,14 +78,16 @@ class CContext():
 
             # initialize preprocessor
             if lOptions.preprocess == True:
-                lProcessor = tsk_context.CTSK(lOptions.imagefile)
-            else:
-                lProcessor = plain_context.CPlain(lOptions.imagefile)
-
-            # determine H.264 headers and fragments
-            lProcessor.parseH264(lVideoFrags,
+                lProcessor = tsk_context.CTSK(lOptions.imagefile,
                     lOptions.offset, lOptions.incrementsize,
                     lOptions.fragmentsize)
+            else:
+                lProcessor = plain_context.CPlain(lOptions.imagefile,
+                    lOptions.offset, lOptions.incrementsize,
+                    lOptions.fragmentsize)
+
+            # determine H.264 headers and fragments
+            lProcessor.parseH264(lVideoFrags)
 
             if lOptions.verbose is True:
                 print("Number of H.264 headers: %d" % len(lVideoFrags.getHeaders()))

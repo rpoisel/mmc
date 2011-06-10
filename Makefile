@@ -1,4 +1,4 @@
-all: frag_mm_meta fragment_context
+all: frag_mm_meta fragment_context 
 
 DIR_FRAG_MM_META=collating/media
 DIR_FRAGMENT_CONTEXT=collating/fragment

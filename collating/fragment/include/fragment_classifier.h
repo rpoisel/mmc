@@ -3,7 +3,8 @@
 
 typedef struct _FragmentClassifier FragmentClassifier;
 
-FragmentClassifier* fragment_classifier_new(const char* pFilename);
+FragmentClassifier* fragment_classifier_new(const char* pFilename, 
+        unsigned int pFragmentSize);
 void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
 
 int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
