@@ -8,6 +8,7 @@ import os.path
 import subprocess
 import optparse
 import traceback
+import logging
 
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
