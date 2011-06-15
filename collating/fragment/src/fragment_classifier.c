@@ -183,7 +183,7 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
     }
 
     /* TODO return number of fragments read */
-    return 0;
+    return 1;
 }
 #endif
 
