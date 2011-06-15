@@ -67,11 +67,6 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
                 (unsigned char*)malloc(sizeof(unsigned char) * pFragmentSize);
             /* randomly open file, random seek, read reference fragment */
             readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, FRAGS_REF_DIR, lTypes[lCntX]);
-
-            /* TODO check that the reference fragments do not contain 
-             * header or footer material */
-
-            /* close file */
         }
     }
 #endif
