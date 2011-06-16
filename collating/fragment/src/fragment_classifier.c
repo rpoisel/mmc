@@ -31,7 +31,15 @@ struct _FragmentClassifier
 #endif
 };
 
+#if TEST_NCD == 1
 static const char *sTypes[] = { ".txt", ".html", ".svg", ".h264", "" };
+struct SNearest
+{
+    int mIdxTypeNearest;
+    double mValNearest;
+};
+#endif
+
 /* static const char *sTypes[] = { ".txt", "" }; */
 
 #if TEST_NCD == 1
@@ -43,7 +51,9 @@ int readRandFrag(unsigned char*, int, const char*, const char*);
 FragmentClassifier* fragment_classifier_new(const char* pFilename, 
         unsigned int pFragmentSize)
 {
+#if TEST_NCD == 1
     int lCntX = 0, lCntY = 0;
+#endif
 
     /* initialize handle structure */
     struct _FragmentClassifier* lHandle = 
@@ -71,6 +81,7 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
 
 void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 {
+#if TEST_NCD == 1
     int lCntX = 0, lCntY = 0;
 
     /* free resources from the structure */
@@ -81,6 +92,7 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
             free(pFragmentClassifier->mReferenceFrags[lCntX][lCntY]);
         }
     }
+#endif
     free(pFragmentClassifier);
 }
 
@@ -111,12 +123,6 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 }
 
 #if TEST_NCD == 1
-struct SNearest
-{
-    int mIdxTypeNearest;
-    double mValNearest;
-};
-
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
     const unsigned char* pFragment)
 {
