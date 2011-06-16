@@ -16,28 +16,21 @@
 
 #if TEST_NCD == 1
 #include "ncd.h"
-#define NUM_FILE_TYPES 3
+#define MAX_NUM_FILE_TYPES 5
 #define NUM_FRAGS_PER_FILE_TYPE 10
 #define FRAGS_REF_DIR "/tmp/frags_ref"
-#define EXT_TXT ".txt"
-#define EXT_HTML ".html"
-#define EXT_SVG ".svg"
+#define MAX_DIR_ENT 256
 #endif
 
 struct _FragmentClassifier
 {
     unsigned int mFragmentSize;
 #if TEST_NCD == 1
-    unsigned char* mReferenceFrags[NUM_FILE_TYPES][NUM_FRAGS_PER_FILE_TYPE];
+    unsigned char* mReferenceFrags[MAX_NUM_FILE_TYPES][NUM_FRAGS_PER_FILE_TYPE];
 #endif
 };
 
-enum EFileType
-{
-    TXT = 0,
-    HTML = 1,
-    SVG = 2
-};
+static const char *sTypes[] = { ".txt", ".html", ".svg", ""};
 
 #if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
@@ -49,7 +42,6 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
         unsigned int pFragmentSize)
 {
     int lCntX = 0, lCntY = 0;
-    const char *lTypes[3] = { ".txt", ".html", ".svg" };
 
     /* initialize handle structure */
     struct _FragmentClassifier* lHandle = 
@@ -58,15 +50,15 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
     lHandle->mFragmentSize = pFragmentSize;
 
 #if TEST_NCD == 1
-    srand(time(NULL));
-    for (lCntX = 0; lCntX < NUM_FILE_TYPES; lCntX++)
+    srandom(time(NULL));
+    for (lCntX = 0; strlen(sTypes[lCntX]) > 0; lCntX++)
     {
         for (lCntY = 0; lCntY < NUM_FRAGS_PER_FILE_TYPE; lCntY++)
         {
             lHandle->mReferenceFrags[lCntX][lCntY] = 
                 (unsigned char*)malloc(sizeof(unsigned char) * pFragmentSize);
             /* randomly open file, random seek, read reference fragment */
-            readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, FRAGS_REF_DIR, lTypes[lCntX]);
+            readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, FRAGS_REF_DIR, sTypes[lCntX]); 
         }
     }
 #endif
@@ -80,7 +72,7 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
     int lCntX = 0, lCntY = 0;
 
     /* free resources from the structure */
-    for (lCntX = 0; lCntX < NUM_FILE_TYPES; lCntX++)
+    for (lCntX = 0; strlen(sTypes[lCntX]) > 0; lCntX++)
     {
         for (lCntY = 0; lCntY < NUM_FRAGS_PER_FILE_TYPE; lCntY++)
         {
@@ -121,7 +113,7 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
     /* FileType counter */
     int lCntFT = 0;
 
-    for (lCntFT = 0; lCntFT < NUM_FILE_TYPES; lCntFT++)
+    for (lCntFT = 0; strlen(sTypes[lCntFT]) > 0; lCntFT++)
     {
         /* determine first nearest neighbor */
         /* depending on a threshold we decide if the fragment is of certain type or not */
@@ -136,11 +128,14 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
 {
     DIR* lDH = NULL;
     FILE* lRandomFH = NULL;
-    struct dirent* lDirEnt = NULL;
+    struct dirent* lCurDir = NULL;
+    struct dirent lDirEnts[MAX_DIR_ENT];
+    int lCnt = 0;
     struct stat lInfo;
     char lFullPath[STRLEN_PATH];
     long lFileSize = 0;
     long lNumFrags = 0;
+    long int lRandIdx = 0;
 
     lDH = opendir(pDir);
     if (lDH == NULL)
@@ -151,35 +146,48 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
 
     for(;;)
     {
-        lDirEnt = readdir(lDH);
-        if (lDirEnt == NULL)
+        lCurDir = readdir(lDH);
+        if (lCurDir == NULL)
         {
             break;
         }
-        stat(lDirEnt->d_name, &lInfo);
-        if (S_ISREG(lInfo.st_mode))
+        else
         {
-            if (strstr((lDirEnt->d_name + strlen(lDirEnt->d_name) - strlen(pFileExt) - 1), 
-                        pFileExt) != NULL)
-            {
-                strcpy(lFullPath, pDir);
-                strcat(lFullPath, "/");
-                strcat(lFullPath, lDirEnt->d_name);
-                lRandomFH = fopen(lFullPath, "rb");
 
-                fseek(lRandomFH, 0, SEEK_END);
-                lFileSize = ftell(lRandomFH);
-                lNumFrags = lFileSize / pFragmentSize;
-                if (lFileSize % pFragmentSize != 0)
+            stat(lCurDir->d_name, &lInfo);
+            if (S_ISREG(lInfo.st_mode))
+            {
+                /* check file extension */
+                if (strstr((lCurDir->d_name + strlen(lCurDir->d_name) - strlen(pFileExt) - 1), 
+                            pFileExt) != NULL)
                 {
-                    lNumFrags++;
+                    lDirEnts[lCnt] = *lCurDir;
+                    lCnt++;
                 }
-                fseek(lRandomFH, (rand() % (lNumFrags - 2) + 1) * pFragmentSize, SEEK_SET);
-                fread(pBuf, 1, pFragmentSize, lRandomFH);
-                
-                fclose(lRandomFH);
             }
         }
+    }
+
+    if (lCnt > 0)
+    {
+        lRandIdx = random() % lCnt;
+
+        strcpy(lFullPath, pDir);
+        strcat(lFullPath, "/");
+        strcat(lFullPath, lDirEnts[lRandIdx].d_name);
+        lRandomFH = fopen(lFullPath, "rb");
+
+        fseek(lRandomFH, 0, SEEK_END);
+        lFileSize = ftell(lRandomFH);
+        lNumFrags = lFileSize / pFragmentSize;
+        if (lFileSize % pFragmentSize != 0)
+        {
+            lNumFrags++;
+        }
+        fseek(lRandomFH, (random() % (lNumFrags - 2) + 1) * pFragmentSize, SEEK_SET);
+        fread(pBuf, 1, pFragmentSize, lRandomFH);
+        
+        fclose(lRandomFH);
     }
 
     /* TODO return number of fragments read */
