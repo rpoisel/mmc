@@ -31,7 +31,9 @@ double ncd(unsigned const char* pFragment1, unsigned const char* pFragment2, uns
     lCy = deflate_zlib(pFragment2, lBufFragsCompr, 
             pFragmentSize, MAX_FRAG_SIZE);
 
+#if 0
     fprintf(stderr, "lCxy: %d, lCx: %d, lCy: %d\n", lCxy, lCx, lCy);
+#endif
 
     return ((double)(lCxy - MIN(lCx, lCy))) / (double)(MAX(lCx, lCy));
 }
