@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 #include "fragment_classifier.h"
 
@@ -30,6 +31,7 @@ struct _FragmentClassifier
 #endif
 };
 
+/* static const char *sTypes[] = { ".txt", ".html", ".svg", ".h264", ""}; */
 static const char *sTypes[] = { ".txt", ".html", ".svg", ""};
 
 #if TEST_NCD == 1
@@ -51,7 +53,7 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
 
 #if TEST_NCD == 1
     srandom(time(NULL));
-    for (lCntX = 0; strlen(sTypes[lCntX]) > 0; lCntX++)
+    for (lCntX = 0; lCntX < MAX_NUM_FILE_TYPES && strlen(sTypes[lCntX]) > 0 ; lCntX++)
     {
         for (lCntY = 0; lCntY < NUM_FRAGS_PER_FILE_TYPE; lCntY++)
         {
@@ -72,7 +74,7 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
     int lCntX = 0, lCntY = 0;
 
     /* free resources from the structure */
-    for (lCntX = 0; strlen(sTypes[lCntX]) > 0; lCntX++)
+    for (lCntX = 0; lCntX < MAX_NUM_FILE_TYPES && strlen(sTypes[lCntX]) > 0; lCntX++)
     {
         for (lCntY = 0; lCntY < NUM_FRAGS_PER_FILE_TYPE; lCntY++)
         {
@@ -85,21 +87,23 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment)
 {
-    if (1)
+    if (1 == 0 /* check for signatures */)
     {
-        /* check for signatures */
+        
     }
-#if TEST_NCD == 1
-    else if (check_ncd(pFragmentClassifier, pFragment) == 0)
-    {
-        /* not relevant fragment */
-        return 0;
-    }
-#endif
     else if (1 == 0 /* check statistics */)
     {
         return 0;
     }
+#if TEST_NCD == 1
+    /* else if (check_ncd(pFragmentClassifier, pFragment) == 0) */
+    else
+    {
+        check_ncd(pFragmentClassifier, pFragment);
+        /* TODO not relevant fragment */
+        return 0;
+    }
+#endif
     /* do further tests here */
 
     /* relevant fragment */
@@ -112,10 +116,26 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
 {
     /* FileType counter */
     int lCntFT = 0;
+    int lCntFrag = 0;
+    double lNCDNearest[MAX_NUM_FILE_TYPES]; /* change to -infinity */
+    double lNCDResult = -INFINITY;
 
-    for (lCntFT = 0; strlen(sTypes[lCntFT]) > 0; lCntFT++)
+    for (lCntFT = 0; lCntFT < MAX_NUM_FILE_TYPES && strlen(sTypes[lCntFT]) > 0; lCntFT++)
     {
+        lNCDNearest[lCntFT] = -INFINITY;
         /* determine first nearest neighbor */
+        for (lCntFrag = 0; lCntFrag < NUM_FRAGS_PER_FILE_TYPE; lCntFrag++)
+        {
+            lNCDResult = ncd(pFragment, 
+                    pFragmentClassifier->mReferenceFrags[lCntFT][lCntFrag], 
+                    pFragmentClassifier->mFragmentSize);
+
+            lNCDNearest[lCntFT] = lNCDResult > lNCDNearest[lCntFT] ? lNCDResult : lNCDNearest[lCntFT];
+            if (lNCDNearest[lCntFT] < 2) /* always */
+            {
+                fprintf(stderr, "NCD Nearest Neighbor: %f\n", lNCDNearest[lCntFT]);
+            }
+        }
         /* depending on a threshold we decide if the fragment is of certain type or not */
     }
 
@@ -144,7 +164,7 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
         return -1;
     }
 
-    for(;;)
+    for(; lCnt < MAX_DIR_ENT;)
     {
         lCurDir = readdir(lDH);
         if (lCurDir == NULL)

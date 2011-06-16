@@ -1,21 +1,39 @@
 #include "ncd.h"
 
+#include <string.h>
 #include <assert.h>
 #include <zlib.h>
 
 #define LEVEL 9
+#define MIN(a,b) ((a)>(b)?(b):(a))
+#define MAX(a,b) ((a)<(b)?(b):(a))
 
-static int deflate_zlib(unsigned char* bufInput, unsigned char* bufOutput, 
+static int deflate_zlib(unsigned const char* bufInput, unsigned const char* bufOutput, 
         unsigned int pSizeInput, unsigned int pSizeOutput);
 
-int ncd(unsigned char* pFragment1, unsigned char* pFragment2, 
-        unsigned int pSizeInput, unsigned int pSizeOutput)
+double ncd(unsigned const char* pFragment1, unsigned const char* pFragment2, unsigned int pFragmentSize)
 {
-    /* TODO change the return value */
-    return -1;
+    
+    unsigned char lBufFrags[MAX_FRAG_SIZE];
+    unsigned char lBufFragsCompr[MAX_FRAG_SIZE];
+    int lCxy = 0;
+    int lCx = 0;
+    int lCy = 0;
+
+    memcpy(lBufFrags, pFragment1, pFragmentSize);
+    memcpy(lBufFrags + pFragmentSize, pFragment2, pFragmentSize);
+
+    lCxy = deflate_zlib(lBufFrags, lBufFragsCompr, 
+            2 * pFragmentSize, MAX_FRAG_SIZE);
+    lCx = deflate_zlib(pFragment1, lBufFragsCompr, 
+            pFragmentSize, MAX_FRAG_SIZE);
+    lCy = deflate_zlib(pFragment2, lBufFragsCompr, 
+            pFragmentSize, MAX_FRAG_SIZE);
+
+    return ((lCxy - MIN(lCx, lCy))) / (double)MAX(lCx, lCy);
 }
 
-static int deflate_zlib(unsigned char* bufInput, unsigned char* bufOutput, 
+static int deflate_zlib(unsigned const char* bufInput, unsigned const char* bufOutput, 
         unsigned int pSizeInput, unsigned int pSizeOutput)
 {
     int lRet;
