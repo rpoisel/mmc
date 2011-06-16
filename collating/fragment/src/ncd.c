@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <zlib.h>
+#include <stdio.h>
 
 #define LEVEL 9
 #define MIN(a,b) ((a)>(b)?(b):(a))
@@ -30,7 +31,9 @@ double ncd(unsigned const char* pFragment1, unsigned const char* pFragment2, uns
     lCy = deflate_zlib(pFragment2, lBufFragsCompr, 
             pFragmentSize, MAX_FRAG_SIZE);
 
-    return ((lCxy - MIN(lCx, lCy))) / (double)MAX(lCx, lCy);
+    fprintf(stderr, "lCxy: %d, lCx: %d, lCy: %d\n", lCxy, lCx, lCy);
+
+    return ((double)(lCxy - MIN(lCx, lCy))) / (double)(MAX(lCx, lCy));
 }
 
 static int deflate_zlib(unsigned const char* bufInput, unsigned const char* bufOutput, 

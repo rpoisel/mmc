@@ -17,7 +17,7 @@
 
 #if TEST_NCD == 1
 #include "ncd.h"
-#define MAX_NUM_FILE_TYPES 5
+#define MAX_NUM_FILE_TYPES 16
 #define NUM_FRAGS_PER_FILE_TYPE 10
 #define FRAGS_REF_DIR "/tmp/frags_ref"
 #define MAX_DIR_ENT 256
@@ -31,8 +31,8 @@ struct _FragmentClassifier
 #endif
 };
 
-/* static const char *sTypes[] = { ".txt", ".html", ".svg", ".h264", ""}; */
-static const char *sTypes[] = { ".txt", ".html", ".svg", ""};
+static const char *sTypes[] = { ".txt", ".html", ".svg", ".h264", "" };
+/* static const char *sTypes[] = { ".txt", "" }; */
 
 #if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
@@ -111,18 +111,25 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 }
 
 #if TEST_NCD == 1
+struct SNearest
+{
+    int mIdxTypeNearest;
+    double mValNearest;
+};
+
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
     const unsigned char* pFragment)
 {
     /* FileType counter */
     int lCntFT = 0;
     int lCntFrag = 0;
-    double lNCDNearest[MAX_NUM_FILE_TYPES]; /* change to -infinity */
-    double lNCDResult = -INFINITY;
+    /* double lNCDNearest[MAX_NUM_FILE_TYPES]; */ /* change to -infinity */
+    struct SNearest lNearest = { -1, INFINITY };
+    double lNCDResult = INFINITY;
 
     for (lCntFT = 0; lCntFT < MAX_NUM_FILE_TYPES && strlen(sTypes[lCntFT]) > 0; lCntFT++)
     {
-        lNCDNearest[lCntFT] = -INFINITY;
+        /* lNCDNearest[lCntFT] = INFINITY; */
         /* determine first nearest neighbor */
         for (lCntFrag = 0; lCntFrag < NUM_FRAGS_PER_FILE_TYPE; lCntFrag++)
         {
@@ -130,14 +137,17 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
                     pFragmentClassifier->mReferenceFrags[lCntFT][lCntFrag], 
                     pFragmentClassifier->mFragmentSize);
 
-            lNCDNearest[lCntFT] = lNCDResult > lNCDNearest[lCntFT] ? lNCDResult : lNCDNearest[lCntFT];
-            if (lNCDNearest[lCntFT] < 2) /* always */
+            if (lNCDResult < lNearest.mValNearest)
             {
-                fprintf(stderr, "NCD Nearest Neighbor: %f\n", lNCDNearest[lCntFT]);
+                lNearest.mIdxTypeNearest = lCntFT;
+                lNearest.mValNearest = lNCDResult;
             }
+            /* lNCDNearest[lCntFT] = lNCDResult < lNCDNearest[lCntFT] ? lNCDResult : lNCDNearest[lCntFT]; */
         }
-        /* depending on a threshold we decide if the fragment is of certain type or not */
     }
+    fprintf(stderr, "NCD Nearest Neighbor %f | Type: %s\n",
+            lNearest.mValNearest, 
+            sTypes[lNearest.mIdxTypeNearest]);
 
     /* keep on processing this fragment */
     return 1;
