@@ -129,13 +129,11 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
     /* FileType counter */
     int lCntFT = 0;
     int lCntFrag = 0;
-    /* double lNCDNearest[MAX_NUM_FILE_TYPES]; */ /* change to -infinity */
     struct SNearest lNearest = { -1, INFINITY };
     double lNCDResult = INFINITY;
 
     for (lCntFT = 0; lCntFT < MAX_NUM_FILE_TYPES && strlen(sTypes[lCntFT]) > 0; lCntFT++)
     {
-        /* lNCDNearest[lCntFT] = INFINITY; */
         /* determine first nearest neighbor */
         for (lCntFrag = 0; lCntFrag < NUM_FRAGS_PER_FILE_TYPE; lCntFrag++)
         {
@@ -148,9 +146,12 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
                 lNearest.mIdxTypeNearest = lCntFT;
                 lNearest.mValNearest = lNCDResult;
             }
-            /* lNCDNearest[lCntFT] = lNCDResult < lNCDNearest[lCntFT] ? lNCDResult : lNCDNearest[lCntFT]; */
         }
     }
+    /* TODO 
+     * determine biggest distance if filetype is correct
+     * determine nearest distance if filetype is incorrect
+     */
     fprintf(stderr, "NCD Nearest Neighbor %f | Type: %s\n",
             lNearest.mValNearest, 
             sTypes[lNearest.mIdxTypeNearest]);
@@ -226,8 +227,7 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
         fclose(lRandomFH);
     }
 
-    /* TODO return number of fragments read */
-    return 1;
+    return (lCnt > 0 ? 1 : 0);
 }
 #endif
 
