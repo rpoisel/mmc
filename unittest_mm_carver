@@ -1,0 +1,4 @@
+#!/bin/sh
+
+PYTHONPATH="./collating/fragment" LD_LIBRARY_PATH="./collating/fragment" env python unittest_mm_carver_impl.py $*
+

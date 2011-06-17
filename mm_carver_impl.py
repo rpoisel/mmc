@@ -2,7 +2,7 @@
 
 import optparse
 
-from context import CContext
+from mm_context import CContext
 
 if __name__ == "__main__":
     lParser = optparse.OptionParser(add_help_option=False)
@@ -39,5 +39,7 @@ if __name__ == "__main__":
             default=CContext.sDefaultOutput)
     (lOptions, lArgs) = lParser.parse_args()
 
+    print(lOptions)
+    
     lContext = CContext()
     lContext.run(lOptions)
