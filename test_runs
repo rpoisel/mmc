@@ -2,4 +2,4 @@
 
 time ./mm_carver -f /tmp/practical.floppy.dd -s 4096 -i 4096 2>/dev/null
 time ./mm_carver -f /home/rpoisel/nosvn/feasibility_images/image_06.img -s 4096 -i 4096 2>/dev/null
-time ./mm_carver -f /home/rpoisel/nosvn/feasibility_images/image_06.img -s 4096 -i 4096 2>/dev/null
+time ./mm_carver -f /home/rpoisel/nosvn/feasibility_images/image_06.img -s 512 -i 512 2>/dev/null
