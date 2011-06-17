@@ -7,17 +7,17 @@ import frags
 
 class CTestFrags(unittest.TestCase):
     def setUp(self):
-        print("Setting up my testing environment")
+        self.__mNumHeaders = 1000
+        self.__mNumIter = 2
 
     def test_frags_and_headers(self):
-        lNumHeaders = 1000
-        lNumIter = 2
         lFrags = frags.CFrags()
-        for lIter in xrange(lNumIter):
-            for lOffset in xrange(lNumHeaders):
+        for lIter in xrange(self.__mNumIter):
+            for lOffset in xrange(self.__mNumHeaders):
                 lFrags.addHeader(lOffset)
         self.assertEquals(len(lFrags.getHeaders()), len(lFrags.getBlocks()))
         self.assertEquals(lFrags.getHeaders()[20], lFrags.getBlocks()[20])
 
 if __name__ == "__main__":
-    unittest.main()
+    lSuite = unittest.TestLoader().loadTestsFromTestCase(CTestFrags)
+    unittest.TextTestRunner(verbosity=2).run(lSuite)
