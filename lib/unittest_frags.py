@@ -6,6 +6,9 @@ import frags
 
 
 class CTestFrags(unittest.TestCase):
+    def setUp(self):
+        print("Setting up my testing environment")
+
     def test_frags_and_headers(self):
         lNumHeaders = 1000
         lNumIter = 2
