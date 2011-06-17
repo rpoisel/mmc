@@ -20,4 +20,4 @@ class CTestFrags(unittest.TestCase):
 
 if __name__ == "__main__":
     lSuite = unittest.TestLoader().loadTestsFromTestCase(CTestFrags)
-    unittest.TextTestRunner(verbosity=2).run(lSuite)
+    unittest.TextTestRunner(verbosity=2, descriptions=2).run(lSuite)
