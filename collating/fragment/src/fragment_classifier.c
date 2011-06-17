@@ -10,7 +10,9 @@
 
 #include "fragment_classifier.h"
 
-/* set to 0 to turn of ncd testing */
+/* turn to 1 for verbose messages */
+#define VERBOSE 1
+/* set to 0 to turn off ncd testing */
 #define TEST_NCD 1
 
 #define STRLEN_PATH 1024
@@ -152,9 +154,11 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
      * determine biggest distance if filetype is correct
      * determine nearest distance if filetype is incorrect
      */
+#if VERBOSE == 1
     fprintf(stderr, "NCD Nearest Neighbor %f | Type: %s\n",
             lNearest.mValNearest, 
             sTypes[lNearest.mIdxTypeNearest]);
+#endif
 
     /* keep on processing this fragment */
     return 1;
