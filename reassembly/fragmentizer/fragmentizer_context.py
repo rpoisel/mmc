@@ -8,6 +8,8 @@ class CFragmentizer:
         pass
 
     def defrag(self, pVideoBlocks, pH264Fragments):
+        if len(pVideoBlocks.getBlocks()) == 0:
+            return
         lFragmentCur = CFragment()
         pH264Fragments.append(lFragmentCur)
         for lIdx in xrange(len(pVideoBlocks.getBlocks()) - 1):
