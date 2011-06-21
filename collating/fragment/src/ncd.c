@@ -21,6 +21,17 @@ double ncd(unsigned const char* pFragment1, unsigned const char* pFragment2, uns
     int lCx = 0;
     int lCy = 0;
 
+#if 0
+    for (lCx = 0; lCx < pFragmentSize; lCx++)
+    {
+        fprintf(stderr, "0x%02X ", pFragment2[lCx]);
+        if ((lCx + 1) % 16 == 0)
+        {
+            fprintf(stderr, "\n");
+        }
+    }
+#endif
+
     memcpy(lBufFrags, pFragment1, pFragmentSize);
     memcpy(lBufFrags + pFragmentSize, pFragment2, pFragmentSize);
 

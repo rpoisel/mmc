@@ -34,7 +34,7 @@ struct _FragmentClassifier
 };
 
 #if TEST_NCD == 1
-static const char *sTypes[] = { ".txt", ".html", ".svg", ".h264", "" };
+static const char *sTypes[] = { ".html", ".txt", ".h264", ".svg", "" };
 struct SNearest
 {
     int mIdxTypeNearest;
@@ -194,12 +194,19 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
         }
         else
         {
+            strcpy(lFullPath, pDir);
+            strcat(lFullPath, "/");
+            strcat(lFullPath, lCurDir->d_name);
 
-            stat(lCurDir->d_name, &lInfo);
+            if (stat(lFullPath, &lInfo) == -1)
+            {
+                fprintf(stderr, "stat() error.\n");
+            }
+
             if (S_ISREG(lInfo.st_mode))
             {
                 /* check file extension */
-                if (strstr((lCurDir->d_name + strlen(lCurDir->d_name) - strlen(pFileExt) - 1), 
+                if (strstr((lFullPath + strlen(lFullPath) - strlen(pFileExt) - 1), 
                             pFileExt) != NULL)
                 {
                     lDirEnts[lCnt] = *lCurDir;
