@@ -162,7 +162,7 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
      * determine nearest distance if filetype is incorrect
      */
 #if VERBOSE == 1
-    fprintf(stderr, "NCD Nearest Neighbor %f | Type: %s\n",
+    fprintf(stdout, "NCD Nearest Neighbor %f | Type: %s\n",
             lNearest.mValNearest, 
             sTypes[lNearest.mIdxTypeNearest]);
 #endif

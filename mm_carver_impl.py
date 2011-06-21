@@ -28,6 +28,11 @@ if __name__ == "__main__":
             " (default:" + str(CContext.sDefaultOffset) + ")",
             default=CContext.sDefaultOffset,
             type="int")
+    lParser.add_option("-b", "--blockgap", dest="blockgap",
+            help="Number of bytes between blocks of the same fragment" +
+            " (default:" + str(CContext.sDefaultBlockGap) + ")",
+            default=CContext.sDefaultBlockGap,
+            type="int")
     lParser.add_option("-p", "--preprocess", action="store_true",
             dest="preprocess",
             help="Turn preprocessing on or off" +

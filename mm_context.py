@@ -23,6 +23,7 @@ class CContext():
     sDefaultImagefile = 'image.img'
     sDefaultFragmentsize = 512
     sDefaultIncrementsize = 512
+    sDefaultBlockGap = 16384
     sDefaultOffset = 0
     sDefaultPreprocessing = False
     sDefaultOutput = '/tmp/clever-output'
@@ -61,7 +62,8 @@ class CContext():
             # the most important properties for blocks => fragments
             # conversions
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            lFragmentizer.defrag(lVideoBlocks, lH264Fragments)
+            lFragmentizer.defrag(lVideoBlocks, lH264Fragments, 
+                    pOptions.fragmentsize, pOptions.blockgap)
             if pOptions.verbose is True:
                 for lH264Fragment in lH264Fragments:
                     print(str(lH264Fragment.mOffset) + " / " + str(lH264Fragment.mNumBlocks) + 
