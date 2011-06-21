@@ -103,26 +103,31 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
         const unsigned char* pFragment,
         int pLen)
 {
-    if (1 == 0 /* check for signatures */)
+    int lReturn = 0;
+
+    /* do test here */
+    if (lReturn < 0 /* check for signatures */)
     {
-        
+        return lReturn;
     }
-    else if (1 == 0 /* check statistics */)
+
+    /* do other test here */
+    if (lReturn < 0 /* check statistics */)
     {
-        return 0;
+        return lReturn;
     }
+
 #if TEST_NCD == 1
-    /* else if (check_ncd(pFragmentClassifier, pFragment) == 0) */
-    else
+    lReturn = check_ncd(pFragmentClassifier, pFragment, pLen);
+    if (lReturn < 0)
     {
-        /* TODO not relevant fragment */
-        return check_ncd(pFragmentClassifier, pFragment, pLen);
+        /* non-relevant fragment */
+        return lReturn;
     }
 #endif
-    /* do further tests here */
 
     /* relevant fragment */
-    return 1;
+    return lReturn;
 }
 
 #if TEST_NCD == 1
