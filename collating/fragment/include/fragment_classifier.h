@@ -8,7 +8,8 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
 void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
 
 int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
-        const unsigned char* pFragment);
+        const unsigned char* pFragment,
+        int pLen);
 
 #endif /* __FRAGMENT_CLASSIFIER_H__ */
 

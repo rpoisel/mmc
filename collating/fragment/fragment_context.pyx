@@ -19,4 +19,5 @@ cdef class CFragmentClassifier:
             raise MemoryError()
         return cfragment_context.fragment_classifier_classify(
                 self._c_fragment_context,
-                pBuf)
+                pBuf,
+                len(pBuf))

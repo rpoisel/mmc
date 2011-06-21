@@ -39,7 +39,5 @@ if __name__ == "__main__":
             default=CContext.sDefaultOutput)
     (lOptions, lArgs) = lParser.parse_args()
 
-    print(lOptions)
-    
     lContext = CContext()
     lContext.run(lOptions)

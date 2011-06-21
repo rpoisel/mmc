@@ -34,7 +34,7 @@ struct _FragmentClassifier
 };
 
 #if TEST_NCD == 1
-static const char *sTypes[] = { ".html", ".txt", ".h264", ".svg", "" };
+static const char *sTypes[] = { ".html", ".txt", ".svg", ".h264", ".jpg", "" };
 struct SNearest
 {
     int mIdxTypeNearest;
@@ -46,7 +46,8 @@ struct SNearest
 
 #if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
-    const unsigned char* pFragment);
+    const unsigned char* pFragment,
+    int pLen);
 int readRandFrag(unsigned char*, int, const char*, const char*);
 #endif
 
@@ -99,7 +100,8 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 }
 
 int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
-        const unsigned char* pFragment)
+        const unsigned char* pFragment,
+        int pLen)
 {
     if (1 == 0 /* check for signatures */)
     {
@@ -113,9 +115,8 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     /* else if (check_ncd(pFragmentClassifier, pFragment) == 0) */
     else
     {
-        check_ncd(pFragmentClassifier, pFragment);
         /* TODO not relevant fragment */
-        return 0;
+        return check_ncd(pFragmentClassifier, pFragment, pLen);
     }
 #endif
     /* do further tests here */
@@ -126,7 +127,8 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 
 #if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
-    const unsigned char* pFragment)
+    const unsigned char* pFragment,
+    int pLen)
 {
     /* FileType counter */
     int lCntFT = 0;
@@ -141,7 +143,7 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
         {
             lNCDResult = ncd(pFragment, 
                     pFragmentClassifier->mReferenceFrags[lCntFT][lCntFrag], 
-                    pFragmentClassifier->mFragmentSize);
+                    pLen);
 
             if (lNCDResult < lNearest.mValNearest)
             {
@@ -159,6 +161,12 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
             lNearest.mValNearest, 
             sTypes[lNearest.mIdxTypeNearest]);
 #endif
+
+    if (lNearest.mIdxTypeNearest < 3)
+    {
+        /* text-based fragment */
+        return -1;
+    }
 
     /* keep on processing this fragment */
     return 1;

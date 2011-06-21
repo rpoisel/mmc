@@ -19,6 +19,7 @@ class CPlain:
         self.__mImage.close()
 
     def parseH264(self, pH264Fragments):
+        lFragsChecked = 0
         lOffset = self.__mOffset
         self.__mImage.seek(lOffset, os.SEEK_SET)
 
@@ -27,6 +28,8 @@ class CPlain:
             lBuffer = self.__mImage.read(self.__mFragmentSize)
             if lBuffer == "":
                 break
+
+            lFragsChecked += 1
 
             # check for beginning of files using libmagic(3)
             if self.__mMagic.determineMagicH264(lBuffer) == True:
@@ -42,3 +45,4 @@ class CPlain:
             # position internal file pointer
             lOffset += self.__mIncrementSize
             self.__mImage.seek(lOffset, os.SEEK_SET)
+        return lFragsChecked

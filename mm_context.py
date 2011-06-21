@@ -46,13 +46,15 @@ class CContext():
                     pOptions.fragmentsize)
 
             # determine H.264 headers and fragments
-            lProcessor.parseH264(lVideoFrags)
+            lFragsTested = lProcessor.parseH264(lVideoFrags)
 
             if pOptions.verbose is True:
                 lFragments = lVideoFrags.getBlocks()
-                print("Number of H.264 headers: %d" % len(lFragments))
+                print("Number of frags tested %d / Number of H.264 fragments %d" % 
+                        (lFragsTested, (len(lFragments) + \
+                                len(lVideoFrags.getHeaders()))))
                 for lH264Header in lFragments:
-                    print("Header offset: " + str(lH264Header))
+                    print("Fragment offset: " + str(lH264Header))
 
             # TODO reassembly (process map of fragments)
             lFFMpeg = ffmpeg_context.CFFMpegContext()
