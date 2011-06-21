@@ -32,7 +32,7 @@ class CContext():
 
     def run(self, pOptions):
         try:
-            lVideoFrags = frags.CFrags()
+            lVideoBlocks = frags.CFrags()
             lH264Fragments = []
 
             # initialize preprocessor
@@ -46,13 +46,12 @@ class CContext():
                     pOptions.fragmentsize)
 
             # determine H.264 headers and fragments
-            lFragsTested = lProcessor.parseH264(lVideoFrags)
+            lFragsTested = lProcessor.parseH264(lVideoBlocks)
 
             if pOptions.verbose is True:
-                lFragments = lVideoFrags.getBlocks()
+                lFragments = lVideoBlocks.getBlocks()
                 print("Number of frags tested %d / Number of H.264 fragments %d" % 
-                        (lFragsTested, (len(lFragments) + \
-                                len(lVideoFrags.getHeaders()))))
+                        (lFragsTested, (len(lFragments))))
                 for lH264Header in lFragments:
                     print("Fragment offset: " + str(lH264Header))
 
@@ -62,7 +61,11 @@ class CContext():
             # the most important properties for blocks => fragments
             # conversions
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            lFragmentizer.defrag(lVideoFrags, lH264Fragments)
+            lFragmentizer.defrag(lVideoBlocks, lH264Fragments)
+            if pOptions.verbose is True:
+                for lH264Fragment in lH264Fragments:
+                    print(str(lH264Fragment.mOffset) + " / " + str(lH264Fragment.mNumBlocks) + 
+                            " (" + str(lH264Fragment.mNumBlocks * pOptions.fragmentsize) + ")")
             lReassembly = reassembly_context.CReassembly(pOptions.output)
             lReassembly.assemble(lH264Fragments, lFFMpeg, pOptions.output)
 
