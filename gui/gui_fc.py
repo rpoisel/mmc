@@ -9,15 +9,18 @@ import sys
 from qtimport import *
 
 # Import the compiled UI module
-from file_carving_ui import Ui_MainFileCarving
+from file_carving_ui import Ui_filecarvingWidget
 
 
 # Create a class for our main window
 class Gui_Qt(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(Gui_Qt, self).__init__(parent)
-        self.ui = Ui_MainFileCarving()
-        self.ui.setupUi(self)
+
+        self.ui = QtGui.QWidget()
+        lUI = Ui_filecarvingWidget()
+        lUI.setupUi(self.ui)
+        self.setCentralWidget(self.ui)
 
 class CMain:
     def __init__(self):
