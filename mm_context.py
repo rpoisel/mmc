@@ -28,8 +28,8 @@ class CContext():
     sDefaultPreprocessing = False
     sDefaultOutput = '/tmp/clever-output'
 
-    def __init__(self):
-        pass
+    def __init__(self, pProgressCb = None):
+        self.mProgressCb = pProgressCb
 
     def run(self, pOptions):
         try:
@@ -48,6 +48,8 @@ class CContext():
 
             # determine H.264 headers and fragments
             lFragsTested = lProcessor.parseH264(lVideoBlocks)
+            if self.mProgressCb != None:
+                self.mProgressCb.on_progress_callback(25)
 
             if pOptions.verbose is True:
                 lFragments = lVideoBlocks.getBlocks()
@@ -64,10 +66,13 @@ class CContext():
             lFragmentizer = fragmentizer_context.CFragmentizer()
             lFragmentizer.defrag(lVideoBlocks, lH264Fragments, 
                     pOptions.fragmentsize, pOptions.blockgap)
-            if pOptions.verbose is True:
-                for lH264Fragment in lH264Fragments:
-                    print(str(lH264Fragment.mOffset) + " / " + str(lH264Fragment.mNumBlocks) + 
-                            " (" + str(lH264Fragment.mNumBlocks * pOptions.fragmentsize) + ")")
+            for lH264Fragment in lH264Fragments:
+                #print(str(lH264Fragment.mOffset) + " / " + str(lH264Fragment.mNumBlocks) + 
+                        #" (" + str(lH264Fragment.mNumBlocks * pOptions.fragmentsize) + ")")
+                if self.mProgressCb != None:
+                    self.mProgressCb.on_result_callback(lH264Fragment.mOffset,
+                            lH264Fragment.mNumBlocks * pOptions.fragmentsize)
+
             lReassembly = reassembly_context.CReassembly(pOptions.output)
             lReassembly.assemble(lH264Fragments, lFFMpeg, pOptions.output)
 

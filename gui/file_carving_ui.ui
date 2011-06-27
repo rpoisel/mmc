@@ -20,21 +20,21 @@
       <widget class="QLineEdit" name="inputFile"/>
      </item>
      <item row="0" column="1">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="inputFileButton">
        <property name="text">
         <string>Input File</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="outputDirButton">
        <property name="text">
         <string>Output Directory</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLineEdit" name="outputdir"/>
+      <widget class="QLineEdit" name="outputDir"/>
      </item>
     </layout>
    </item>
@@ -102,7 +102,7 @@
       </widget>
      </item>
      <item row="1" column="3">
-      <widget class="QLineEdit" name="blockgap">
+      <widget class="QLineEdit" name="blockGap">
        <property name="text">
         <string>16384</string>
        </property>
