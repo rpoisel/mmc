@@ -27,6 +27,21 @@ class Gui_Qt(QtGui.QMainWindow):
 
         self.setCentralWidget(self.widget)
 
+        self.connect(self.ui.actionExit, QtCore.SIGNAL("triggered(bool)"),
+                     self.on_actionExit_triggered)
+        self.connect(self.ui.actionAbout, QtCore.SIGNAL("triggered(bool)"),
+                     self.on_actionAbout_triggered)
+
+    def on_actionExit_triggered(self, pChecked=None):
+        if pChecked is None:
+            return
+        self.close()
+
+    def on_actionAbout_triggered(self, pChecked=None):
+        QtGui.QMessageBox.about(self, "FREDI",
+            "Forensics Recommendation Engine for Digital Investigators")
+
+
 class CMain:
     def __init__(self):
         if gUsePyQt:
