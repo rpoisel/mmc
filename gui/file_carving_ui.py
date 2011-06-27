@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Mon Jun 27 11:37:47 2011
+# Created: Mon Jun 27 16:01:15 2011
 #      by: pyside-uic 0.2.10 running on PySide 1.0.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_filecarvingWidget(object):
     def setupUi(self, filecarvingWidget):
         filecarvingWidget.setObjectName("filecarvingWidget")
-        filecarvingWidget.resize(551, 470)
+        filecarvingWidget.resize(479, 434)
         self.verticalLayout = QtGui.QVBoxLayout(filecarvingWidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.gridLayout_2 = QtGui.QGridLayout()
@@ -75,9 +75,11 @@ class Ui_filecarvingWidget(object):
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
-        self.resultList = QtGui.QListWidget(filecarvingWidget)
-        self.resultList.setObjectName("resultList")
-        self.verticalLayout.addWidget(self.resultList)
+        self.resultTable = QtGui.QTableWidget(filecarvingWidget)
+        self.resultTable.setObjectName("resultTable")
+        self.resultTable.setColumnCount(0)
+        self.resultTable.setRowCount(0)
+        self.verticalLayout.addWidget(self.resultTable)
         self.progressBar = QtGui.QProgressBar(filecarvingWidget)
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")

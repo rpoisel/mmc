@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>551</width>
-    <height>470</height>
+    <width>479</width>
+    <height>434</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -131,7 +131,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QListWidget" name="resultList"/>
+    <widget class="QTableWidget" name="resultTable"/>
    </item>
    <item>
     <widget class="QProgressBar" name="progressBar">

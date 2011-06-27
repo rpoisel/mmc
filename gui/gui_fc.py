@@ -21,21 +21,29 @@ class Gui_Qt(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
-        self.widget = QtGui.QWidget()
-        lUI = Ui_filecarvingWidget()
-        lUI.setupUi(self.widget)
+        self.centralwidget = QtGui.QWidget()
+        self.customwidget = Ui_filecarvingWidget()
+        self.customwidget.setupUi(self.centralwidget)
 
-        self.setCentralWidget(self.widget)
+        self.setCentralWidget(self.centralwidget)
 
         # adjust widget elements
-        lUI.preprocessing.addItem("none")
-        lUI.preprocessing.addItem("sleuthkit")
+        self.customwidget.preprocessing.addItem("none")
+        self.customwidget.preprocessing.addItem("sleuthkit")
+
+        self.customwidget.resultTable.setColumnCount(3)
+        self.customwidget.resultTable.setHorizontalHeaderLabels(("Fragment", "Offset", "Size"))
+        self.customwidget.resultTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.customwidget.resultTable.verticalHeader().setVisible(False)
+        self.numRowsResult = 0
 
         # actions
         self.connect(self.ui.actionExit, QtCore.SIGNAL("triggered(bool)"),
-                     self.on_actionExit_triggered)
+                self.on_actionExit_triggered)
         self.connect(self.ui.actionAbout, QtCore.SIGNAL("triggered(bool)"),
-                     self.on_actionAbout_triggered)
+                self.on_actionAbout_triggered)
+        self.connect(self.customwidget.processButton, QtCore.SIGNAL("clicked(bool)"),
+                self.on_processButton_clicked)
 
     def on_actionExit_triggered(self, pChecked=None):
         if pChecked is None:
@@ -45,6 +53,16 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_actionAbout_triggered(self, pChecked=None):
         QtGui.QMessageBox.about(self, "FREDI",
             "Forensics Recommendation Engine for Digital Investigators")
+
+    def on_processButton_clicked(self, pChecked=None):
+        # start processing
+        # callback progress bar
+        # callback for results
+        self.customwidget.resultTable.insertRow(self.numRowsResult)
+        lItem = QtGui.QTableWidgetItem("Fragment " + str(self.numRowsResult + 1))
+        lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+        self.customwidget.resultTable.setItem(self.numRowsResult, 0, lItem)
+        self.numRowsResult += 1
 
 
 class CMain:

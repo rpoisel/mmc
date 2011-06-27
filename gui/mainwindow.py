@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Mon Jun 27 10:50:19 2011
+# Created: Mon Jun 27 15:50:05 2011
 #      by: pyside-uic 0.2.10 running on PySide 1.0.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,6 +31,8 @@ class Ui_MainWindow(object):
         self.actionAbout.setObjectName("actionAbout")
         self.actionExit = QtGui.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
+        self.actionWhatever = QtGui.QAction(MainWindow)
+        self.actionWhatever.setObjectName("actionWhatever")
         self.menu_File.addAction(self.actionExit)
         self.menu_Help.addAction(self.actionAbout)
         self.menubar.addAction(self.menu_File.menuAction())
@@ -47,4 +49,5 @@ class Ui_MainWindow(object):
         self.actionAbout.setShortcut(QtGui.QApplication.translate("MainWindow", "F1", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "E&xit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWhatever.setText(QtGui.QApplication.translate("MainWindow", "Whatever", None, QtGui.QApplication.UnicodeUTF8))
 
