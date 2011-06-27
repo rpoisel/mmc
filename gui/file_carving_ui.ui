@@ -54,7 +54,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox"/>
+      <widget class="QComboBox" name="preprocessing"/>
      </item>
     </layout>
    </item>

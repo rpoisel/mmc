@@ -27,6 +27,11 @@ class Gui_Qt(QtGui.QMainWindow):
 
         self.setCentralWidget(self.widget)
 
+        # adjust widget elements
+        lUI.preprocessing.addItem("none")
+        lUI.preprocessing.addItem("sleuthkit")
+
+        # actions
         self.connect(self.ui.actionExit, QtCore.SIGNAL("triggered(bool)"),
                      self.on_actionExit_triggered)
         self.connect(self.ui.actionAbout, QtCore.SIGNAL("triggered(bool)"),
