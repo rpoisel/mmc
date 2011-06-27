@@ -10,6 +10,7 @@ from qtimport import *
 
 # Import the compiled UI module
 from file_carving_ui import Ui_filecarvingWidget
+from mainwindow import Ui_MainWindow
 
 
 # Create a class for our main window
@@ -17,10 +18,14 @@ class Gui_Qt(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(Gui_Qt, self).__init__(parent)
 
-        self.ui = QtGui.QWidget()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        
+        self.widget = QtGui.QWidget()
         lUI = Ui_filecarvingWidget()
-        lUI.setupUi(self.ui)
-        self.setCentralWidget(self.ui)
+        lUI.setupUi(self.widget)
+
+        self.setCentralWidget(self.widget)
 
 class CMain:
     def __init__(self):
