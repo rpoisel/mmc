@@ -60,7 +60,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.preprocessing.addItem("sleuthkit")
 
         self.customwidget.resultTable.setColumnCount(3)
-        self.customwidget.resultTable.setHorizontalHeaderLabels(("Fragment", "Offset", "Size"))
+        self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
         self.customwidget.resultTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
         self.numRowsResult = 0
@@ -132,17 +132,23 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_result_callback(self, pOffset, pSize):
         self.customwidget.resultTable.insertRow(self.numRowsResult)
 
-        lItem = QtGui.QTableWidgetItem("Fragment " + str(self.numRowsResult + 1))
+        lItem = QtGui.QTableWidgetItem(1)
+        lItem.data(Qt.CheckedStateRole)
+        lItem.setCheckState(Qt.Checked)
         lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         self.customwidget.resultTable.setItem(self.numRowsResult, 0, lItem)
 
-        lItem = QtGui.QTableWidgetItem(str(pOffset))
+        lItem = QtGui.QTableWidgetItem("Fragment " + str(self.numRowsResult + 1))
         lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         self.customwidget.resultTable.setItem(self.numRowsResult, 1, lItem)
 
-        lItem = QtGui.QTableWidgetItem(str(pSize))
+        lItem = QtGui.QTableWidgetItem(str(pOffset))
         lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         self.customwidget.resultTable.setItem(self.numRowsResult, 2, lItem)
+
+        lItem = QtGui.QTableWidgetItem(str(pSize))
+        lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+        self.customwidget.resultTable.setItem(self.numRowsResult, 3, lItem)
 
         self.numRowsResult += 1
 
