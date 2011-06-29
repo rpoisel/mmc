@@ -53,6 +53,7 @@ class CPlain:
             lOffset += self.__mIncrementSize
             self.__mImage.seek(lOffset, os.SEEK_SET)
 
-        pCaller.finishedCallback()
+        if pCaller != None:
+            pCaller.finishedCallback()
 
         return lFragsChecked
