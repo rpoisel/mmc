@@ -17,23 +17,15 @@ class CFrags:
     def addHeader(self, pHeaderOffset):
         # determine if block exists
         lIndex = 0
-        try:
+        if pHeaderOffset in self.__mBlocks:
             lIndex = self.__mBlocks.index(pHeaderOffset)
-        except ValueError:
+        else:
             self.__mBlocks.append(pHeaderOffset)
             lIndex = self.__mBlocks.index(pHeaderOffset)
-        # determine if index in headers exists
-        try:
-            lHdrIdx = self.__mHeaders.index(lIndex)
-        except ValueError:
+        if lIndex not in self.__mHeaders:
             self.__mHeaders.append(lIndex)
             return True
         return False
 
     def addBlock(self, pBlockOffset):
-        try:
-            lIndex = self.__mBlocks.index(pBlockOffset)
-            return False
-        except ValueError:
-            self.__mBlocks.append(pBlockOffset)
-            return True
+        return pBlockOffset in self.__mBlocks
