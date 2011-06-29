@@ -74,6 +74,10 @@ class Gui_Qt(QtGui.QMainWindow):
                 self.on_actionExit_triggered)
         self.connect(self.ui.actionAbout, QtCore.SIGNAL("triggered(bool)"),
                 self.on_actionAbout_triggered)
+        self.connect(self.ui.actionChooseOutputDir, QtCore.SIGNAL("triggered(bool)"),
+                self.on_outputDirButton_clicked)
+        self.connect(self.ui.actionOpenImage, QtCore.SIGNAL("triggered(bool)"),
+                self.on_inputFileButton_clicked)
         self.connect(self.customwidget.processButton, QtCore.SIGNAL("clicked(bool)"),
                 self.on_processButton_clicked)
         self.connect(self.customwidget.inputFileButton, QtCore.SIGNAL("clicked(bool)"),
@@ -92,7 +96,7 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def on_inputFileButton_clicked(self, pChecked=None):
         lFilename = QtGui.QFileDialog.getOpenFileName(self, \
-                "Open Image", \
+                "Choose Image", \
                 os.path.dirname(self.customwidget.inputFile.text()), \
                 "All Files (*)")
         if lFilename[0] != "":
@@ -102,7 +106,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lDialog = QtGui.QFileDialog()
         lDialog.setFileMode(QtGui.QFileDialog.Directory)
         lFilename = lDialog.getExistingDirectory(self, \
-                "Open Output Directory", \
+                "Choose Output Directory", \
                 os.path.dirname(self.customwidget.outputDir.text()), \
                 QtGui.QFileDialog.ShowDirsOnly)
         if lFilename != "":

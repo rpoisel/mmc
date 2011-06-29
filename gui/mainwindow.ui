@@ -27,6 +27,9 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionOpenImage"/>
+    <addaction name="actionChooseOutputDir"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
@@ -55,9 +58,20 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionWhatever">
+  <action name="actionOpenImage">
    <property name="text">
-    <string>Whatever</string>
+    <string>Open image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionChooseOutputDir">
+   <property name="text">
+    <string>Choose Output Directory</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

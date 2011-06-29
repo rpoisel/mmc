@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Mon Jun 27 15:50:05 2011
+# Created: Thu Jun 30 01:10:15 2011
 #      by: pyside-uic 0.2.10 running on PySide 1.0.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,8 +31,13 @@ class Ui_MainWindow(object):
         self.actionAbout.setObjectName("actionAbout")
         self.actionExit = QtGui.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
-        self.actionWhatever = QtGui.QAction(MainWindow)
-        self.actionWhatever.setObjectName("actionWhatever")
+        self.actionOpenImage = QtGui.QAction(MainWindow)
+        self.actionOpenImage.setObjectName("actionOpenImage")
+        self.actionChooseOutputDir = QtGui.QAction(MainWindow)
+        self.actionChooseOutputDir.setObjectName("actionChooseOutputDir")
+        self.menu_File.addAction(self.actionOpenImage)
+        self.menu_File.addAction(self.actionChooseOutputDir)
+        self.menu_File.addSeparator()
         self.menu_File.addAction(self.actionExit)
         self.menu_Help.addAction(self.actionAbout)
         self.menubar.addAction(self.menu_File.menuAction())
@@ -49,5 +54,8 @@ class Ui_MainWindow(object):
         self.actionAbout.setShortcut(QtGui.QApplication.translate("MainWindow", "F1", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "E&xit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionWhatever.setText(QtGui.QApplication.translate("MainWindow", "Whatever", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpenImage.setText(QtGui.QApplication.translate("MainWindow", "Open image", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpenImage.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionChooseOutputDir.setText(QtGui.QApplication.translate("MainWindow", "Choose Output Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionChooseOutputDir.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
 

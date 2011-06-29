@@ -22,14 +22,14 @@
      <item row="0" column="1">
       <widget class="QPushButton" name="inputFileButton">
        <property name="text">
-        <string>Input File</string>
+        <string>&amp;Input File</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
       <widget class="QPushButton" name="outputDirButton">
        <property name="text">
-        <string>Output Directory</string>
+        <string>&amp;Output Directory</string>
        </property>
       </widget>
      </item>
@@ -143,7 +143,7 @@
    <item>
     <widget class="QPushButton" name="processButton">
      <property name="text">
-      <string>Process</string>
+      <string>&amp;Process</string>
      </property>
     </widget>
    </item>

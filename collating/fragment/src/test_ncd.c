@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     double lNCDResult = -INFINITY;
 
     unsigned const char* lFragment1 = "aaaaaaaaaaaa";
-    unsigned const char* lFragment2 = "aaaaaaaaaaaa";
+    unsigned const char* lFragment2 = "bbbbbbbbbbbb";
 
     lNCDResult = ncd(lFragment1, 
             lFragment2,
