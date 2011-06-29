@@ -87,15 +87,16 @@ class Gui_Qt(QtGui.QMainWindow):
         self.close()
 
     def on_actionAbout_triggered(self, pChecked=None):
-        QtGui.QMessageBox.about(self, "FREDI",
-            "Forensics Recommendation Engine for Digital Investigators")
+        QtGui.QMessageBox.about(self, "Multimedia File Carver",
+            "Developed by Rainer Poisel and Vasileios Miskos (St. Poelten University of Applied Sciences)")
 
     def on_inputFileButton_clicked(self, pChecked=None):
         lFilename = QtGui.QFileDialog.getOpenFileName(self, \
                 "Open Image", \
                 os.path.dirname(self.customwidget.inputFile.text()), \
                 "All Files (*)")
-        self.customwidget.inputFile.setText(lFilename[0])
+        if lFilename[0] != "":
+            self.customwidget.inputFile.setText(lFilename[0])
 
     def on_outputDirButton_clicked(self, pChecked=None):
         lDialog = QtGui.QFileDialog()
@@ -104,10 +105,19 @@ class Gui_Qt(QtGui.QMainWindow):
                 "Open Output Directory", \
                 os.path.dirname(self.customwidget.outputDir.text()), \
                 QtGui.QFileDialog.ShowDirsOnly)
-        self.customwidget.outputDir.setText(lFilename)
+        if lFilename != "":
+            self.customwidget.outputDir.setText(lFilename)
 
     def on_processButton_clicked(self, pChecked=None):
-        if self.__mProcessLock.tryLock() == True:
+        if not os.path.exists(self.customwidget.inputFile.text()):
+            QtGui.QMessageBox.about(self, "Error",
+                "Please make sure that your input file exists.")
+            return
+        elif not os.path.isdir(self.customwidget.outputDir.text()):
+            QtGui.QMessageBox.about(self, "Error",
+                "Please make sure that your output directory exists.")
+            return
+        elif self.__mProcessLock.tryLock() == True:
             self.customwidget.progressBar.setValue(0)
             lCnt = self.customwidget.resultTable.rowCount() - 1
             while (lCnt >= 0):
@@ -135,6 +145,7 @@ class Gui_Qt(QtGui.QMainWindow):
             self.__mProcess.sResult.connect(self.on_result_callback, \
                     QtCore.Qt.QueuedConnection)
             self.__mProcess.start()
+        return
 
     def on_result_callback(self, pHeader, pOffset, pSize):
         self.customwidget.resultTable.insertRow(self.numRowsResult)
