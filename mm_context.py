@@ -69,7 +69,8 @@ class CContext:
             for lH264Fragment in lH264Fragments:
                 print(lH264Fragment)
                 if self.mCaller != None:
-                    self.mCaller.resultCallback(lH264Fragment.mOffset,
+                    self.mCaller.resultCallback(lH264Fragment.mIsHeader, \
+                            lH264Fragment.mOffset,
                             lH264Fragment.mSize)
 
             lReassembly = reassembly_context.CReassembly(pOptions.output)

@@ -18,7 +18,7 @@ from gui_options import CGuiOptions
 class CProcessThread(QtCore.QThread):
     sProgress = QtCore.Signal(int)
     sFinished = QtCore.Signal()
-    sResult = QtCore.Signal(int, int)
+    sResult = QtCore.Signal(bool, int, int)
 
     def __init__(self, pOptions):
         super(CProcessThread, self).__init__()
@@ -31,8 +31,8 @@ class CProcessThread(QtCore.QThread):
         self.sProgress.emit(100)
         self.sFinished.emit()
 
-    def resultCallback(self, pOffset, pSize):
-        self.sResult.emit(pOffset, pSize)
+    def resultCallback(self, pHeader, pOffset, pSize):
+        self.sResult.emit(pHeader, pOffset, pSize)
 
     def run(self):
         lContext = CContext(self)
@@ -48,6 +48,7 @@ class Gui_Qt(QtGui.QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
         
         self.centralwidget = QtGui.QWidget()
         self.customwidget = Ui_filecarvingWidget()
@@ -59,7 +60,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.preprocessing.addItem("none")
         self.customwidget.preprocessing.addItem("sleuthkit")
 
-        self.customwidget.resultTable.setColumnCount(3)
+        self.customwidget.resultTable.setColumnCount(4)
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
         self.customwidget.resultTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
@@ -90,13 +91,19 @@ class Gui_Qt(QtGui.QMainWindow):
             "Forensics Recommendation Engine for Digital Investigators")
 
     def on_inputFileButton_clicked(self, pChecked=None):
-        lFilename = QtGui.QFileDialog.getOpenFileName(self, "Open Image", "~", "All Files (*)")
+        lFilename = QtGui.QFileDialog.getOpenFileName(self, \
+                "Open Image", \
+                os.path.dirname(self.customwidget.inputFile.text()), \
+                "All Files (*)")
         self.customwidget.inputFile.setText(lFilename[0])
 
     def on_outputDirButton_clicked(self, pChecked=None):
         lDialog = QtGui.QFileDialog()
         lDialog.setFileMode(QtGui.QFileDialog.Directory)
-        lFilename = lDialog.getExistingDirectory(self, "Open Output Directory", "", QtGui.QFileDialog.ShowDirsOnly)
+        lFilename = lDialog.getExistingDirectory(self, \
+                "Open Output Directory", \
+                os.path.dirname(self.customwidget.outputDir.text()), \
+                QtGui.QFileDialog.ShowDirsOnly)
         self.customwidget.outputDir.setText(lFilename)
 
     def on_processButton_clicked(self, pChecked=None):
@@ -129,25 +136,28 @@ class Gui_Qt(QtGui.QMainWindow):
                     QtCore.Qt.QueuedConnection)
             self.__mProcess.start()
 
-    def on_result_callback(self, pOffset, pSize):
+    def on_result_callback(self, pHeader, pOffset, pSize):
         self.customwidget.resultTable.insertRow(self.numRowsResult)
 
-        lItem = QtGui.QTableWidgetItem(1)
-        lItem.data(Qt.CheckedStateRole)
-        lItem.setCheckState(Qt.Checked)
-        lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+        if pHeader == True:
+            lItem = QtGui.QTableWidgetItem("H")
+        else:
+            lItem = QtGui.QTableWidgetItem("")
+        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+        lItem.setTextAlignment(QtCore.Qt.AlignCenter)
         self.customwidget.resultTable.setItem(self.numRowsResult, 0, lItem)
 
         lItem = QtGui.QTableWidgetItem("Fragment " + str(self.numRowsResult + 1))
-        lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+        lItem.setTextAlignment(QtCore.Qt.AlignCenter)
         self.customwidget.resultTable.setItem(self.numRowsResult, 1, lItem)
 
         lItem = QtGui.QTableWidgetItem(str(pOffset))
-        lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
         self.customwidget.resultTable.setItem(self.numRowsResult, 2, lItem)
 
         lItem = QtGui.QTableWidgetItem(str(pSize))
-        lItem.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
         self.customwidget.resultTable.setItem(self.numRowsResult, 3, lItem)
 
         self.numRowsResult += 1

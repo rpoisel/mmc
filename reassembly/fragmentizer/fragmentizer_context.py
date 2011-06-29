@@ -30,7 +30,6 @@ class CFragmentizer:
                 # start new header-fragment
                 lFragmentCur.mIsHeader = True
                 lFragmentCur.mOffset = pVideoBlocks.getBlocks()[lIdx]
-                #pH264Fragments.append(copy.copy(lFragmentCur))
                 pH264Fragments.append(lFragmentCur)
                 #lFragmentCur = CFragment(pBlockSize)
             elif lFragmentCur.mOffset == -1: # new no-header fragment
