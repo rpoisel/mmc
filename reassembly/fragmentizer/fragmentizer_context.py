@@ -1,8 +1,16 @@
+import copy
+
 class CFragment:
-    def __init__(self):
+    def __init__(self, pBlockSize):
         self.mOffset = -1
-        self.mNumBlocks = 1
+        self.mSize = pBlockSize
         self.mIsHeader = False
+
+    def __str__(self):
+        lString = str(self.mOffset) + " / " + str(self.mSize)
+        if self.mIsHeader:
+            lString += " | Header"
+        return lString
 
 class CFragmentizer:
     def __init__(self):
@@ -14,32 +22,26 @@ class CFragmentizer:
             return
 
         # first do the block building
-        lFragmentCur = CFragment()
-        pH264Fragments.append(lFragmentCur)
-        for lIdx in xrange(len(pVideoBlocks.getBlocks()) - 1):
-            # TODO check if currently investigated fragments are headers
-            # and start a new fragment if so
-            if pVideoBlocks.getBlocks()[lIdx] - \
-                    pVideoBlocks.getBlocks()[lIdx + 1] <= pBlockGap:
-                if lFragmentCur.mOffset == -1:
-                    lFragmentCur.mOffset = pVideoBlocks.getBlocks()[lIdx]
-                    if lFragmentCur.mOffset in pVideoBlocks.getHeaders():
-                        lFragmentCur.mIsHeader = True
-                lFragmentCur.mNumBlocks += 1
-            else:
-                lFragmentCur = CFragment()
+        lFragmentCur = CFragment(pBlockSize)
+        #pH264Fragments.append(lFragmentCur)
+        for lIdx in xrange(len(pVideoBlocks.getBlocks())):
+            if pVideoBlocks.getBlocks()[lIdx] in pVideoBlocks.getHeaders(): # header fragment
+                lFragmentCur = CFragment(pBlockSize)
+                # start new header-fragment
+                lFragmentCur.mIsHeader = True
+                lFragmentCur.mOffset = pVideoBlocks.getBlocks()[lIdx]
+                #pH264Fragments.append(copy.copy(lFragmentCur))
                 pH264Fragments.append(lFragmentCur)
-                
-        # divide fragments at headers
-        # TODO integrate this step into the previous one
-        for lHeader in pVideoBlocks.getHeaders():
-            for lFragment in pH264Fragments:
-                if lFragment.mOffset < lHeader < (lFragment.mOffset + lFragment.mNumBlocks * pBlockSize):
-                    lNumBlocksOld = (lHeader - lFragment.mOffset) / pBlockSize
-                    lFragmentNew = CFragment()
-                    lFragmentNew.mNumBlocks = lFragment.mNumBlocks - lNumBlocksOld
-                    lFragmentNew.mOffset = lHeader
-                    lFragment.mNumBlocks = lNumBlocksOld
-                    pH264Fragments.append(lFragmentNew)
-
-        
+                #lFragmentCur = CFragment(pBlockSize)
+            elif lFragmentCur.mOffset == -1: # new no-header fragment
+                lFragmentCur.mOffset = pVideoBlocks.getBlocks()[lIdx]
+                pH264Fragments.append(lFragmentCur)
+            elif (pVideoBlocks.getBlocks()[lIdx] - \
+                    (lFragmentCur.mOffset + lFragmentCur.mSize)) > pBlockGap: 
+                # fragment after header or new no-header with big gap
+                pH264Fragments.append(lFragmentCur)
+                lFragmentCur = CFragment(pBlockSize)
+                lFragmentCur.mOffset = pVideoBlocks.getBlocks()[lIdx]
+            else: #fragment after header or new no-header with small gap
+                lFragmentCur.mSize = pVideoBlocks.getBlocks()[lIdx] - \
+                        lFragmentCur.mOffset + pBlockSize

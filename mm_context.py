@@ -47,9 +47,7 @@ class CContext():
                     pOptions.fragmentsize)
 
             # determine H.264 headers and fragments
-            lFragsTested = lProcessor.parseH264(lVideoBlocks)
-            if self.mProgressCb != None:
-                self.mProgressCb.on_progress_callback(25)
+            lFragsTested = lProcessor.parseH264(lVideoBlocks, self.mProgressCb)
 
             if pOptions.verbose is True:
                 lFragments = lVideoBlocks.getBlocks()
@@ -67,11 +65,10 @@ class CContext():
             lFragmentizer.defrag(lVideoBlocks, lH264Fragments, 
                     pOptions.fragmentsize, pOptions.blockgap)
             for lH264Fragment in lH264Fragments:
-                #print(str(lH264Fragment.mOffset) + " / " + str(lH264Fragment.mNumBlocks) + 
-                        #" (" + str(lH264Fragment.mNumBlocks * pOptions.fragmentsize) + ")")
+                print(lH264Fragment)
                 if self.mProgressCb != None:
                     self.mProgressCb.on_result_callback(lH264Fragment.mOffset,
-                            lH264Fragment.mNumBlocks * pOptions.fragmentsize)
+                            lH264Fragment.mSize)
 
             lReassembly = reassembly_context.CReassembly(pOptions.output)
             lReassembly.assemble(lH264Fragments, lFFMpeg, pOptions.output)

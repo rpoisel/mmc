@@ -28,4 +28,7 @@ class CFrags:
         return False
 
     def addBlock(self, pBlockOffset):
-        return pBlockOffset in self.__mBlocks
+        if pBlockOffset in self.__mBlocks:
+            return True
+        self.__mBlocks.append(pBlockOffset)
+        return False

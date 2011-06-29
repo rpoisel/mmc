@@ -75,6 +75,12 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def on_processButton_clicked(self, pChecked=None):
         # start processing
+        lCnt = self.customwidget.resultTable.rowCount() - 1
+        while (lCnt >= 0):
+            self.customwidget.resultTable.removeRow(lCnt)
+            lCnt -= 1
+        self.numRowsResult = 0
+        self.customwidget.resultTable.update()
         lOptions = CGuiOptions()
         if self.customwidget.preprocessing.currentText() == "sleuthkit":
             lOptions.preprocess = True

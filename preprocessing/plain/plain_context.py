@@ -14,11 +14,12 @@ class CPlain:
         self.__mH264FC = fragment_context.CFragmentClassifier("<path>",
                 pFragmentSize)
         self.__mImage = open(pImageFile, "rb")
+        self.__mSize = os.path.getsize(pImageFile)
 
     def __del__(self):
         self.__mImage.close()
 
-    def parseH264(self, pH264Blocks):
+    def parseH264(self, pH264Blocks, pProgressCb = None):
         lFragsChecked = 0
         lOffset = self.__mOffset
         self.__mImage.seek(lOffset, os.SEEK_SET)
@@ -26,6 +27,12 @@ class CPlain:
         # collating: walk through fragments of the file
 
         while True:
+            if pProgressCb != None and lFragsChecked > 0:
+                lFragsTotal = self.__mSize / self.__mFragmentSize
+                if self.__mSize % self.__mFragmentSize != 0:
+                    lFragsTotal += 1
+                pProgressCb.on_progress_callback(90 * (lFragsTotal / lFragsChecked))
+
             lBuffer = self.__mImage.read(self.__mFragmentSize)
             if lBuffer == "":
                 break

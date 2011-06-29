@@ -11,5 +11,5 @@ class CTSK:
     def __del__(self):
         pass
 
-    def parseH264(self, pH264Fragments):
+    def parseH264(self, pH264Fragments, pProgressCb = None):
         pass
