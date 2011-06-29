@@ -6,6 +6,7 @@ import os.path
 import subprocess
 import traceback
 import logging
+import threading
 
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
@@ -19,7 +20,7 @@ from lib import datatypes
 from lib import frags
 
 
-class CContext():
+class CContext:
     sDefaultImagefile = 'image.img'
     sDefaultFragmentsize = 512
     sDefaultIncrementsize = 512
@@ -28,8 +29,9 @@ class CContext():
     sDefaultPreprocessing = False
     sDefaultOutput = '/tmp/clever-output'
 
-    def __init__(self, pProgressCb = None):
-        self.mProgressCb = pProgressCb
+    def __init__(self, pCaller = None):
+        #super(CContext, self).__init__()
+        self.mCaller = pCaller
 
     def run(self, pOptions):
         try:
@@ -47,7 +49,7 @@ class CContext():
                     pOptions.fragmentsize)
 
             # determine H.264 headers and fragments
-            lFragsTested = lProcessor.parseH264(lVideoBlocks, self.mProgressCb)
+            lFragsTested = lProcessor.parseH264(lVideoBlocks, self.mCaller)
 
             if pOptions.verbose is True:
                 lFragments = lVideoBlocks.getBlocks()
@@ -66,8 +68,8 @@ class CContext():
                     pOptions.fragmentsize, pOptions.blockgap)
             for lH264Fragment in lH264Fragments:
                 print(lH264Fragment)
-                if self.mProgressCb != None:
-                    self.mProgressCb.on_result_callback(lH264Fragment.mOffset,
+                if self.mCaller != None:
+                    self.mCaller.resultCallback(lH264Fragment.mOffset,
                             lH264Fragment.mSize)
 
             lReassembly = reassembly_context.CReassembly(pOptions.output)

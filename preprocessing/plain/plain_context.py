@@ -19,19 +19,19 @@ class CPlain:
     def __del__(self):
         self.__mImage.close()
 
-    def parseH264(self, pH264Blocks, pProgressCb = None):
+    def parseH264(self, pH264Blocks, pCaller = None):
         lFragsChecked = 0
         lOffset = self.__mOffset
         self.__mImage.seek(lOffset, os.SEEK_SET)
 
         # collating: walk through fragments of the file
+        lFragsTotal = self.__mSize / self.__mFragmentSize
+        if self.__mSize % self.__mFragmentSize != 0:
+            lFragsTotal += 1
 
         while True:
-            if pProgressCb != None and lFragsChecked > 0:
-                lFragsTotal = self.__mSize / self.__mFragmentSize
-                if self.__mSize % self.__mFragmentSize != 0:
-                    lFragsTotal += 1
-                pProgressCb.on_progress_callback(90 * (lFragsTotal / lFragsChecked))
+            if pCaller != None and lFragsChecked > 0:
+                pCaller.progressCallback(90 * lFragsChecked / lFragsTotal)
 
             lBuffer = self.__mImage.read(self.__mFragmentSize)
             if lBuffer == "":
@@ -52,4 +52,7 @@ class CPlain:
             # position internal file pointer
             lOffset += self.__mIncrementSize
             self.__mImage.seek(lOffset, os.SEEK_SET)
+
+        pCaller.finishedCallback()
+
         return lFragsChecked

@@ -15,10 +15,36 @@ from mm_context import CContext
 from gui_options import CGuiOptions
 
 
+class CProcessThread(QtCore.QThread):
+    sProgress = QtCore.Signal(int)
+    sFinished = QtCore.Signal()
+    sResult = QtCore.Signal(int, int)
+
+    def __init__(self, pOptions):
+        super(CProcessThread, self).__init__()
+        self.mOptions = pOptions
+
+    def progressCallback(self, pProgress):
+        self.sProgress.emit(pProgress)
+
+    def finishedCallback(self):
+        self.sProgress.emit(100)
+        self.sFinished.emit()
+
+    def resultCallback(self, pOffset, pSize):
+        self.sResult.emit(pOffset, pSize)
+
+    def run(self):
+        lContext = CContext(self)
+        lContext.run(self.mOptions)
+
+
 # Create a class for our main window
 class Gui_Qt(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(Gui_Qt, self).__init__(parent)
+
+        self.__mProcessLock = QtCore.QMutex()
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -74,27 +100,34 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.outputDir.setText(lFilename)
 
     def on_processButton_clicked(self, pChecked=None):
-        # start processing
-        lCnt = self.customwidget.resultTable.rowCount() - 1
-        while (lCnt >= 0):
-            self.customwidget.resultTable.removeRow(lCnt)
-            lCnt -= 1
-        self.numRowsResult = 0
-        self.customwidget.resultTable.update()
-        lOptions = CGuiOptions()
-        if self.customwidget.preprocessing.currentText() == "sleuthkit":
-            lOptions.preprocess = True
-        else:
-            lOptions.preprocess = False
-        lOptions.imagefile = self.customwidget.inputFile.text()
-        lOptions.output = self.customwidget.outputDir.text()
-        lOptions.offset = int(self.customwidget.offset.text())
-        lOptions.fragmentsize = int(self.customwidget.fragmentSize.text())
-        lOptions.incrementsize = int(self.customwidget.incrementSize.text())
-        lOptions.blockgap = int(self.customwidget.blockGap.text())
-        lOptions.verbose = False
-        lContext = CContext(self)
-        lContext.run(lOptions)
+        if self.__mProcessLock.tryLock() == True:
+            self.customwidget.progressBar.setValue(0)
+            lCnt = self.customwidget.resultTable.rowCount() - 1
+            while (lCnt >= 0):
+                self.customwidget.resultTable.removeRow(lCnt)
+                lCnt -= 1
+            self.numRowsResult = 0
+            self.customwidget.resultTable.update()
+            lOptions = CGuiOptions()
+            if self.customwidget.preprocessing.currentText() == "sleuthkit":
+                lOptions.preprocess = True
+            else:
+                lOptions.preprocess = False
+            lOptions.imagefile = self.customwidget.inputFile.text()
+            lOptions.output = self.customwidget.outputDir.text()
+            lOptions.offset = int(self.customwidget.offset.text())
+            lOptions.fragmentsize = int(self.customwidget.fragmentSize.text())
+            lOptions.incrementsize = int(self.customwidget.incrementSize.text())
+            lOptions.blockgap = int(self.customwidget.blockGap.text())
+            lOptions.verbose = False
+            self.__mProcess = CProcessThread(lOptions)
+            self.__mProcess.sProgress.connect(self.on_progress_callback, \
+                    QtCore.Qt.QueuedConnection)
+            self.__mProcess.sFinished.connect(self.on_finished_callback, \
+                    QtCore.Qt.QueuedConnection)
+            self.__mProcess.sResult.connect(self.on_result_callback, \
+                    QtCore.Qt.QueuedConnection)
+            self.__mProcess.start()
 
     def on_result_callback(self, pOffset, pSize):
         self.customwidget.resultTable.insertRow(self.numRowsResult)
@@ -116,6 +149,9 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_progress_callback(self, pValue):
         if 0 <= pValue <= 100:
             self.customwidget.progressBar.setValue(pValue)
+
+    def on_finished_callback(self):
+        self.__mProcessLock.unlock()
 
 
 class CMain:
