@@ -34,7 +34,7 @@ struct _FragmentClassifier
 };
 
 #if TEST_NCD == 1
-static const char *sTypes[] = { ".html", ".txt", ".svg", ".h264", ".jpg", "" };
+static const char *sTypes[] = { ".html", ".txt", ".svg", ".h264", "" };
 struct SNearest
 {
     int mIdxTypeNearest;

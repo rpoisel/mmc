@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Thu Jun 30 01:13:38 2011
+# Created: Tue Jul 26 12:18:13 2011
 #      by: pyside-uic 0.2.10 running on PySide 1.0.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,7 @@ class Ui_filecarvingWidget(object):
         self.gridLayout_2 = QtGui.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.inputFile = QtGui.QLineEdit(filecarvingWidget)
+        self.inputFile.setText("")
         self.inputFile.setObjectName("inputFile")
         self.gridLayout_2.addWidget(self.inputFile, 0, 0, 1, 1)
         self.inputFileButton = QtGui.QPushButton(filecarvingWidget)
@@ -27,6 +28,7 @@ class Ui_filecarvingWidget(object):
         self.outputDirButton.setObjectName("outputDirButton")
         self.gridLayout_2.addWidget(self.outputDirButton, 1, 1, 1, 1)
         self.outputDir = QtGui.QLineEdit(filecarvingWidget)
+        self.outputDir.setText("")
         self.outputDir.setObjectName("outputDir")
         self.gridLayout_2.addWidget(self.outputDir, 1, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_2)
