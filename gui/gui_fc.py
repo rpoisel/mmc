@@ -12,7 +12,6 @@ from qtimport import *
 from file_carving_ui import Ui_filecarvingWidget
 from mainwindow import Ui_MainWindow
 from mm_context import CContext
-from gui_options import CGuiOptions
 
 class Jobs:
     CLASSIFY=0x1
