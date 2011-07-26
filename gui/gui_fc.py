@@ -14,15 +14,20 @@ from mainwindow import Ui_MainWindow
 from mm_context import CContext
 from gui_options import CGuiOptions
 
+class Jobs:
+    CLASSIFY=0x1
+    REASSEMBLE=0x2
 
-class CProcessThread(QtCore.QThread):
+class CThreadWorker(QtCore.QThread):
     sProgress = QtCore.Signal(int)
     sFinished = QtCore.Signal()
     sResult = QtCore.Signal(bool, int, int)
 
-    def __init__(self, pOptions):
-        super(CProcessThread, self).__init__()
+    def __init__(self, pOptions, pContext, pJobs):
+        super(CThreadWorker, self).__init__()
         self.mOptions = pOptions
+        self.mContext = pContext
+        self.mJobs = pJobs
 
     def progressCallback(self, pProgress):
         self.sProgress.emit(pProgress)
@@ -35,16 +40,19 @@ class CProcessThread(QtCore.QThread):
         self.sResult.emit(pHeader, pOffset, pSize)
 
     def run(self):
-        lContext = CContext(self)
-        lContext.run(self.mOptions)
+        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
+            self.mContext.runClassify(self.mOptions, self)
+        if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
+            self.mContext.runReassembly(self.mOptions, self)
 
 
 # Create a class for our main window
 class Gui_Qt(QtGui.QMainWindow):
+
     def __init__(self, parent=None):
         super(Gui_Qt, self).__init__(parent)
 
-        self.__mProcessLock = QtCore.QMutex()
+        self.__mLock = QtCore.QMutex()
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -59,6 +67,8 @@ class Gui_Qt(QtGui.QMainWindow):
         # adjust widget elements
         self.customwidget.preprocessing.addItem("none")
         self.customwidget.preprocessing.addItem("sleuthkit")
+        self.customwidget.outputformat.addItem("JPEG")
+        self.customwidget.outputformat.addItem("PNG")
 
         self.customwidget.resultTable.setColumnCount(4)
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
@@ -78,6 +88,10 @@ class Gui_Qt(QtGui.QMainWindow):
                 self.on_outputDirButton_clicked)
         self.connect(self.ui.actionOpenImage, QtCore.SIGNAL("triggered(bool)"),
                 self.on_inputFileButton_clicked)
+        self.connect(self.customwidget.classifyButton, QtCore.SIGNAL("clicked(bool)"),
+                self.on_classifyButton_clicked)
+        self.connect(self.customwidget.reassembleButton, QtCore.SIGNAL("clicked(bool)"),
+                self.on_reassembleButton_clicked)
         self.connect(self.customwidget.processButton, QtCore.SIGNAL("clicked(bool)"),
                 self.on_processButton_clicked)
         self.connect(self.customwidget.inputFileButton, QtCore.SIGNAL("clicked(bool)"),
@@ -121,35 +135,81 @@ class Gui_Qt(QtGui.QMainWindow):
             QtGui.QMessageBox.about(self, "Error",
                 "Please make sure that your output directory exists.")
             return
-        elif self.__mProcessLock.tryLock() == True:
+        elif self.__mLock.tryLock() == True:
+            self.mContext = CContext()
+            self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
-            lCnt = self.customwidget.resultTable.rowCount() - 1
-            while (lCnt >= 0):
-                self.customwidget.resultTable.removeRow(lCnt)
-                lCnt -= 1
-            self.numRowsResult = 0
-            self.customwidget.resultTable.update()
-            lOptions = CGuiOptions()
-            if self.customwidget.preprocessing.currentText() == "sleuthkit":
-                lOptions.preprocess = True
-            else:
-                lOptions.preprocess = False
-            lOptions.imagefile = self.customwidget.inputFile.text()
-            lOptions.output = self.customwidget.outputDir.text()
-            lOptions.offset = int(self.customwidget.offset.text())
-            lOptions.fragmentsize = int(self.customwidget.fragmentSize.text())
-            lOptions.incrementsize = int(self.customwidget.incrementSize.text())
-            lOptions.blockgap = int(self.customwidget.blockGap.text())
-            lOptions.verbose = False
-            self.__mProcess = CProcessThread(lOptions)
-            self.__mProcess.sProgress.connect(self.on_progress_callback, \
-                    QtCore.Qt.QueuedConnection)
-            self.__mProcess.sFinished.connect(self.on_finished_callback, \
-                    QtCore.Qt.QueuedConnection)
-            self.__mProcess.sResult.connect(self.on_result_callback, \
-                    QtCore.Qt.QueuedConnection)
-            self.__mProcess.start()
-        return
+            self.__startWorker(Jobs.CLASSIFY|Jobs.REASSEMBLE)
+
+    def on_reassembleButton_clicked(self, pChecked=None):
+        if len(self.mContext.getH264Fragments()) is 0:
+            QtGui.QMessageBox.about(self, "Stooopid",
+                "What would you like to reassemble? Nothing classified yet!")
+        elif self.__mLock.tryLock() == True:
+            self.mContext = CContext()
+            self.customwidget.progressBar.setValue(0)
+            self.__startWorker(Jobs.REASSEMBLE)
+
+    def on_classifyButton_clicked(self, pChecked=None):
+        if not os.path.exists(self.customwidget.inputFile.text()):
+            QtGui.QMessageBox.about(self, "Error",
+                "Please make sure that your input file exists.")
+            return
+        elif not os.path.isdir(self.customwidget.outputDir.text()):
+            QtGui.QMessageBox.about(self, "Error",
+                "Please make sure that your output directory exists.")
+            return
+        elif self.__mLock.tryLock() == True:
+            self.mContext = CContext()
+            self.__clearFragments()
+            self.customwidget.progressBar.setValue(0)
+            self.__startWorker(Jobs.CLASSIFY)
+
+    def __clearFragments(self):
+        lCnt = self.customwidget.resultTable.rowCount() - 1
+        while (lCnt >= 0):
+            self.customwidget.resultTable.removeRow(lCnt)
+            lCnt -= 1
+        self.numRowsResult = 0
+        self.customwidget.resultTable.update()
+
+
+    def __enableElements(self, pEnabled):
+        self.customwidget.classifyButton.setEnabled(pEnabled)
+        self.customwidget.reassembleButton.setEnabled(pEnabled)
+        self.customwidget.processButton.setEnabled(pEnabled)
+        # TODO add all elements that should be deactivated
+
+    def __startWorker(self, pJob):
+        lOptions = self.__getOptions()
+        self.__mWorker = CThreadWorker(lOptions, self.mContext, pJob)
+        self.__mWorker.sProgress.connect(self.on_progress_callback, \
+                QtCore.Qt.QueuedConnection)
+        self.__mWorker.sFinished.connect(self.on_finished_callback, \
+                QtCore.Qt.QueuedConnection)
+        self.__mWorker.sResult.connect(self.on_result_callback, \
+                QtCore.Qt.QueuedConnection)
+        self.__enableElements(False)
+        self.__mWorker.start()
+
+    def __getOptions(self):
+        lOptions = CGuiOptions()
+        if self.customwidget.preprocessing.currentText() == "sleuthkit":
+            lOptions.preprocess = True
+        else:
+            lOptions.preprocess = False
+        if self.customwidget.outputformat.currentText() == "PNG":
+            lOptions.outputformat = ".png"
+        else:
+            lOptions.outputformat = ".jpg"
+        lOptions.imagefile = self.customwidget.inputFile.text()
+        lOptions.output = self.customwidget.outputDir.text()
+        lOptions.offset = int(self.customwidget.offset.text())
+        lOptions.fragmentsize = int(self.customwidget.fragmentSize.text())
+        lOptions.incrementsize = int(self.customwidget.incrementSize.text())
+        lOptions.blockgap = int(self.customwidget.blockGap.text())
+        lOptions.verbose = False
+        return lOptions
 
     def on_result_callback(self, pHeader, pOffset, pSize):
         self.customwidget.resultTable.insertRow(self.numRowsResult)
@@ -182,7 +242,8 @@ class Gui_Qt(QtGui.QMainWindow):
             self.customwidget.progressBar.setValue(pValue)
 
     def on_finished_callback(self):
-        self.__mProcessLock.unlock()
+        self.__mLock.unlock()
+        self.__enableElements(True)
 
 
 class CMain:

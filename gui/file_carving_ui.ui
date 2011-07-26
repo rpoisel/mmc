@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>479</width>
-    <height>434</height>
+    <width>568</width>
+    <height>468</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLineEdit" name="inputFile">
        <property name="text">
-           <string></string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -40,7 +40,7 @@
      <item row="1" column="0">
       <widget class="QLineEdit" name="outputDir">
        <property name="text">
-           <string></string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -149,11 +149,52 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="processButton">
-     <property name="text">
-      <string>&amp;Process</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_7">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Output Format:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="outputformat"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="classifyButton">
+       <property name="text">
+        <string>&amp;Classify</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="reassembleButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>&amp;Reassemble</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="processButton">
+       <property name="text">
+        <string>&amp;Process (do it all)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

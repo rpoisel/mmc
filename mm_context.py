@@ -27,16 +27,18 @@ class CContext:
     sDefaultBlockGap = 16384
     sDefaultOffset = 0
     sDefaultPreprocessing = False
-    sDefaultOutput = '/tmp/clever-output'
+    sDefaultOutput = '/tmp/temp'
+    sDefaultOutputFormat = 'jpg'
 
-    def __init__(self, pCaller = None):
-        #super(CContext, self).__init__()
-        self.mCaller = pCaller
+    def __init__(self):
+        self.mH264Fragments = []
 
-    def run(self, pOptions):
+    def getH264Fragments(self):
+        return self.mH264Fragments
+
+    def runClassify(self, pOptions, pCaller):
         try:
             lVideoBlocks = frags.CFrags()
-            lH264Fragments = []
 
             # initialize preprocessor
             if pOptions.preprocess == True:
@@ -49,7 +51,7 @@ class CContext:
                     pOptions.fragmentsize)
 
             # determine H.264 headers and fragments
-            lFragsTested = lProcessor.parseH264(lVideoBlocks, self.mCaller)
+            lFragsTested = lProcessor.parseH264(lVideoBlocks, pCaller)
 
             if pOptions.verbose is True:
                 lFragments = lVideoBlocks.getBlocks()
@@ -58,24 +60,45 @@ class CContext:
                 for lH264Header in lFragments:
                     print("Fragment offset: " + str(lH264Header))
 
-            # TODO reassembly (process map of fragments)
-            lFFMpeg = ffmpeg_context.CFFMpegContext()
             # initialize fragmentizer with parameters that describe
             # the most important properties for blocks => fragments
             # conversions
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            lFragmentizer.defrag(lVideoBlocks, lH264Fragments, 
+            lFragmentizer.defrag(lVideoBlocks, self.mH264Fragments, 
                     pOptions.fragmentsize, pOptions.blockgap)
-            for lH264Fragment in lH264Fragments:
+            for lH264Fragment in self.mH264Fragments:
                 print(lH264Fragment)
-                if self.mCaller != None:
-                    self.mCaller.resultCallback(lH264Fragment.mIsHeader, \
-                            lH264Fragment.mOffset,
-                            lH264Fragment.mSize)
+                #if pCaller != None:
+                pCaller.resultCallback(lH264Fragment.mIsHeader, \
+                        lH264Fragment.mOffset,
+                        lH264Fragment.mSize)
 
-            lReassembly = reassembly_context.CReassembly(pOptions.output)
-            lReassembly.assemble(lH264Fragments, lFFMpeg, pOptions.output)
+            #if pCaller != None:
+            pCaller.finishedCallback()
 
+        except LookupError, pExc:
+            print("LookupError: " + str(pExc))
+            traceback.print_exc()
+            sys.exit(-1)
+        except NameError, pExc:
+            print("NameError: " + str(pExc))
+            traceback.print_exc()
+            sys.exit(-2)
+        except EOFError, pExc:
+            print("EOFError: " + str(pExc))
+            traceback.print_exc()
+            sys.exit(-3)
+        except Exception, pExc:
+            print("Error: " + str(pExc))
+            traceback.print_exc()
+            sys.exit(-4)
+
+    def runReassembly(self, pOptions, pCaller):
+        try:
+            lFFMpeg = ffmpeg_context.CFFMpegContext()
+            lReassembly = reassembly_context.CReassembly()
+            lReassembly.assemble(pOptions, self.mH264Fragments, lFFMpeg)
+            pCaller.finishedCallback()
         except LookupError, pExc:
             print("LookupError: " + str(pExc))
             traceback.print_exc()

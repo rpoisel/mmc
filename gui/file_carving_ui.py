@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Tue Jul 26 12:18:13 2011
+# Created: Tue Jul 26 16:59:21 2011
 #      by: pyside-uic 0.2.10 running on PySide 1.0.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_filecarvingWidget(object):
     def setupUi(self, filecarvingWidget):
         filecarvingWidget.setObjectName("filecarvingWidget")
-        filecarvingWidget.resize(479, 434)
+        filecarvingWidget.resize(568, 468)
         self.verticalLayout = QtGui.QVBoxLayout(filecarvingWidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.gridLayout_2 = QtGui.QGridLayout()
@@ -86,9 +86,33 @@ class Ui_filecarvingWidget(object):
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
         self.verticalLayout.addWidget(self.progressBar)
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.label_7 = QtGui.QLabel(filecarvingWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_7.sizePolicy().hasHeightForWidth())
+        self.label_7.setSizePolicy(sizePolicy)
+        self.label_7.setObjectName("label_7")
+        self.horizontalLayout_2.addWidget(self.label_7)
+        self.outputformat = QtGui.QComboBox(filecarvingWidget)
+        self.outputformat.setObjectName("outputformat")
+        self.horizontalLayout_2.addWidget(self.outputformat)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.classifyButton = QtGui.QPushButton(filecarvingWidget)
+        self.classifyButton.setObjectName("classifyButton")
+        self.horizontalLayout_3.addWidget(self.classifyButton)
+        self.reassembleButton = QtGui.QPushButton(filecarvingWidget)
+        self.reassembleButton.setEnabled(False)
+        self.reassembleButton.setObjectName("reassembleButton")
+        self.horizontalLayout_3.addWidget(self.reassembleButton)
         self.processButton = QtGui.QPushButton(filecarvingWidget)
         self.processButton.setObjectName("processButton")
-        self.verticalLayout.addWidget(self.processButton)
+        self.horizontalLayout_3.addWidget(self.processButton)
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
 
         self.retranslateUi(filecarvingWidget)
         QtCore.QMetaObject.connectSlotsByName(filecarvingWidget)
@@ -106,5 +130,8 @@ class Ui_filecarvingWidget(object):
         self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "16384", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Gap", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("filecarvingWidget", "Fragment Size", None, QtGui.QApplication.UnicodeUTF8))
-        self.processButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Process", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
+        self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))
+        self.reassembleButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Reassemble", None, QtGui.QApplication.UnicodeUTF8))
+        self.processButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Process (do it all)", None, QtGui.QApplication.UnicodeUTF8))
 
