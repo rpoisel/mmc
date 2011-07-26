@@ -31,7 +31,7 @@ class CPlain:
 
         while True:
             if pCaller != None and lFragsChecked > 0:
-                pCaller.progressCallback(90 * lFragsChecked / lFragsTotal)
+                pCaller.progressCallback(100 * lFragsChecked / lFragsTotal)
 
             lBuffer = self.__mImage.read(self.__mFragmentSize)
             if lBuffer == "":

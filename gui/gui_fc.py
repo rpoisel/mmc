@@ -12,8 +12,10 @@ from qtimport import *
 from file_carving_ui import Ui_filecarvingWidget
 from mainwindow import Ui_MainWindow
 from mm_context import CContext
+from gui_options import CGuiOptions
 
 class Jobs:
+    NONE=0x0
     CLASSIFY=0x1
     REASSEMBLE=0x2
 
@@ -27,12 +29,21 @@ class CThreadWorker(QtCore.QThread):
         self.mOptions = pOptions
         self.mContext = pContext
         self.mJobs = pJobs
+        self.mRunningJob = Jobs.NONE
 
     def progressCallback(self, pProgress):
-        self.sProgress.emit(pProgress)
+        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY \
+                and \
+                self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
+                    if self.mRunningJob & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
+                        self.sProgress.emit(85 + pProgress * 0.15)
+                    else:
+                        self.sProgress.emit(pProgress * 0.85)
+        else:
+            self.sProgress.emit(pProgress)
 
     def finishedCallback(self):
-        self.sProgress.emit(100)
+        #self.sProgress.emit(100)
         self.sFinished.emit()
 
     def resultCallback(self, pHeader, pOffset, pSize):
@@ -40,8 +51,10 @@ class CThreadWorker(QtCore.QThread):
 
     def run(self):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
+            self.mRunningJob = Jobs.CLASSIFY
             self.mContext.runClassify(self.mOptions, self)
         if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
+            self.mRunningJob = Jobs.REASSEMBLE
             self.mContext.runReassembly(self.mOptions, self)
 
 

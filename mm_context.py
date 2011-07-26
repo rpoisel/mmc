@@ -97,7 +97,7 @@ class CContext:
         try:
             lFFMpeg = ffmpeg_context.CFFMpegContext()
             lReassembly = reassembly_context.CReassembly()
-            lReassembly.assemble(pOptions, self.mH264Fragments, lFFMpeg)
+            lReassembly.assemble(pOptions, self.mH264Fragments, lFFMpeg, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:
             print("LookupError: " + str(pExc))

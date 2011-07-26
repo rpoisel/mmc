@@ -6,7 +6,7 @@ class CReassembly:
     def __init__(self):
         pass
 
-    def assemble(self, pOptions, pFragments, pValidator):
+    def assemble(self, pOptions, pFragments, pValidator, pCaller):
         # sort list so that header fragments are at the beginning
         lSortedFrags = sorted(pFragments, key=lambda lFrag: lFrag.mIsHeader, reverse = True)
         lIdxNoHeader = 0
@@ -37,3 +37,4 @@ class CReassembly:
             lFFMpeg.communicate(input=lRecoverData)
             lRecoverFH.close()
             lCntHdr += 1
+            pCaller.progressCallback(100 * len(lSortedFrags[0:lIdxNoHeader]) / (lCntHdr))
