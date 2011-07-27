@@ -1,0 +1,728 @@
+From gaudenz at soziologie.ch  Wed Dec  1 03:37:58 2010
+From: gaudenz at soziologie.ch (Gaudenz Steinlin)
+Date: Wed, 01 Dec 2010 09:37:58 +0100
+Subject: [sup-devel] [PATCH] Converted crypto to use the gpgme gem
+In-Reply-To: <1291097850-sup-6043@tilus.net>
+References: <AANLkTinrSAheJb2F4Xw9AmgXcGLxeQh0_MEnuTSATye_@mail.gmail.com>
+	<AANLkTinXwKiJqgKyFrrcVV21a8j8hV=fw4QcvDLhtM8E@mail.gmail.com>
+	<AANLkTi=7yasVvAW4P85v3GJxf+quJrE3-1XruDgUZq+D@mail.gmail.com>
+	<1289466286-sup-7540@meteor.durcheinandertal.local>
+	<AANLkTikUwyX6xj-f_ZnLp6s2s9vaCpgayPKygniWndoJ@mail.gmail.com>
+	<1289907535-sup-3989@meteor.durcheinandertal.local>
+	<AANLkTi=xz16ecZ0C5=RUcOG4wzojVVzs70PZ2ueKa0ht@mail.gmail.com>
+	<1289932061-sup-96@meteor.durcheinandertal.local>
+	<AANLkTin=1MRrW0vuj_7uMvjcyLc3Aaw4ddZ_Rq6TBiyx@mail.gmail.com>
+	<AANLkTinvv59bWu0UfjW2K-xDRUP42tDwmgMh5yZdmaN_@mail.gmail.com>
+	<1291023322-sup-8457@meteor.durcheinandertal.local>
+	<1291097850-sup-6043@tilus.net>
+Message-ID: <1291192005-sup-7698@meteor.durcheinandertal.local>
+
+Excerpts from Tero Tilus's message of Die Nov 30 07:22:48 +0100 2010:
+> Gaudenz Steinlin, 2010-11-29 11:41:
+> > As far as I understood the branch layout the flow of changes is
+> > master -> next -> release. So applying to next would mean it ends up
+> > in the next release (0.12).
+> 
+> Master is considered "stable" and next "unstable".  Releases are
+> tagged from master and small changes may go directly to master.  New
+> features are introduced in next and merged to master when they are
+> considered stable (enough).
+
+Thanks for clarifying this.At the moment this does not seem to reflect
+the current reality in the git repository. Master has quite a lot of
+commits next does not have. Also next has not been updated since
+several months.
+
+I guess this is due to the fact that there were no major code changes
+during the last months and therefore all the work has been done
+directly on master. 
+
+Gaudenz
+-- 
+Ever tried. Ever failed. No matter.
+Try again. Fail again. Fail better.
+~ Samuel Beckett ~
+
+From sup-bugs at masanjin.net  Wed Dec  1 09:42:34 2010
+From: sup-bugs at masanjin.net (plutek)
+Date: Wed, 01 Dec 2010 14:42:34 +0000
+Subject: [sup-devel] [issue135] crash on attempting to start sup
+In-Reply-To: <1291214554.07.0.588958545349.issue135@masanjin.net>
+Message-ID: <1291214554.07.0.588958545349.issue135@masanjin.net>
+
+
+New submission from plutek <plutek at infinity.net>:
+
+this morning, after running sup-sync -a, sup will not start -- it crashes
+immediately. i've been running this version of sup successfully for a long time
+now, and haven't changed my usage pattern at all.
+
+attached is my .sup/exception-log.txt
+
+cheers!
+
+----------
+files: exception-log.txt
+messages: 317
+nosy: plutek
+priority: bug
+ruby_version: 1.8
+status: unread
+sup_version: 0.11
+title: crash on attempting to start sup
+
+_________________________________________
+Sup issue tracker <sup-bugs at masanjin.net>
+<http://masanjin.net/sup-bugs/issue135>
+_________________________________________
+-------------- next part --------------
+--- RuntimeError from thread: load threads for thread-index-mode
+wrong id called on nil
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup.rb:17:in `id'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:234:in `update'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/hook.rb:123:in `sort_by'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:234:in `each'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:234:in `sort_by'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:234:in `update'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:232:in `synchronize'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:232:in `update'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:643:in `__unprotected_load_n_threads'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/thread.rb:334:in `load_n_threads'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/index.rb:148:in `each_id_by_date'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/index.rb:239:in `each_id'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/index.rb:239:in `each'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/index.rb:239:in `each_id'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/index.rb:148:in `each_id_by_date'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/thread.rb:328:in `load_n_threads'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:640:in `__unprotected_load_n_threads'
+(eval):12:in `load_n_threads'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:624:in `load_n_threads_background'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup.rb:76:in `reporting_thread'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup.rb:74:in `initialize'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup.rb:74:in `new'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup.rb:74:in `reporting_thread'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:623:in `load_n_threads_background'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/lib/sup/modes/thread-index-mode.rb:694:in `__unprotected_load_threads'
+(eval):12:in `load_threads'
+/usr/lib/ruby/gems/1.8/gems/sup-0.11/bin/sup:231
+/usr/bin/sup:19:in `load'
+/usr/bin/sup:19
+
+From dmishd at gmail.com  Mon Dec  6 18:31:43 2010
+From: dmishd at gmail.com (Hamish D)
+Date: Mon, 6 Dec 2010 23:31:43 +0000
+Subject: [sup-devel] [PATCH] Converted crypto to use the gpgme gem
+In-Reply-To: <1291023322-sup-8457@meteor.durcheinandertal.local>
+References: <AANLkTinrSAheJb2F4Xw9AmgXcGLxeQh0_MEnuTSATye_@mail.gmail.com>
+	<AANLkTinXwKiJqgKyFrrcVV21a8j8hV=fw4QcvDLhtM8E@mail.gmail.com>
+	<AANLkTi=7yasVvAW4P85v3GJxf+quJrE3-1XruDgUZq+D@mail.gmail.com>
+	<1289466286-sup-7540@meteor.durcheinandertal.local>
+	<AANLkTikUwyX6xj-f_ZnLp6s2s9vaCpgayPKygniWndoJ@mail.gmail.com>
+	<1289907535-sup-3989@meteor.durcheinandertal.local>
+	<AANLkTi=xz16ecZ0C5=RUcOG4wzojVVzs70PZ2ueKa0ht@mail.gmail.com>
+	<1289932061-sup-96@meteor.durcheinandertal.local>
+	<AANLkTin=1MRrW0vuj_7uMvjcyLc3Aaw4ddZ_Rq6TBiyx@mail.gmail.com>
+	<AANLkTinvv59bWu0UfjW2K-xDRUP42tDwmgMh5yZdmaN_@mail.gmail.com>
+	<1291023322-sup-8457@meteor.durcheinandertal.local>
+Message-ID: <AANLkTi=AJZGLAra20fQvEvU0EasQ_1yWpsr6+4TV3iEn@mail.gmail.com>
+
+> I just discovered another problem: If the secret key is not available
+> (because it's on a removable media and the media is not mounted), the
+> mail is sent anyway. While this is just a bit annoying for signed mail
+> it definitely should not happen for encrypted mails. Current sup
+> corectly fails in this case.
+
+I have replicated this (by turning off gpg agent) but I'm confused as
+to why this is happening. If I try the same steps in irb I get an
+exception, and this should be caught and dealt with in the same way as
+current sup does. I guess I'll have to keep trying to replicate more
+and more of the path way through ... sigh.
+
+Once I have worked out the proper logic I can then add some extra
+checks for ensuring that gpg agent is running and that sup knows where
+to find it. I could even have sup ask you for your gpg passphrase with
+gpgme. There might be some security issues with having ruby ask you
+for your passphrase I guess, but I don't think it would be worse than
+gpg agent. gpg agent doesn't seem to have the suid bit set, though
+maybe as a C program it can be more rigorous about overwriting your
+passphrase in memory. I could always implement it as a hook with gpg
+agent as the default.
+
+> It would also be nice to have different colors for different trust
+> levels. So you don't have to expand the extra information to see if a
+> valid signature is trusted or not. Is this already possible with the
+> current hook?
+
+That requires code changes, but I've done that and attached a patch
+(intended to go on top of the other 4 patches). Now untrusted
+signatures have a blue background. (Trusted signatures have a default
+background - black normally, and bad signatures have a red
+background). All signatures have yellow text.
+
+I'm quite open to a different colour scheme being chosen if someone
+thinks something else would be clearer.
+
+Hamish Downer
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: 0005-added-color-for-untrusted-cryptonotice.patch
+Type: text/x-patch
+Size: 4170 bytes
+Desc: not available
+URL: <http://rubyforge.org/pipermail/sup-devel/attachments/20101206/35adb245/attachment-0001.bin>
+
+From sup-bugs at masanjin.net  Wed Dec  8 13:59:56 2010
+From: sup-bugs at masanjin.net (anonymous)
+Date: Wed, 08 Dec 2010 18:59:56 +0000
+Subject: [sup-devel] [issue136] Crash when searching for during:december
+In-Reply-To: <1291834796.86.0.985380843914.issue136@masanjin.net>
+Message-ID: <1291834796.86.0.985380843914.issue136@masanjin.net>
+
+
+New submission from anonymous:
+
+When searching for "during:december", I get the following exception. Searching 
+for e.g. "during:june" works fine.
+
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/index.rb:800:in `index_text'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/index.rb:681:in 
+`index_message_static'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/index.rb:642:in `sync_message'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/util.rb:609:in `send'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/util.rb:609:in `method_missing'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/poll.rb:188:in `poll_from'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/maildir.rb:144:in `poll'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/maildir.rb:143:in `each'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/maildir.rb:143:in `poll'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/poll.rb:174:in `poll_from'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/util.rb:609:in `send'
+/usr/lib/ruby/gems/1.8/gems/sup-999/lib/sup/util.rb:609:in `method_missing'
+/usr/lib/ruby/gems/1.8/gems/sup-999/bin/sup-sync:123
+/usr/lib/ruby/gems/1.8/gems/sup-999/bin/sup-sync:118:in `each'
+/usr/lib/ruby/gems/1.8/gems/sup-999/bin/sup-sync:118
+/usr/bin/sup-sync:19:in `load'
+/usr/bin/sup-sync:19
+
+----------
+messages: 319
+nosy: anonymous
+priority: bug
+ruby_version: 1.8.7 (2010-01-10 patchlevel 249) [x86_64-linux]
+status: unread
+sup_version: 9f86033
+title: Crash when searching for during:december
+
+_________________________________________
+Sup issue tracker <sup-bugs at masanjin.net>
+<http://masanjin.net/sup-bugs/issue136>
+_________________________________________
+
+From sup-bugs at masanjin.net  Thu Dec  9 23:27:33 2010
+From: sup-bugs at masanjin.net (anonymous)
+Date: Fri, 10 Dec 2010 04:27:33 +0000
+Subject: [sup-devel] [issue137] "wrong id called on nil" when searching
+In-Reply-To: <1291955252.92.0.499188876837.issue137@masanjin.net>
+Message-ID: <1291955252.92.0.499188876837.issue137@masanjin.net>
+
+
+New submission from anonymous:
+
+When I search for messages from a specific person, sup crashes with this error. 
+Searching for anyone or anything else works.
+
+----------
+keyword: maildir
+messages: 320
+nosy: anonymous
+priority: feature request
+ruby_version: 1.8
+status: unread
+sup_version: 0.11
+title: "wrong id called on nil" when searching
+
+_________________________________________
+Sup issue tracker <sup-bugs at masanjin.net>
+<http://masanjin.net/sup-bugs/issue137>
+_________________________________________
+
+From sup-bugs at masanjin.net  Tue Dec 14 03:05:01 2010
+From: sup-bugs at masanjin.net (anonymous)
+Date: Tue, 14 Dec 2010 08:05:01 +0000
+Subject: [sup-devel] [issue138] Sup crash at startup
+In-Reply-To: <1292313900.88.0.725708300725.issue138@masanjin.net>
+Message-ID: <1292313900.88.0.725708300725.issue138@masanjin.net>
+
+
+New submission from anonymous:
+
+sup-mail crashes at startup. I can see the main screen but in half a second, 
+when not even the messages has appeared, it crashes:
+
+
+--- RuntimeError from thread: load threads for thread-index-mode
+wrong id called on nil
+/usr/lib/ruby/1.8/sup.rb:16:in `id'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:226:in `update'
+/usr/lib/ruby/1.8/sup/hook.rb:122:in `sort_by'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:226:in `each'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:226:in `sort_by'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:226:in `update'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:224:in `synchronize'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:224:in `update'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:642:in 
+`__unprotected_load_n_threads'
+(eval):12:in `load_n_threads'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:614:in 
+`load_n_threads_background'
+/usr/lib/ruby/1.8/sup.rb:76:in `reporting_thread'
+/usr/lib/ruby/1.8/sup.rb:74:in `initialize'
+/usr/lib/ruby/1.8/sup.rb:74:in `new'
+/usr/lib/ruby/1.8/sup.rb:74:in `reporting_thread'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:613:in 
+`load_n_threads_background'
+/usr/lib/ruby/1.8/sup/modes/thread-index-mode.rb:684:in 
+`__unprotected_load_threads'
+(eval):12:in `load_threads'
+/usr/bin/sup-mail:224
+
+----------
+files: sup-exception-log.txt
+messages: 321
+nosy: anonymous
+priority: bug
+ruby_version: 1.8.7
+status: unread
+sup_version: 0.10.2
+title: Sup crash at startup
+
+_________________________________________
+Sup issue tracker <sup-bugs at masanjin.net>
+<http://masanjin.net/sup-bugs/issue138>
+_________________________________________
+-------------- next part --------------
+/usr/lib/ruby/1.8/monitor.rb:102:in `stop'
+/usr/lib/ruby/1.8/monitor.rb:102:in `wait'
+/usr/lib/ruby/1.8/net/imap.rb:974:in `get_tagged_response'
+/usr/lib/ruby/1.8/net/imap.rb:1034:in `send_command'
+/usr/lib/ruby/1.8/monitor.rb:242:in `synchronize'
+/usr/lib/ruby/1.8/net/imap.rb:1019:in `send_command'
+/usr/lib/ruby/1.8/net/imap.rb:1172:in `fetch_internal'
+/usr/lib/ruby/1.8/monitor.rb:242:in `synchronize'
+/usr/lib/ruby/1.8/net/imap.rb:1170:in `fetch_internal'
+/usr/lib/ruby/1.8/net/imap.rb:713:in `fetch'
+/usr/lib/ruby/1.8/sup/imap.rb:218:in `fetch'
+/usr/lib/ruby/1.8/sup/imap.rb:332:in `safely'
+/usr/lib/ruby/1.8/sup/imap.rb:218:in `fetch'
+/usr/lib/ruby/1.8/sup/imap.rb:165:in `unsynchronized_scan_mailbox'
+/usr/lib/ruby/1.8/sup/imap.rb:202:in `unsynchronized_start_offset'
+(eval):3:in `start_offset'
+(eval):3:in `synchronize'
+(eval):3:in `start_offset'
+/usr/lib/ruby/1.8/sup/source.rb:88:in `done?'
+/usr/lib/ruby/1.8/sup/util.rb:599:in `send'
+/usr/lib/ruby/1.8/sup/util.rb:599:in `__pass'
+/usr/lib/ruby/1.8/sup/util.rb:586:in `method_missing'
+/usr/lib/ruby/1.8/sup/poll.rb:155:in `each_message_from'
+/usr/lib/ruby/1.8/sup/util.rb:559:in `send'
+/usr/lib/ruby/1.8/sup/util.rb:559:in `method_missing'
+/usr/bin/sup-sync:146
+/usr/bin/sup-sync:141:in `each'
+/usr/bin/sup-sync:141
+
+From sup-bugs at masanjin.net  Thu Dec 16 03:39:34 2010
+From: sup-bugs at masanjin.net (anonymous)
+Date: Thu, 16 Dec 2010 08:39:34 +0000
+Subject: [sup-devel] [issue139] bug while deleting a message
+In-Reply-To: <1292488774.0.0.532674457502.issue139@masanjin.net>
+Message-ID: <1292488774.0.0.532674457502.issue139@masanjin.net>
+
+
+New submission from anonymous:
+
+while I was deleting a message from the inbox sup crashes..
+
+----------
+files: exception-log.txt
+messages: 324
+nosy: anonymous
+priority: bug
+ruby_version: 1.9.1
+status: unread
+sup_version: git
+title: bug while deleting a message
+
+_________________________________________
+Sup issue tracker <sup-bugs at masanjin.net>
+<http://masanjin.net/sup-bugs/issue139>
+_________________________________________
+-------------- next part --------------
+--- Errno::ENOSPC from thread: load messages for thread-view-mode
+No space left on device - /tmp/redwood.payload20101216-29861-1v6uapo-0
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/crypto.rb:124:in `verify'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/util.rb:609:in `method_missing'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/message.rb:381:in `multipart_signed_to_chunks'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/message.rb:421:in `message_to_chunks'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/message.rb:259:in `load_from_source!'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/modes/thread-index-mode.rb:116:in `block (3 levels) in select'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:81:in `block (2 levels) in each'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:176:in `block (2 levels) in each_with_stuff'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:174:in `each_with_stuff'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:176:in `block in each_with_stuff'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:175:in `each'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:175:in `each_with_stuff'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:78:in `block in each'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:75:in `each'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/thread.rb:75:in `each'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/modes/thread-index-mode.rb:113:in `each_with_index'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/modes/thread-index-mode.rb:113:in `block (2 levels) in select'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/buffer.rb:740:in `say'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/util.rb:609:in `method_missing'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup/modes/thread-index-mode.rb:112:in `block in select'
+/usr/lib/ruby/gems/1.9.1/gems/sup-999/lib/sup.rb:78:in `block in reporting_thread'
+
+From tero at tilus.net  Tue Dec 21 16:45:14 2010
+From: tero at tilus.net (Tero Tilus)
+Date: Tue, 21 Dec 2010 23:45:14 +0200
+Subject: [sup-devel] Message#text_to_chunks performance
+In-Reply-To: <1288264300-sup-7747@tilus.net>
+References: <1288264300-sup-7747@tilus.net>
+Message-ID: <1292967783-sup-4582@tilus.net>
+
+And here's (finally) the patch.
+
+--
+Tero Tilus ## 050 3635 235 ## http://tero.tilus.net/
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: 0001-Message-text_to_chunks-avoid-O-n-2-behavior-on-seq.patch
+Type: application/octet-stream
+Size: 1266 bytes
+Desc: not available
+URL: <http://rubyforge.org/pipermail/sup-devel/attachments/20101221/da87abd5/attachment.obj>
+
+From rlane at club.cc.cmu.edu  Thu Dec 23 13:38:24 2010
+From: rlane at club.cc.cmu.edu (Rich Lane)
+Date: Thu, 23 Dec 2010 13:38:24 -0500
+Subject: [sup-devel] Message#text_to_chunks performance
+In-Reply-To: <1292967783-sup-4582@tilus.net>
+References: <1288264300-sup-7747@tilus.net> <1292967783-sup-4582@tilus.net>
+Message-ID: <1293129445-sup-8097@zyrg.net>
+
+Branch blank-lines-perf, merged to next. I'll merge it to master after
+0.12 is released.
+
+From rlane at club.cc.cmu.edu  Thu Dec 23 13:43:45 2010
+From: rlane at club.cc.cmu.edu (Rich Lane)
+Date: Thu, 23 Dec 2010 13:43:45 -0500
+Subject: [sup-devel] [PATCH] Converted crypto to use the gpgme gem
+In-Reply-To: <AANLkTi=AJZGLAra20fQvEvU0EasQ_1yWpsr6+4TV3iEn@mail.gmail.com>
+References: <AANLkTinrSAheJb2F4Xw9AmgXcGLxeQh0_MEnuTSATye_@mail.gmail.com>
+	<AANLkTinXwKiJqgKyFrrcVV21a8j8hV=fw4QcvDLhtM8E@mail.gmail.com>
+	<AANLkTi=7yasVvAW4P85v3GJxf+quJrE3-1XruDgUZq+D@mail.gmail.com>
+	<1289466286-sup-7540@meteor.durcheinandertal.local>
+	<AANLkTikUwyX6xj-f_ZnLp6s2s9vaCpgayPKygniWndoJ@mail.gmail.com>
+	<1289907535-sup-3989@meteor.durcheinandertal.local>
+	<AANLkTi=xz16ecZ0C5=RUcOG4wzojVVzs70PZ2ueKa0ht@mail.gmail.com>
+	<1289932061-sup-96@meteor.durcheinandertal.local>
+	<AANLkTin=1MRrW0vuj_7uMvjcyLc3Aaw4ddZ_Rq6TBiyx@mail.gmail.com>
+	<AANLkTinvv59bWu0UfjW2K-xDRUP42tDwmgMh5yZdmaN_@mail.gmail.com>
+	<1291023322-sup-8457@meteor.durcheinandertal.local>
+	<AANLkTi=AJZGLAra20fQvEvU0EasQ_1yWpsr6+4TV3iEn@mail.gmail.com>
+Message-ID: <1293129774-sup-3146@zyrg.net>
+
+All 5 patches applied to branch gpgme and merged to next.
+
+From sup-bugs at masanjin.net  Sat Dec 25 11:50:56 2010
+From: sup-bugs at masanjin.net (Matthias Vallentin)
+Date: Sat, 25 Dec 2010 16:50:56 +0000
+Subject: [sup-devel] [issue140] Execute startup hook before adding draft and
+	sent sources
+In-Reply-To: <1293295856.45.0.529523964282.issue140@masanjin.net>
+Message-ID: <1293295856.45.0.529523964282.issue140@masanjin.net>
+
+
+New submission from Matthias Vallentin <vallentin at icir.org>:
+
+By moving the execution of the startup hook before the selection of the draft and 
+send source, this hook becomes more flexible and allows users to have more control 
+about the source selection process.
+
+Attached is a patch that enables this functionality.
+
+----------
+files: hook.diff
+messages: 341
+nosy: matthias
+priority: feature request
+ruby_version: 1.8
+status: unread
+sup_version: git
+title: Execute startup hook before adding draft and sent sources
+
+_________________________________________
+Sup issue tracker <sup-bugs at masanjin.net>
+<http://masanjin.net/sup-bugs/issue140>
+_________________________________________
+-------------- next part --------------
+diff --git a/bin/sup b/bin/sup
+old mode 100755
+new mode 100644
+index 10be161..831964b
+--- a/bin/sup
++++ b/bin/sup
+@@ -158,6 +158,9 @@ begin
+   trap("TERM") { |x| $die = true }
+   trap("WINCH") { |x| BufferManager.sigwinch_happened! }
+ 
++  HookManager.run "startup"
++  Redwood::Keymap.run_hook global_keymap
++
+   if(s = Redwood::SourceManager.source_for DraftManager.source_name)
+     DraftManager.source = s
+   else
+@@ -171,9 +174,6 @@ begin
+     Redwood::SourceManager.add_source SentManager.default_source
+   end
+ 
+-  HookManager.run "startup"
+-  Redwood::Keymap.run_hook global_keymap
+-
+   debug "starting curses"
+   Redwood::Logger.remove_sink $stderr
+   start_cursing
+diff --git a/bin/sup-add b/bin/sup-add
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-cmd b/bin/sup-cmd
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-config b/bin/sup-config
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-dump b/bin/sup-dump
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-recover-sources b/bin/sup-recover-sources
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-sync b/bin/sup-sync
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-sync-back b/bin/sup-sync-back
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-sync-back-maildir b/bin/sup-sync-back-maildir
+old mode 100755
+new mode 100644
+diff --git a/bin/sup-tweak-labels b/bin/sup-tweak-labels
+old mode 100755
+new mode 100644
+
+From tero at tilus.net  Thu Dec 30 18:35:56 2010
+From: tero at tilus.net (Tero Tilus)
+Date: Fri, 31 Dec 2010 01:35:56 +0200
+Subject: [sup-devel] Scrolling (with patches)
+Message-ID: <1293750761-sup-3852@tilus.net>
+
+Jonas H. reported about slow horizontal scrolling on talk.
+http://rubyforge.org/pipermail/sup-talk/2010-December/004400.html
+
+I looked into it and found out that scrolling is pretty much fully
+dependant on Buffer#write and main cpu hogs within it are
+String#display_length (uses String#scan when on 1.8) and
+Ncurses::WINDOW#method_missing (wide/normal dispatching).
+
+Caching String#display_length cuts down String#scan calls by ~30%.
+That and hardwiring Ncurses::WINDOW#mvaddstr and #attrset cut average
+Buffer#write call to half of what it was.
+
+Also having configurable COL_JUMP would help people who need to scroll
+horizontally a lot.  Included in the sup patch.
+
+Perceivable difference of these modifications is very small, at least
+to me.  Please have a look if these patches (one of them against sup
+and another against ncursesw.rb in ncursesw gem) make any sense.
+
+====
+--- /usr/lib/ruby/gems/1.8/gems/ncursesw-1.2.4.2/lib/ncursesw.rb        2010-12-
+31 00:37:31.000000000 +0200
++++ lib/ncurses.rb        2010-12-30 23:50:26.000000000 +0200
+@@ -59,6 +58,29 @@
+   module Destroy_checker; def destroyed?; @destroyed; end; end
+   class WINDOW
+     include Destroy_checker
++
++    @@mvwaddstr = Ncurses.respond_to? "mvwaddstr"
++    # This would be handled by #method_missing below, but for
++    # performance reasons it is extracted here.  #mvaddstr is the beef
++    # of Redwood::Buffer#write which does all the drawing.
++    def mvaddstr(*args)
++      if @@mvwaddstr
++        Ncurses.mvwaddstr(*args)
++      else
++        Ncurses.mvaddstr(*args)
++      end
++    end
++
++    @@wattrset = Ncurses.respond_to? "wattrset"
++    # See #mvaddstr abowe.
++    def attrset(*args)
++      if @@wattrset
++        Ncurses.wattrset(*args)
++      else
++        Ncurses.attrset(*args)
++      end
++    end
++
+     def method_missing(name, *args)
+       name = name.to_s
+       if (name[0,2] == "mv")
+====
+
+-- 
+Tero Tilus ## 050 3635 235 ## http://tero.tilus.net/
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: 0002-Performance-and-configurability-of-horizontal-scroll.patch
+Type: application/octet-stream
+Size: 2673 bytes
+Desc: not available
+URL: <http://rubyforge.org/pipermail/sup-devel/attachments/20101231/bc945134/attachment-0001.obj>
+
+From rlane at club.cc.cmu.edu  Thu Dec 30 19:10:06 2010
+From: rlane at club.cc.cmu.edu (Rich Lane)
+Date: Thu, 30 Dec 2010 19:10:06 -0500
+Subject: [sup-devel] Scrolling (with patches)
+In-Reply-To: <1293750761-sup-3852@tilus.net>
+References: <1293750761-sup-3852@tilus.net>
+Message-ID: <1293753763-sup-6661@zyrg.net>
+
+Yeah, I've noticed how slow method_missing is and that's also a problem
+with our use of Singleton in the codebase. Here we might as well hoist
+the conditional out of the method definition.
+
+From tero at tilus.net  Thu Dec 30 19:34:09 2010
+From: tero at tilus.net (Tero Tilus)
+Date: Fri, 31 Dec 2010 02:34:09 +0200
+Subject: [sup-devel] Scrolling (with patches)
+In-Reply-To: <1293753763-sup-6661@zyrg.net>
+References: <1293750761-sup-3852@tilus.net> <1293753763-sup-6661@zyrg.net>
+Message-ID: <1293755445-sup-9811@tilus.net>
+
+Rich Lane, 2010-12-31 02:10:
+> Yeah, I've noticed how slow method_missing is and that's also a
+> problem with our use of Singleton in the codebase.
+
+I think we could have Singleton.method_missing actually create the
+methods as they are called.
+
+-- 
+Tero Tilus ## 050 3635 235 ## http://tero.tilus.net/
+
+From tero at tilus.net  Thu Dec 30 20:44:36 2010
+From: tero at tilus.net (Tero Tilus)
+Date: Fri, 31 Dec 2010 03:44:36 +0200
+Subject: [sup-devel] Scrolling (with patches)
+In-Reply-To: <1293755445-sup-9811@tilus.net>
+References: <1293750761-sup-3852@tilus.net> <1293753763-sup-6661@zyrg.net>
+	<1293755445-sup-9811@tilus.net>
+Message-ID: <1293759788-sup-1949@tilus.net>
+
+Tero Tilus, 2010-12-31 02:34:
+> I think we could have Singleton.method_missing actually create the
+> methods as they are called.
+
+>From words to deeds.  ;)
+
+-- 
+Tero Tilus ## 050 3635 235 ## http://tero.tilus.net/
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: 0003-Improve-Singleton-performance.patch
+Type: application/octet-stream
+Size: 972 bytes
+Desc: not available
+URL: <http://rubyforge.org/pipermail/sup-devel/attachments/20101231/7ce5578e/attachment.obj>
+
+From tero at tilus.net  Thu Dec 30 22:18:29 2010
+From: tero at tilus.net (Tero Tilus)
+Date: Fri, 31 Dec 2010 05:18:29 +0200
+Subject: [sup-devel] Scrolling (with patches)
+In-Reply-To: <1293759788-sup-1949@tilus.net>
+References: <1293750761-sup-3852@tilus.net> <1293753763-sup-6661@zyrg.net>
+	<1293755445-sup-9811@tilus.net> <1293759788-sup-1949@tilus.net>
+Message-ID: <1293765315-sup-8280@tilus.net>
+
+Tero Tilus, 2010-12-31 03:44:
+> From words to deeds.  ;)
+
+...to first fix.  Private methods (at least Index.sync_message) are
+being called on singletons and looks like they are expected to work.
+
+-- 
+Tero Tilus ## 050 3635 235 ## http://tero.tilus.net/
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: 0003-Improve-Singleton-performance.patch
+Type: application/octet-stream
+Size: 984 bytes
+Desc: not available
+URL: <http://rubyforge.org/pipermail/sup-devel/attachments/20101231/da0a3712/attachment.obj>
+
+From sup-bugs at masanjin.net  Fri Dec 31 05:03:36 2010
+From: sup-bugs at masanjin.net (Jonas H)
+Date: Fri, 31 Dec 2010 10:03:36 +0000
+Subject: [sup-devel] [issue141] Can't see my own messages from Thunderbird
+	mbox sources
+In-Reply-To: <1293789816.3.0.27954195476.issue141@masanjin.net>
+Message-ID: <1293789816.3.0.27954195476.issue141@masanjin.net>
+
+
+New submission from Jonas H <jonas at lophus.org>:
+
+As discussed in this thread <http://rubyforge.org/pipermail/sup-talk/2010-
+December/004387.html>, here comes my example mbox file.
+
+The mbox attached contains two messages: One message to myself and one reply to 
+that message.
+
+Short trip into the weird world of Thunderbird Disk Space Saving(tm):
+If I got messages in folder A and then copy them to folder B, they won't really 
+be copied to save disk space. Thus, if I index folder B, all messages that were 
+copied from folder A are missing from the index.  (If folder A gets deleted, 
+Thunderbird moves all marked-to-copy-into-B messages into folder B.)
+
+In case of two messages, folder A actually contained three messages (although I 
+only see two of them in Thunderbird). The third message was the first e-mail I 
+sent to myself coming from the e-mail server - actually I immediately deleted 
+that one, but apparently it stays in the mbox anyway.
+
+The mbox I attached is of type B, i.e. a folder that theoretically should 
+contain three messages following Thunderbird Logic(tm), but it only contains two 
+because Thunderbird does this magic disk space saving thing (I guess).
+
+Anyway, sup should grab the bodies in both cases because they're in the mbox in 
+any case.
+
+----------
+files: bla
+messages: 363
+nosy: jonash
+priority: bug
+ruby_version: 1.8
+status: unread
+sup_version: 0.11
+title: Can't see my own messages from Thunderbird mbox sources
+
+_________________________________________
+Sup issue tracker <sup-bugs at masanjin.net>
+<http://masanjin.net/sup-bugs/issue141>
+_________________________________________
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: bla
+Type: application/octet-stream
+Size: 2572 bytes
+Desc: not available
+URL: <http://rubyforge.org/pipermail/sup-devel/attachments/20101231/77f59659/attachment.obj>
+

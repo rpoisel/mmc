@@ -21,7 +21,7 @@
 #include "ncd.h"
 #define MAX_NUM_FILE_TYPES 16
 #define NUM_FRAGS_PER_FILE_TYPE 10
-#define FRAGS_REF_DIR "/tmp/frags_ref"
+#define FRAGS_REF_DIR "./data/frags_ref"
 #define MAX_DIR_ENT 256
 #endif
 
