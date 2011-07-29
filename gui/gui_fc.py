@@ -155,10 +155,10 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def on_reassembleButton_clicked(self, pChecked=None):
         if len(self.mContext.getH264Fragments()) is 0:
-            QtGui.QMessageBox.about(self, "Stooopid",
-                "What would you like to reassemble? Nothing classified yet!")
+            QtGui.QMessageBox.about(self, "Error",
+                "What would you like to reassemble? No H.264 headers have been classified yet!")
         elif self.__mLock.tryLock() == True:
-            self.mContext = CContext()
+            #self.mContext = CContext()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.REASSEMBLE)
 

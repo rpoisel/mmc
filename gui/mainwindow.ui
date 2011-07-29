@@ -13,13 +13,17 @@
   <property name="windowTitle">
    <string>Multimedia File Carver</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+       <normaloff>gui/icon_mm_carver.png</normaloff>icon_mm_carver.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>529</width>
+     <width>800</width>
      <height>25</height>
     </rect>
    </property>
@@ -63,7 +67,7 @@
     <string>Open image</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+O</string>
+    <string>Ctrl+I</string>
    </property>
   </action>
   <action name="actionChooseOutputDir">
@@ -71,7 +75,7 @@
     <string>Choose Output Directory</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>

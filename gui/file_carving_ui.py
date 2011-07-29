@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Tue Jul 26 18:06:25 2011
+# Created: Fri Jul 29 10:19:48 2011
 #      by: pyside-uic 0.2.10 running on PySide 1.0.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,6 +49,7 @@ class Ui_filecarvingWidget(object):
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
         self.fragmentSize = QtGui.QLineEdit(filecarvingWidget)
+        self.fragmentSize.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.fragmentSize.setObjectName("fragmentSize")
         self.gridLayout.addWidget(self.fragmentSize, 1, 0, 1, 1)
         self.label_2 = QtGui.QLabel(filecarvingWidget)
@@ -56,6 +57,7 @@ class Ui_filecarvingWidget(object):
         self.label_2.setObjectName("label_2")
         self.gridLayout.addWidget(self.label_2, 0, 1, 1, 1)
         self.incrementSize = QtGui.QLineEdit(filecarvingWidget)
+        self.incrementSize.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.incrementSize.setObjectName("incrementSize")
         self.gridLayout.addWidget(self.incrementSize, 1, 1, 1, 1)
         self.label_3 = QtGui.QLabel(filecarvingWidget)
@@ -63,20 +65,24 @@ class Ui_filecarvingWidget(object):
         self.label_3.setObjectName("label_3")
         self.gridLayout.addWidget(self.label_3, 0, 2, 1, 1)
         self.offset = QtGui.QLineEdit(filecarvingWidget)
+        self.offset.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.offset.setObjectName("offset")
         self.gridLayout.addWidget(self.offset, 1, 2, 1, 1)
-        self.blockGap = QtGui.QLineEdit(filecarvingWidget)
-        self.blockGap.setObjectName("blockGap")
-        self.gridLayout.addWidget(self.blockGap, 1, 3, 1, 1)
-        self.label_4 = QtGui.QLabel(filecarvingWidget)
-        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_4.setObjectName("label_4")
-        self.gridLayout.addWidget(self.label_4, 0, 3, 1, 1)
         self.label = QtGui.QLabel(filecarvingWidget)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
+        self.gridLayout_3 = QtGui.QGridLayout()
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.blockGap = QtGui.QLineEdit(filecarvingWidget)
+        self.blockGap.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.blockGap.setObjectName("blockGap")
+        self.gridLayout_3.addWidget(self.blockGap, 1, 1, 1, 1)
+        self.label_6 = QtGui.QLabel(filecarvingWidget)
+        self.label_6.setObjectName("label_6")
+        self.gridLayout_3.addWidget(self.label_6, 1, 0, 1, 1)
+        self.verticalLayout.addLayout(self.gridLayout_3)
         self.resultTable = QtGui.QTableWidget(filecarvingWidget)
         self.resultTable.setObjectName("resultTable")
         self.resultTable.setColumnCount(0)
@@ -127,9 +133,9 @@ class Ui_filecarvingWidget(object):
         self.incrementSize.setText(QtGui.QApplication.translate("filecarvingWidget", "512", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("filecarvingWidget", "Offset", None, QtGui.QApplication.UnicodeUTF8))
         self.offset.setText(QtGui.QApplication.translate("filecarvingWidget", "0", None, QtGui.QApplication.UnicodeUTF8))
-        self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "16384", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Gap", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("filecarvingWidget", "Fragment Size", None, QtGui.QApplication.UnicodeUTF8))
+        self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "16384", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_6.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Gap", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
         self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))
         self.reassembleButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Reassemble", None, QtGui.QApplication.UnicodeUTF8))
