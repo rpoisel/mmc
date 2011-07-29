@@ -81,6 +81,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.preprocessing.addItem("sleuthkit")
         self.customwidget.outputformat.addItem("JPEG")
         self.customwidget.outputformat.addItem("PNG")
+        self.customwidget.outputformat.addItem("MKV")
 
         self.customwidget.resultTable.setColumnCount(4)
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
@@ -211,9 +212,11 @@ class Gui_Qt(QtGui.QMainWindow):
         else:
             lOptions.preprocess = False
         if self.customwidget.outputformat.currentText() == "PNG":
-            lOptions.outputformat = ".png"
+            lOptions.outputformat = "%08d.png"
+        elif self.customwidget.outputformat.currentText() == "MKV":
+            lOptions.outputformat = "movie.mkv"
         else:
-            lOptions.outputformat = ".jpg"
+            lOptions.outputformat = "%08d.jpg"
         lOptions.imagefile = self.customwidget.inputFile.text()
         lOptions.output = self.customwidget.outputDir.text()
         lOptions.offset = int(self.customwidget.offset.text())

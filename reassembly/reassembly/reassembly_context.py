@@ -24,7 +24,8 @@ class CReassembly:
                 os.makedirs(lDir)
             lRecoverData = ""
             lFFMpeg = subprocess.Popen(
-                    ["ffmpeg", "-i", "-", lDir + "/%08d" + pOptions.outputformat], 
+                    #["ffmpeg", "-i", "-", lDir + "/%08d" + pOptions.outputformat], 
+                    ["ffmpeg", "-i", "-", lDir + "/" + pOptions.outputformat], 
                     bufsize=512, stdin=subprocess.PIPE) #, stderr=subprocess.PIPE)
             lRecoverFH = open(pOptions.imagefile, "rb")
             lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
