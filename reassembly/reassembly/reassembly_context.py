@@ -17,14 +17,13 @@ class CReassembly:
 
         lCntHdr = 0
 
-        print("Trying combinations: ")
+        print("Trying combinations... ")
         for lFragHeader in lSortedFrags[0:lIdxNoHeader]:
             lDir = pOptions.output + "/" + str(lCntHdr)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
             lRecoverData = ""
             lFFMpeg = subprocess.Popen(
-                    #["ffmpeg", "-i", "-", lDir + "/%08d" + pOptions.outputformat], 
                     ["ffmpeg", "-i", "-", lDir + "/" + pOptions.outputformat], 
                     bufsize=512, stdin=subprocess.PIPE) #, stderr=subprocess.PIPE)
             lRecoverFH = open(pOptions.imagefile, "rb")
