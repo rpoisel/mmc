@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/forms">
+        <file>file_carving_ui.ui</file>
+        <file>mainwindow.ui</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file>icon_mm_carver.png</file>
+    </qresource>
+</RCC>

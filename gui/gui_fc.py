@@ -9,6 +9,7 @@ import sys
 from qtimport import *
 
 # Import the compiled UI module
+import gui_resources
 from file_carving_ui import Ui_filecarvingWidget
 from mainwindow import Ui_MainWindow
 from mm_context import CContext
@@ -66,14 +67,27 @@ class Gui_Qt(QtGui.QMainWindow):
 
         self.__mLock = QtCore.QMutex()
 
+        #lLoader = QtUiTools.QUiLoader()
+        #lFile = QtCore.QFile(":/images/icon_mm_carver.png")
+        #lFile.open(QtCore.QFile.ReadOnly)
+        #lIcon = lLoader.load(lFile, self)
+        #self.customwidget = lLoader.load(lFile, self)
+        #lFile.close()
+
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
+        #self.setWindowIcon(lIcon)
         
+        #lLoader = QtUiTools.QUiLoader()
+        #lFile = QtCore.QFile(":/forms/file_carving_ui.ui")
+        #lFile.open(QtCore.QFile.ReadOnly)
+        #self.customwidget = lLoader.load(lFile, self)
+        #lFile.close()
+        #self.setCentralWidget(self.customwidget)
+
         self.centralwidget = QtGui.QWidget()
         self.customwidget = Ui_filecarvingWidget()
         self.customwidget.setupUi(self.centralwidget)
-
         self.setCentralWidget(self.centralwidget)
 
         # adjust widget elements
@@ -263,12 +277,7 @@ class Gui_Qt(QtGui.QMainWindow):
 
 class CMain:
     def __init__(self):
-        if gUsePyQt:
-            self.__mApp = QtGui.QApplication(sys.argv)
-        else:
-            # unicode issue work-around for PySide
-            self.__mApp = QtGui.QApplication("nothing")
-
+        self.__mApp = QtGui.QApplication(sys.argv)
         self.__mWindow = Gui_Qt()
 
     def run(self):
