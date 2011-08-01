@@ -56,12 +56,10 @@ class CContext:
                     pOptions.fragmentsize, pOptions.blockgap)
             for lH264Fragment in self.mH264Fragments:
                 print(lH264Fragment)
-                #if pCaller != None:
                 pCaller.resultCallback(lH264Fragment.mIsHeader, \
                         lH264Fragment.mOffset,
                         lH264Fragment.mSize)
 
-            #if pCaller != None:
             pCaller.finishedCallback()
 
         except LookupError, pExc:

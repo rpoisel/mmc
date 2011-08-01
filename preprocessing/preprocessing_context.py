@@ -37,5 +37,3 @@ class CPreprocessing:
             # generate a map of filetypes of fragments
             elif self.__mH264FC.classify(lBlock[1]) > 0:
                 self.__mVideoBlocks.addBlock(lBlock[0])
-            #print(lBlock)
-        return 0
