@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Fri Jul 29 10:19:48 2011
-#      by: pyside-uic 0.2.10 running on PySide 1.0.4
+# Created: Mon Aug  1 15:12:49 2011
+#      by: pyside-uic 0.2.11 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,11 +26,14 @@ class Ui_filecarvingWidget(object):
         self.gridLayout_2.addWidget(self.inputFileButton, 0, 1, 1, 1)
         self.outputDirButton = QtGui.QPushButton(filecarvingWidget)
         self.outputDirButton.setObjectName("outputDirButton")
-        self.gridLayout_2.addWidget(self.outputDirButton, 1, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.outputDirButton, 2, 1, 1, 1)
         self.outputDir = QtGui.QLineEdit(filecarvingWidget)
         self.outputDir.setText("")
         self.outputDir.setObjectName("outputDir")
-        self.gridLayout_2.addWidget(self.outputDir, 1, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.outputDir, 2, 0, 1, 1)
+        self.fsInfo = QtGui.QLabel(filecarvingWidget)
+        self.fsInfo.setObjectName("fsInfo")
+        self.gridLayout_2.addWidget(self.fsInfo, 1, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_2)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -127,13 +130,14 @@ class Ui_filecarvingWidget(object):
         filecarvingWidget.setWindowTitle(QtGui.QApplication.translate("filecarvingWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.inputFileButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Input File", None, QtGui.QApplication.UnicodeUTF8))
         self.outputDirButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Output Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("filecarvingWidget", "Preprocessing: ", None, QtGui.QApplication.UnicodeUTF8))
         self.fragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "512", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("filecarvingWidget", "Increment Size", None, QtGui.QApplication.UnicodeUTF8))
         self.incrementSize.setText(QtGui.QApplication.translate("filecarvingWidget", "512", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("filecarvingWidget", "Offset", None, QtGui.QApplication.UnicodeUTF8))
         self.offset.setText(QtGui.QApplication.translate("filecarvingWidget", "0", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("filecarvingWidget", "Fragment Size", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Size", None, QtGui.QApplication.UnicodeUTF8))
         self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "16384", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Gap", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))

@@ -2,12 +2,19 @@ import os
 
 from preprocessing.tsk import tsk_context
 from preprocessing.plain import plain_context
+from preprocessing import fsstat_context
 from collating.fragment import fragment_context
 from collating.magic import magic_context
 from lib import frags
 
 
 class CPreprocessing:
+
+    # TODO implement read list of available plugins
+    @staticmethod
+    def getPreprocessors():
+        return [{'name':'plain'}, {'name':'sleuthkit'}]
+
     def __init__(self, pOptions):
         self.__mVideoBlocks = frags.CFrags()
         self.__mMagic = magic_context.CMagic()

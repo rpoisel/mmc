@@ -14,6 +14,8 @@ from file_carving_ui import Ui_filecarvingWidget
 from mainwindow import Ui_MainWindow
 from mm_context import CContext
 from gui_options import CGuiOptions
+from preprocessing import preprocessing_context
+from preprocessing import fsstat_context
 
 class Jobs:
     NONE=0x0
@@ -91,8 +93,9 @@ class Gui_Qt(QtGui.QMainWindow):
         self.setCentralWidget(self.centralwidget)
 
         # adjust widget elements
-        self.customwidget.preprocessing.addItem("none")
-        self.customwidget.preprocessing.addItem("sleuthkit")
+        for lPreprocessor in preprocessing_context.CPreprocessing.getPreprocessors():
+            self.customwidget.preprocessing.addItem(lPreprocessor['name'])
+
         self.customwidget.outputformat.addItem("JPEG")
         self.customwidget.outputformat.addItem("PNG")
         self.customwidget.outputformat.addItem("MKV")
@@ -142,6 +145,15 @@ class Gui_Qt(QtGui.QMainWindow):
                 "All Files (*)")
         if lFilename[0] != "":
             self.customwidget.inputFile.setText(lFilename[0])
+            lOptions = self.__getOptions()
+            lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
+            self.customwidget.offset.setText(str(lGeometry.offset))
+            self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
+            self.customwidget.incrementSize.setText(str(lGeometry.increment))
+            self.customwidget.fsInfo.setText("FS Info: " + lGeometry.fstype + 
+                    ", block size = " + str(lGeometry.blocksize) +
+                    ", increment size = " + str(lGeometry.increment) +
+                    ", offset = " + str(lGeometry.offset))
 
     def on_outputDirButton_clicked(self, pChecked=None):
         lDialog = QtGui.QFileDialog()
