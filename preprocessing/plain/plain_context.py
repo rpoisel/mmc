@@ -1,56 +1,51 @@
 import os
 
 from collating.fragment import fragment_context
-from collating.magic import magic_context
 
 
-class CPlain:
-    def __init__(self, pImageFile,
-            pOffset, pIncrementSize, pFragmentSize):
-        self.__mOffset = pOffset
-        self.__mIncrementSize = pIncrementSize
-        self.__mFragmentSize = pFragmentSize
-        self.__mMagic = magic_context.CMagic()
-        self.__mH264FC = fragment_context.CFragmentClassifier("<path>",
-                pFragmentSize)
-        self.__mImage = open(pImageFile, "rb")
-        self.__mSize = os.path.getsize(pImageFile)
+class CPlainImgProcessor:
+    def __init__(self, pOptions):
+        # TODO create accessors
+        self.__mOffset = pOptions.offset
+        self.__mIncrementSize = pOptions.incrementsize
+        self.__mFragmentSize = pOptions.fragmentsize
+
+        self.__mImage = open(pOptions.imagefile, "rb")
+        self.__mSize = os.path.getsize(pOptions.imagefile)
+        self.__mGenerator = self.__createGenerator()
 
     def __del__(self):
         self.__mImage.close()
 
-    def parseH264(self, pH264Blocks, pCaller = None):
-        lFragsChecked = 0
+    def __createGenerator(self):
+        self.__mFragsChecked = 0
         lOffset = self.__mOffset
+        # TODO catch IOError if illegal offset has been given
         self.__mImage.seek(lOffset, os.SEEK_SET)
 
         # collating: walk through fragments of the file
-        lFragsTotal = self.__mSize / self.__mFragmentSize
+        self.__mFragsTotal = self.__mSize / self.__mFragmentSize
         if self.__mSize % self.__mFragmentSize != 0:
-            lFragsTotal += 1
+            self.__mFragsTotal += 1
 
         while True:
-            if pCaller != None and lFragsChecked > 0:
-                pCaller.progressCallback(100 * lFragsChecked / lFragsTotal)
-
             lBuffer = self.__mImage.read(self.__mFragmentSize)
             if lBuffer == "":
                 break
+            
+            self.__mFragsChecked += 1
 
-            lFragsChecked += 1
+            yield (lOffset, lBuffer)
 
-            # check for beginning of files using libmagic(3)
-            if self.__mMagic.determineMagicH264(lBuffer) == True:
-                pH264Blocks.addHeader(lOffset)
-
-            # TODO ignore header fragments from other identifiable file types
-
-            # generate a map of filetypes of fragments
-            elif self.__mH264FC.classify(lBuffer) > 0:
-                pH264Blocks.addBlock(lOffset)
-
-            # position internal file pointer
             lOffset += self.__mIncrementSize
             self.__mImage.seek(lOffset, os.SEEK_SET)
 
-        return lFragsChecked
+
+    def getFragsRead(self):
+        return self.__mFragsChecked
+
+    def getFragsTotal(self):
+        return self.__mFragsTotal
+
+    def getGenerator(self):
+        return self.__mGenerator

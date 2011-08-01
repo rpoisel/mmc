@@ -10,14 +10,12 @@ import threading
 
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
-from preprocessing.tsk import tsk_context
-from preprocessing.plain import plain_context
+from preprocessing import preprocessing_context
 from collating.magic import magic_context
 from reassembly.reassembly import reassembly_context
 from reassembly.fragmentizer import fragmentizer_context
 from reassembly.ffmpeg import ffmpeg_context
 from lib import datatypes
-from lib import frags
 
 
 class CContext:
@@ -38,25 +36,15 @@ class CContext:
 
     def runClassify(self, pOptions, pCaller):
         try:
-            lVideoBlocks = frags.CFrags()
 
             # initialize preprocessor
-            if pOptions.preprocess == True:
-                lProcessor = tsk_context.CTSK(pOptions.imagefile,
-                    pOptions.offset, pOptions.incrementsize,
-                    pOptions.fragmentsize)
-            else:
-                lProcessor = plain_context.CPlain(pOptions.imagefile,
-                    pOptions.offset, pOptions.incrementsize,
-                    pOptions.fragmentsize)
-
-            # determine H.264 headers and fragments
-            lFragsTested = lProcessor.parseH264(lVideoBlocks, pCaller)
+            lProcessor = preprocessing_context.CPreprocessing(pOptions)
+            lProcessor.classify(pCaller)
 
             if pOptions.verbose is True:
-                lFragments = lVideoBlocks.getBlocks()
+                lFragments = lProcessor.getVideoBlocks().getBlocks()
                 print("Number of frags tested %d / Number of H.264 fragments %d" % 
-                        (lFragsTested, (len(lFragments))))
+                        len(lProcessor.getVideoBlocks()), (len(lFragments)))
                 for lH264Header in lFragments:
                     print("Fragment offset: " + str(lH264Header))
 
@@ -64,7 +52,7 @@ class CContext:
             # the most important properties for blocks => fragments
             # conversions
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            lFragmentizer.defrag(lVideoBlocks, self.mH264Fragments, 
+            lFragmentizer.defrag(lProcessor.getVideoBlocks(), self.mH264Fragments, 
                     pOptions.fragmentsize, pOptions.blockgap)
             for lH264Fragment in self.mH264Fragments:
                 print(lH264Fragment)

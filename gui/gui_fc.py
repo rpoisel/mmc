@@ -221,10 +221,7 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def __getOptions(self):
         lOptions = CGuiOptions()
-        if self.customwidget.preprocessing.currentText() == "sleuthkit":
-            lOptions.preprocess = True
-        else:
-            lOptions.preprocess = False
+        lOptions.preprocess = self.customwidget.preprocessing.currentText()
         if self.customwidget.outputformat.currentText() == "PNG":
             lOptions.outputformat = "%08d.png"
         elif self.customwidget.outputformat.currentText() == "MKV":
