@@ -28,9 +28,10 @@ class CReassembly:
                     bufsize=512, stdin=subprocess.PIPE) #, stderr=subprocess.PIPE)
             lRecoverFH = open(pOptions.imagefile, "rb")
             lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
-            lRecoverData += lRecoverFH.read(lFragHeader.mSize)
+            lRecoverHdrData = lRecoverFH.read(lFragHeader.mSize)
             for lCnt in xrange(len(lSortedFrags[lIdxNoHeader:])+1):
                 for lPermutation in itertools.permutations(lSortedFrags[lIdxNoHeader:], lCnt):
+                    lRecoverData = lRecoverHdrData
                     for lFrag in lPermutation:
                         lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                         lRecoverData += lRecoverFH.read(lFrag.mSize)
