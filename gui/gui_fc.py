@@ -136,7 +136,7 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def on_actionAbout_triggered(self, pChecked=None):
         QtGui.QMessageBox.about(self, "Multimedia File Carver",
-            "Developed by Rainer Poisel and Vasileios Miskos\n(St. Poelten University of Applied Sciences)")
+            "<html>Developed by Rainer Poisel, Vasileios Miskos and Manfred Ruzicka\n &copy; 2011 St. Poelten University of Applied Sciences</html>")
 
     def on_inputFileButton_clicked(self, pChecked=None):
         lFilename = QtGui.QFileDialog.getOpenFileName(self, \
