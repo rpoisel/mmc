@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Mon Aug  1 15:12:49 2011
+# Created: Tue Aug  2 16:58:09 2011
 #      by: pyside-uic 0.2.11 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -128,8 +128,8 @@ class Ui_filecarvingWidget(object):
 
     def retranslateUi(self, filecarvingWidget):
         filecarvingWidget.setWindowTitle(QtGui.QApplication.translate("filecarvingWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.inputFileButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Input File", None, QtGui.QApplication.UnicodeUTF8))
-        self.outputDirButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Output Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.inputFileButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Data Source", None, QtGui.QApplication.UnicodeUTF8))
+        self.outputDirButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Export Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("filecarvingWidget", "Preprocessing: ", None, QtGui.QApplication.UnicodeUTF8))
         self.fragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "512", None, QtGui.QApplication.UnicodeUTF8))
