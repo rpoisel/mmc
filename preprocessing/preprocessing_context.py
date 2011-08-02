@@ -37,6 +37,7 @@ class CPreprocessing:
             pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal())
             # check for beginning of files using libmagic(3)
             if self.__mMagic.determineMagicH264(lBlock[1]) == True:
+                print("Found H.264-Header fragment.")
                 self.__mVideoBlocks.addHeader(lBlock[0])
 
             # TODO ignore header fragments from other identifiable file types

@@ -39,4 +39,5 @@ class CReassembly:
             lRecoverFH.close()
             lCntHdr += 1
             pCaller.progressCallback(100 * len(lSortedFrags[0:lIdxNoHeader]) / (lCntHdr))
+        print("... Finished!")
         pCaller.progressCallback(100)
