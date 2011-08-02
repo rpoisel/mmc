@@ -147,13 +147,11 @@ class Gui_Qt(QtGui.QMainWindow):
             self.customwidget.inputFile.setText(lFilename[0])
             lOptions = self.__getOptions()
             lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
+            print("FS Info: " + str(lGeometry))
             self.customwidget.offset.setText(str(lGeometry.offset))
             self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
             self.customwidget.incrementSize.setText(str(lGeometry.increment))
-            self.customwidget.fsInfo.setText("FS Info: " + lGeometry.fstype + 
-                    ", block size = " + str(lGeometry.blocksize) +
-                    ", increment size = " + str(lGeometry.increment) +
-                    ", offset = " + str(lGeometry.offset))
+            self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
 
     def on_outputDirButton_clicked(self, pChecked=None):
         lDialog = QtGui.QFileDialog()

@@ -8,6 +8,13 @@ class CFsOptions:
         self.blocksize = pBlockSize
         self.fstype = pFsType
 
+    def __str__(self):
+        lString = self.fstype + \
+                    ", block size = " + str(self.blocksize) + \
+                    ", increment size = " + str(self.increment) + \
+                    ", offset = " + str(self.offset)
+        return lString
+
 class CFsStatContext:
     @staticmethod
     def getFsGeometry(pOptions):
@@ -30,3 +37,4 @@ class CFsStatContext:
                 pBlockSize = lBlockSize,
                 pIncrement = lBlockSize,
                 pFsType = lTskProperties["File System Type"] if "File System Type" in lTskProperties else "N/A")
+
