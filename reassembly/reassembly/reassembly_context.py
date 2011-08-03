@@ -27,17 +27,21 @@ class CReassembly:
             lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
             lRecoverHdrData = lRecoverFH.read(lFragHeader.mSize)
             for lCnt in xrange(len(lSortedFrags[lIdxNoHeader:])+1):
-                for lPermutation in itertools.permutations(lSortedFrags[lIdxNoHeader:], lCnt):
-                    print("Trying permutation: " + str(lFragHeader) + ' ' + \
-                            ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
-                    lRecoverData = lRecoverHdrData
-                    for lFrag in lPermutation:
-                        lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
-                        lRecoverData += lRecoverFH.read(lFrag.mSize)
-                    lFFMpeg = subprocess.Popen(
-                            ["ffmpeg", "-i", "-", lDir + "/" + pOptions.outputformat], 
-                            bufsize=512, stdin=subprocess.PIPE) #, stderr=subprocess.PIPE)
-                    lFFMpeg.communicate(input=lRecoverData)
+                try:
+                    for lPermutation in itertools.permutations(lSortedFrags[lIdxNoHeader:], lCnt):
+                        print("Trying permutation: " + str(lFragHeader) + ' ' + \
+                                ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
+                        lFFMpeg = subprocess.Popen(
+                                ["ffmpeg", "-i", "-", lDir + "/" + pOptions.outputformat], 
+                                bufsize=512, stdin=subprocess.PIPE) #, stderr=subprocess.PIPE)
+                        lFFMpeg.stdin.write(lRecoverHdrData)
+                        for lFrag in lPermutation:
+                            lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
+                            lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
+                        lFFMpeg.stdin.flush()
+                except IOError:
+                    # TODO return error
+                    pass
             lRecoverFH.close()
             lCntHdr += 1
             pCaller.progressCallback(100 * len(lSortedFrags[0:lIdxNoHeader]) / (lCntHdr))
