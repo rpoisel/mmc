@@ -15,18 +15,24 @@ class CReassembly:
                 break
             lIdxNoHeader += 1
 
-        lCntHdr = 0
+        #self.__assemble_imageproc(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
+        self.__assemble_permutations(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
 
+    def __assemble_imageproc(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+        pass
+
+    def __assemble_permutations(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+        lCntHdr = 0
         print("Trying combinations... ")
-        for lFragHeader in lSortedFrags[0:lIdxNoHeader]:
+        for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
             lDir = pOptions.output + "/" + str(lCntHdr)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
             lRecoverData = ""
             lRecoverFH = open(pOptions.imagefile, "rb")
-            for lCnt in xrange(len(lSortedFrags[lIdxNoHeader:])+1):
+            for lCnt in xrange(len(pSortedFrags[pIdxNoHeader:])+1):
                 try:
-                    for lPermutation in itertools.permutations(lSortedFrags[lIdxNoHeader:], lCnt):
+                    for lPermutation in itertools.permutations(pSortedFrags[pIdxNoHeader:], lCnt):
                         print("Trying permutation: " + str(lFragHeader) + ' ' + \
                                 ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
                         lFFMpeg = subprocess.Popen(
@@ -43,6 +49,6 @@ class CReassembly:
                     pass
             lRecoverFH.close()
             lCntHdr += 1
-            pCaller.progressCallback(100 * len(lSortedFrags[0:lIdxNoHeader]) / (lCntHdr))
+            pCaller.progressCallback(100 * len(pSortedFrags[0:pIdxNoHeader]) / (lCntHdr))
         print("... Finished!")
         pCaller.progressCallback(100)
