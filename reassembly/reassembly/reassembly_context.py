@@ -1,6 +1,8 @@
 import os
 import itertools
 import subprocess
+import fnmatch
+import shutil
 
 class CReassembly:
 
@@ -15,15 +17,19 @@ class CReassembly:
         lSortedFrags = sorted(pFragments, key=lambda lFrag: lFrag.mIsHeader, reverse = True)
         lIdxNoHeader = 0
         for lFrag in lSortedFrags:
-            if lFrag.mIsHeader == False:
-                break
-            lIdxNoHeader += 1
+            if lFrag.mIsHeader == True:
+                lIdxNoHeader += 1
+            lFrag.mIsSmall = False
+            lFrag.mPicBegin = ""
+            lFrag.mPicEnd = ""
 
         CReassembly.sReassemblyMethods[pOptions.assemblymethod]['func'].__get__(None, CReassembly)(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
 
     @staticmethod
     def __assemble_imageproc(pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         for lDir in [pOptions.output + "/hdr", pOptions.output + "/frg"]:
+            if os.path.exists(lDir):
+                shutil.rmtree(lDir)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
 
@@ -44,8 +50,11 @@ class CReassembly:
                 CReassembly.__decodeVideo(lFragHeader.mOffset + pOptions.hdrsize,
                         pOptions.output, "hdr", lCntHdr, lFragHeader.mSize, lHdrData,
                         CReassembly.FRG_HDR, lRecoverFH)
+                lFragHeader.mIsSmall = True
+            CReassembly.__determineCut(pOptions.output, "hdr", lFragHeader, lCntHdr)
 
             # extract fragments frames
+            # TODO check if fragment has already been decoded successfully
             lCntFrg = 0
             for lFrag in pSortedFrags[pIdxNoHeader:]:
                 print("Processing fragment: " + str(lFrag))
@@ -66,6 +75,8 @@ class CReassembly:
                     CReassembly.__decodeVideo(lFrag.mOffset, pOptions.output, "frg", 
                             lCntFrg, lFrag.mSize, lHdrData, CReassembly.FRG_SMALL,
                             lRecoverFH)
+                    lFrag.mIsSmall = True
+                CReassembly.__determineCut(pOptions.output, "frg", lFrag, lCntFrg)
                 lCntFrg += 1
             
             print("Finished header processing: " + str(lFragHeader))
@@ -73,28 +84,69 @@ class CReassembly:
             pCaller.progressCallback(100 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
 
         # check for similarities
+        for lFrag in pSortedFrags:
+            print lFrag
+
+        # extract determined videos
 
         lRecoverFH.close()
         pCaller.progressCallback(100)
 
     @staticmethod
+    def __determineCut(pOut, pDir, pFrag, pIdx):
+        if pFrag.mIsSmall == True and pFrag.mIsHeader == False:
+            lFiles = []
+            for lFile in os.listdir(pOut + os.sep + pDir):
+                if fnmatch.fnmatch(lFile, "s%04d*.png" % pIdx):
+                    lFiles.append(lFile)
+            lSortedFiles = sorted(lFiles)
+            if len(lSortedFiles) > 0:
+                pFrag.mPicEnd = lSortedFiles[-1]
+                if len(lSortedFiles) > 9:
+                    pFrag.mPicBegin = lSortedFiles[9]
+                else:
+                    pFrag.mPicBegin = lSortedFiles[-1]
+        else:
+            lFilesBegin = []
+            lFilesEnd = []
+            print pOut + os.sep + pDir + " => " + str(pIdx)
+            for lFile in os.listdir(pOut + os.sep + pDir):
+                if fnmatch.fnmatch(lFile, "b%04d*.png" % pIdx):
+                    lFilesBegin.append(lFile)
+                if fnmatch.fnmatch(lFile, "[he]%04d*.png" % pIdx):
+                    lFilesEnd.append(lFile)
+
+            lSortedFilesBegin = sorted(lFilesBegin)
+            lSortedFilesEnd = sorted(lFilesEnd)
+
+            # TODO check if index exists
+            if len(lSortedFilesEnd) > 0:
+                pFrag.mPicEnd = lSortedFilesEnd[-1]
+            if len(lSortedFilesBegin) > 9:
+                pFrag.mPicBegin = lSortedFilesBegin[9]
+            elif len(lSortedFilesBegin) > 0:
+                pFrag.mPicBegin = lSortedFilesBegin[-1]
+
+    @staticmethod
     def __decodeVideo(pOffset, pOut, pDir, pIdx, pLen, pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
+        lFilename = pOut + os.sep + pDir + os.sep
         if pWhence == CReassembly.FRG_HDR:
-            lFilename = "h%04d" % (pIdx) + "%04d.png"
+            lFilename += "h"
         elif pWhence == CReassembly.FRG_BEGIN:
-            lFilename = "b%04d" % (pIdx) + "%04d.png"
+            lFilename += "b"
         elif pWhence == CReassembly.FRG_SMALL:
-            lFilename = "s%04d" % (pIdx) + "%04d.png"
+            lFilename += "s"
         else:
-            lFilename = "e%04d" % (pIdx) + "%04d.png"
+            lFilename += "e"
+        lFilename += "%04d" % (pIdx) + "%04d.png"
         lFFMpeg = subprocess.Popen(
-                ["ffmpeg", "-y", "-i", "-", pOut + \
-                        "/" + pDir + "/" + lFilename],
-                bufsize = 512, stdin = subprocess.PIPE)
+                ["ffmpeg", "-y", "-i", "-", lFilename],
+                bufsize = 512, stdin = subprocess.PIPE,
+                stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         lFFMpeg.stdin.write(pHdrData)
         lFFMpeg.stdin.write(pFH.read(pLen))
-        lFFMpeg.stdin.flush()
+        lFFMpeg.communicate()
 
     @staticmethod
     def __assemble_permutations(pOptions, pSortedFrags, pIdxNoHeader, pCaller):
@@ -111,14 +163,14 @@ class CReassembly:
                         print("Trying permutation: " + str(lFragHeader) + ' ' + \
                                 ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
                         lFFMpeg = subprocess.Popen(
-                                ["ffmpeg", "-y", "-i", "-", lDir + "/" + pOptions.outputformat], 
-                                bufsize = 512, stdin = subprocess.PIPE)
+                                ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
+                                bufsize = 512, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
                         lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
                         lFFMpeg.stdin.write(lRecoverFH.read(lFragHeader.mSize))
                         for lFrag in lPermutation:
                             lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                             lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
-                        lFFMpeg.stdin.flush()
+                        lFFMpeg.communicate()
                 except IOError:
                     # TODO return error
                     pass
