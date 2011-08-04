@@ -24,17 +24,16 @@ class CReassembly:
                 os.makedirs(lDir)
             lRecoverData = ""
             lRecoverFH = open(pOptions.imagefile, "rb")
-            lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
-            lRecoverHdrData = lRecoverFH.read(lFragHeader.mSize)
             for lCnt in xrange(len(lSortedFrags[lIdxNoHeader:])+1):
                 try:
                     for lPermutation in itertools.permutations(lSortedFrags[lIdxNoHeader:], lCnt):
                         print("Trying permutation: " + str(lFragHeader) + ' ' + \
                                 ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
                         lFFMpeg = subprocess.Popen(
-                                ["ffmpeg", "-i", "-", lDir + "/" + pOptions.outputformat], 
-                                bufsize=512, stdin=subprocess.PIPE) #, stderr=subprocess.PIPE)
-                        lFFMpeg.stdin.write(lRecoverHdrData)
+                                ["ffmpeg", "-y", "-i", "-", lDir + "/" + pOptions.outputformat], 
+                                bufsize = 512, stdin = subprocess.PIPE)
+                        lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
+                        lFFMpeg.stdin.write(lRecoverFH.read(lFragHeader.mSize))
                         for lFrag in lPermutation:
                             lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                             lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))

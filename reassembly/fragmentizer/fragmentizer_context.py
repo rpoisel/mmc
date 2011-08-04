@@ -43,3 +43,11 @@ class CFragmentizer:
             else: #fragment after header or new no-header with small gap
                 lFragmentCur.mSize = pVideoBlocks.getBlocks()[lIdx] - \
                         lFragmentCur.mOffset + pBlockSize
+
+        self.__reduce(pH264Fragments, pBlockSize, 4)
+
+    def __reduce(self, pH264Fragments, pBlockSize, pMultiplicator):
+        for lFragment in pH264Fragments:
+            if lFragment.mIsHeader is False and \
+                    lFragment.mSize <= (pBlockSize * pMultiplicator):
+                pH264Fragments.remove(lFragment)
