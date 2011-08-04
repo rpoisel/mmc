@@ -16,6 +16,7 @@ from mm_context import CContext
 from gui_options import CGuiOptions
 from preprocessing import preprocessing_context
 from preprocessing import fsstat_context
+from reassembly.reassembly import reassembly_context
 
 class Jobs:
     NONE=0x0
@@ -100,6 +101,9 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.outputformat.addItem("JPEG")
         self.customwidget.outputformat.addItem("PNG")
 
+        for lAssembly in reassembly_context.CReassembly.getAssemblyMethods():
+            self.customwidget.assemblyMethod.addItem(lAssembly['name'])
+
         self.customwidget.resultTable.setColumnCount(4)
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
         self.customwidget.resultTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -150,7 +154,6 @@ class Gui_Qt(QtGui.QMainWindow):
             print("FS Info: " + str(lGeometry))
             self.customwidget.offset.setText(str(lGeometry.offset))
             self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
-            self.customwidget.incrementSize.setText(str(lGeometry.increment))
             self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
 
     def on_outputDirButton_clicked(self, pChecked=None):
@@ -242,8 +245,12 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.output = self.customwidget.outputDir.text()
         lOptions.offset = int(self.customwidget.offset.text())
         lOptions.fragmentsize = int(self.customwidget.fragmentSize.text())
-        lOptions.incrementsize = int(self.customwidget.incrementSize.text())
+        lOptions.incrementsize = lOptions.fragmentsize
         lOptions.blockgap = int(self.customwidget.blockGap.text())
+        lOptions.minfragsize = int(self.customwidget.minimumFragmentSize.text())
+        lOptions.hdrsize = int(self.customwidget.headerSize.text())
+        lOptions.extractsize = int(self.customwidget.extractSize.text())
+        lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
         lOptions.verbose = False
         return lOptions
 

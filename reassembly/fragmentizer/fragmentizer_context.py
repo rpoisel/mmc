@@ -16,7 +16,8 @@ class CFragmentizer:
     def __init__(self):
         pass
 
-    def defrag(self, pVideoBlocks, pH264Fragments, pBlockSize, pBlockGap):
+    def defrag(self, pVideoBlocks, pH264Fragments, pBlockSize, pBlockGap, 
+            pMinFragSize):
         # only do this if we found some video fragments
         if len(pVideoBlocks.getBlocks()) == 0:
             return
@@ -44,7 +45,7 @@ class CFragmentizer:
                 lFragmentCur.mSize = pVideoBlocks.getBlocks()[lIdx] - \
                         lFragmentCur.mOffset + pBlockSize
 
-        self.__reduce(pH264Fragments, pBlockSize, 4)
+        self.__reduce(pH264Fragments, pBlockSize, pMinFragSize)
 
     def __reduce(self, pH264Fragments, pBlockSize, pMultiplicator):
         for lFragment in pH264Fragments:

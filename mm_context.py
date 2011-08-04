@@ -53,7 +53,8 @@ class CContext:
             # conversions
             lFragmentizer = fragmentizer_context.CFragmentizer()
             lFragmentizer.defrag(lProcessor.getVideoBlocks(), self.mH264Fragments, 
-                    pOptions.fragmentsize, pOptions.blockgap)
+                    pOptions.fragmentsize, pOptions.blockgap,
+                    pOptions.minfragsize)
             for lH264Fragment in self.mH264Fragments:
                 print(lH264Fragment)
                 pCaller.resultCallback(lH264Fragment.mIsHeader, \

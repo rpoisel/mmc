@@ -6,6 +6,10 @@ class CReassembly:
     def __init__(self):
         pass
 
+    @staticmethod
+    def getAssemblyMethods():
+        return [{'name':'permutations'}, {'name':'image processor'}]
+
     def assemble(self, pOptions, pFragments, pValidator, pCaller):
         # sort list so that header fragments are at the beginning
         lSortedFrags = sorted(pFragments, key=lambda lFrag: lFrag.mIsHeader, reverse = True)
@@ -15,11 +19,13 @@ class CReassembly:
                 break
             lIdxNoHeader += 1
 
-        #self.__assemble_imageproc(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
-        self.__assemble_permutations(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
+        if pOptions.assemblymethod == "image processor":
+            self.__assemble_imageproc(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
+        else:
+            self.__assemble_permutations(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
 
     def __assemble_imageproc(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
-        pass
+        pCaller.progressCallback(100)
 
     def __assemble_permutations(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         lCntHdr = 0
@@ -28,7 +34,6 @@ class CReassembly:
             lDir = pOptions.output + "/" + str(lCntHdr)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
-            lRecoverData = ""
             lRecoverFH = open(pOptions.imagefile, "rb")
             for lCnt in xrange(len(pSortedFrags[pIdxNoHeader:])+1):
                 try:
