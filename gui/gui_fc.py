@@ -96,9 +96,9 @@ class Gui_Qt(QtGui.QMainWindow):
         for lPreprocessor in preprocessing_context.CPreprocessing.getPreprocessors():
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
 
+        self.customwidget.outputformat.addItem("MKV")
         self.customwidget.outputformat.addItem("JPEG")
         self.customwidget.outputformat.addItem("PNG")
-        self.customwidget.outputformat.addItem("MKV")
 
         self.customwidget.resultTable.setColumnCount(4)
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
