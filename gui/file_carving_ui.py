@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Thu Aug  4 13:01:45 2011
+# Created: Thu Aug  4 16:01:48 2011
 #      by: pyside-uic 0.2.11 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -163,22 +163,24 @@ class Ui_filecarvingWidget(object):
         self.outputDirButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Export Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("filecarvingWidget", "Preprocessing: ", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_3.setTitle(QtGui.QApplication.translate("filecarvingWidget", "File System Options", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_3.setTitle(QtGui.QApplication.translate("filecarvingWidget", "File System Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Size", None, QtGui.QApplication.UnicodeUTF8))
         self.fragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "512", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("filecarvingWidget", "Offset", None, QtGui.QApplication.UnicodeUTF8))
         self.offset.setText(QtGui.QApplication.translate("filecarvingWidget", "0", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_2.setTitle(QtGui.QApplication.translate("filecarvingWidget", "Fragmentizer Options", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_2.setTitle(QtGui.QApplication.translate("filecarvingWidget", "Fragmentizer Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Gap", None, QtGui.QApplication.UnicodeUTF8))
         self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "16384", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("filecarvingWidget", "Minimum Fragment Size", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Minimum fragment size in blocks", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "4", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("filecarvingWidget", "Video Parameters", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_8.setText(QtGui.QApplication.translate("filecarvingWidget", "Header Size", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_8.setText(QtGui.QApplication.translate("filecarvingWidget", "Header Size (bytes)", None, QtGui.QApplication.UnicodeUTF8))
+        self.headerSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Size of the header in bytes", None, QtGui.QApplication.UnicodeUTF8))
         self.headerSize.setText(QtGui.QApplication.translate("filecarvingWidget", "32", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("filecarvingWidget", "Extract Size", None, QtGui.QApplication.UnicodeUTF8))
-        self.extractSize.setText(QtGui.QApplication.translate("filecarvingWidget", "64", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(QtGui.QApplication.translate("filecarvingWidget", "Extract Size (kB)", None, QtGui.QApplication.UnicodeUTF8))
+        self.extractSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Size of the subfragment to forward to the decoder", None, QtGui.QApplication.UnicodeUTF8))
+        self.extractSize.setText(QtGui.QApplication.translate("filecarvingWidget", "90", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("filecarvingWidget", "Assembly Method", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
         self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))

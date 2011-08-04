@@ -82,7 +82,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>File System Options</string>
+      <string>File System Parameters</string>
      </property>
      <layout class="QGridLayout" name="fsLayout">
       <item row="0" column="0">
@@ -131,7 +131,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Fragmentizer Options</string>
+      <string>Fragmentizer Parameters</string>
      </property>
      <layout class="QGridLayout" name="fragmentizerLayout">
       <item row="0" column="0">
@@ -183,7 +183,7 @@
       <item row="1" column="1">
        <widget class="QLabel" name="label_8">
         <property name="text">
-         <string>Header Size</string>
+         <string>Header Size (bytes)</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -192,6 +192,9 @@
       </item>
       <item row="1" column="3">
        <widget class="QLineEdit" name="headerSize">
+        <property name="statusTip">
+         <string>Size of the header in bytes</string>
+        </property>
         <property name="text">
          <string>32</string>
         </property>
@@ -203,7 +206,7 @@
       <item row="1" column="4">
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>Extract Size</string>
+         <string>Extract Size (kB)</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -212,8 +215,11 @@
       </item>
       <item row="1" column="5">
        <widget class="QLineEdit" name="extractSize">
+        <property name="statusTip">
+         <string>Size of the subfragment to forward to the decoder</string>
+        </property>
         <property name="text">
-         <string>64</string>
+         <string>90</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

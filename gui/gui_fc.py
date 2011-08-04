@@ -102,7 +102,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.outputformat.addItem("PNG")
 
         for lAssembly in reassembly_context.CReassembly.getAssemblyMethods():
-            self.customwidget.assemblyMethod.addItem(lAssembly['name'])
+            self.customwidget.assemblyMethod.addItem(lAssembly)
 
         self.customwidget.resultTable.setColumnCount(4)
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
@@ -249,7 +249,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.blockgap = int(self.customwidget.blockGap.text())
         lOptions.minfragsize = int(self.customwidget.minimumFragmentSize.text())
         lOptions.hdrsize = int(self.customwidget.headerSize.text())
-        lOptions.extractsize = int(self.customwidget.extractSize.text())
+        lOptions.extractsize = int(self.customwidget.extractSize.text()) * 1024
         lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
         lOptions.verbose = False
         return lOptions
