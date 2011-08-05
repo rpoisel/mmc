@@ -104,6 +104,9 @@ class CReassembly:
                 lFiles.append((lFilename, os.path.getsize(lFilename)))
 
         # determine begin and end frames
+        if len(lFiles) < 1:
+            return
+
         lSortedFiles = sorted(lFiles, key=lambda lFile: lFile[0])
 
         lRefSize = max(lSortedFiles, key = lambda lFile:lFile[1])[1]
