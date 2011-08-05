@@ -79,18 +79,58 @@ class CReassembly:
                 lCntFrg += 1
             
             lCntHdr += 1
-            pCaller.progressCallback(100 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
+            pCaller.progressCallback(50 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
 
-        # check for similarities
         print("8<=============== FRAGS ==============")
         for lFrag in pSortedFrags:
             print lFrag
         print("8<=============== FRAGS ==============")
 
+        # check for similarities
+        lNumFrg = len(pSortedFrags) - pIdxNoHeader
+        lPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
+        while lNumFrg > 0:
+            print("Enter Loop")
+            lBestResult = (None, -1, -1, 0)
+            for lIdxHdr in xrange(pIdxNoHeader):
+                lIdxHead = lPaths[lIdxHdr]
+                lFragHead = pSortedFrags[lIdxHead]
+                print("Current header: " + str(lFragHead))
+                for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
+                    print("Enter Frag-Loop")
+                    lFrag = pSortedFrags[lIdxFrag]
+                    if lFrag.mNextIdx == -1:
+                        lCmp = CReassembly.__diffFrames(lFragHead, lFrag)
+                        if lCmp > lBestResult[3]:
+                            # TODO copy by value/reference issue?
+                            print("Assigning best result: " + str(lIdxHead) + ", " + str(lIdxFrag))
+                            lBestResult = (lFragHead, lIdxFrag, lIdxHdr, lCmp)
+            lBestResult[0].mNextIdx = lBestResult[1]
+            lPaths[lIdxHdr] = lBestResult[1]
+            lNumFrg -= 1
+
+        print("8<==================")
+        print("Num of fragments: " + str(len(pSortedFrags)))
+        for lFrag in pSortedFrags:
+            print("Fragment: " + str(lFrag))
+        print("8<==================")
+
         # extract determined videos
+        for lIdxHdr in xrange(pIdxNoHeader):
+            lFrag = pSortedFrags[lIdxHdr]
+            while True:
+                print("Current Fragment: " + str(lFrag))
+                if lFrag.mNextIdx == -1:
+                    break
+                lFrag = pSortedFrags[lFrag.mNextIdx]
 
         lRecoverFH.close()
         pCaller.progressCallback(100)
+
+    @staticmethod
+    def __diffFrames(pPath1, pPath2):
+        # TODO implement this ;-)
+        return 1
 
     @staticmethod
     def __determineCut(pOut, pDir, pFrag, pIdx, pMinPicSize):
