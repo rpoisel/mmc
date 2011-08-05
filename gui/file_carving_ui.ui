@@ -25,7 +25,7 @@
      <item row="0" column="0">
       <widget class="QLineEdit" name="inputFile">
        <property name="text">
-        <string/>
+        <string>data/image_ref_h264_ntfs.img</string>
        </property>
       </widget>
      </item>
@@ -46,7 +46,7 @@
      <item row="2" column="0">
       <widget class="QLineEdit" name="outputDir">
        <property name="text">
-        <string/>
+        <string>/tmp/temp</string>
        </property>
       </widget>
      </item>
@@ -235,6 +235,23 @@
       </item>
       <item row="0" column="3">
        <widget class="QComboBox" name="assemblyMethod"/>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>MinPicSize (%)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="text">
+         <string>20</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

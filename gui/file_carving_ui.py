@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Thu Aug  4 16:01:48 2011
+# Created: Fri Aug  5 11:25:58 2011
 #      by: pyside-uic 0.2.11 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,6 @@ class Ui_filecarvingWidget(object):
         self.srcdstLayout = QtGui.QGridLayout()
         self.srcdstLayout.setObjectName("srcdstLayout")
         self.inputFile = QtGui.QLineEdit(filecarvingWidget)
-        self.inputFile.setText("")
         self.inputFile.setObjectName("inputFile")
         self.srcdstLayout.addWidget(self.inputFile, 0, 0, 1, 1)
         self.inputFileButton = QtGui.QPushButton(filecarvingWidget)
@@ -29,7 +28,6 @@ class Ui_filecarvingWidget(object):
         self.outputDirButton.setObjectName("outputDirButton")
         self.srcdstLayout.addWidget(self.outputDirButton, 2, 1, 1, 1)
         self.outputDir = QtGui.QLineEdit(filecarvingWidget)
-        self.outputDir.setText("")
         self.outputDir.setObjectName("outputDir")
         self.srcdstLayout.addWidget(self.outputDir, 2, 0, 1, 1)
         self.fsInfo = QtGui.QLabel(filecarvingWidget)
@@ -116,6 +114,13 @@ class Ui_filecarvingWidget(object):
         self.assemblyMethod = QtGui.QComboBox(self.groupBox)
         self.assemblyMethod.setObjectName("assemblyMethod")
         self.videoparamLayout.addWidget(self.assemblyMethod, 0, 3, 1, 1)
+        self.label_9 = QtGui.QLabel(self.groupBox)
+        self.label_9.setObjectName("label_9")
+        self.videoparamLayout.addWidget(self.label_9, 0, 4, 1, 1)
+        self.lineEdit = QtGui.QLineEdit(self.groupBox)
+        self.lineEdit.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.lineEdit.setObjectName("lineEdit")
+        self.videoparamLayout.addWidget(self.lineEdit, 0, 5, 1, 1)
         self.verticalLayout.addWidget(self.groupBox)
         self.resultTable = QtGui.QTableWidget(filecarvingWidget)
         self.resultTable.setObjectName("resultTable")
@@ -159,8 +164,10 @@ class Ui_filecarvingWidget(object):
 
     def retranslateUi(self, filecarvingWidget):
         filecarvingWidget.setWindowTitle(QtGui.QApplication.translate("filecarvingWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
+        self.inputFile.setText(QtGui.QApplication.translate("filecarvingWidget", "data/image_ref_h264_ntfs.img", None, QtGui.QApplication.UnicodeUTF8))
         self.inputFileButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Data Source", None, QtGui.QApplication.UnicodeUTF8))
         self.outputDirButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Export Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.outputDir.setText(QtGui.QApplication.translate("filecarvingWidget", "/tmp/temp", None, QtGui.QApplication.UnicodeUTF8))
         self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("filecarvingWidget", "Preprocessing: ", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_3.setTitle(QtGui.QApplication.translate("filecarvingWidget", "File System Parameters", None, QtGui.QApplication.UnicodeUTF8))
@@ -182,6 +189,8 @@ class Ui_filecarvingWidget(object):
         self.extractSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Size of the subfragment to forward to the decoder", None, QtGui.QApplication.UnicodeUTF8))
         self.extractSize.setText(QtGui.QApplication.translate("filecarvingWidget", "90", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("filecarvingWidget", "Assembly Method", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_9.setText(QtGui.QApplication.translate("filecarvingWidget", "MinPicSize (%)", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit.setText(QtGui.QApplication.translate("filecarvingWidget", "20", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
         self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))
         self.reassembleButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Reassemble", None, QtGui.QApplication.UnicodeUTF8))

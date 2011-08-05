@@ -1,23 +1,26 @@
 import subprocess
+import os.path
 
 class CFsOptions:
 
-    def __init__(self, pOffset = 0, pIncrement = 512, pBlockSize = 512, pFsType = "N/A"):
+    def __init__(self, pSize = 0, pOffset = 0, pIncrement = 512, pBlockSize = 512, pFsType = "N/A"):
+        self.size = pSize
         self.offset = pOffset
         self.increment = pIncrement
         self.blocksize = pBlockSize
         self.fstype = pFsType
 
     def __str__(self):
-        lString = self.fstype + \
+        lString = str(self.size) + " bytes, " + \
+                self.fstype + \
                     ", block size = " + str(self.blocksize) + \
-                    ", increment size = " + str(self.increment) + \
                     ", offset = " + str(self.offset)
         return lString
 
 class CFsStatContext:
     @staticmethod
     def getFsGeometry(pOptions):
+        lSize = os.path.getsize(pOptions.imagefile)
         # dirty hack
         lTsk = subprocess.Popen(['fsstat', pOptions.imagefile], bufsize=512, stdout=subprocess.PIPE)
         lTskOutput = lTsk.communicate()
@@ -33,7 +36,8 @@ class CFsStatContext:
         else:
             lOffset = 0
 
-        return CFsOptions(pOffset = lOffset,
+        return CFsOptions(pSize = lSize,
+                pOffset = lOffset,
                 pBlockSize = lBlockSize,
                 pIncrement = lBlockSize,
                 pFsType = lTskProperties["File System Type"] if "File System Type" in lTskProperties else "N/A")

@@ -52,7 +52,7 @@ class CContext:
             # the most important properties for blocks => fragments
             # conversions
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            lFragmentizer.defrag(lProcessor.getVideoBlocks(), self.mH264Fragments, 
+            self.mH264Fragments = lFragmentizer.defrag(lProcessor.getVideoBlocks(), 
                     pOptions.fragmentsize, pOptions.blockgap,
                     pOptions.minfragsize)
             for lH264Fragment in self.mH264Fragments:

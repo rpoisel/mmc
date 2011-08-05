@@ -99,11 +99,12 @@ class CReassembly:
             if fnmatch.fnmatch(lFile, "b%04d*.png" % pIdx) or \
                     fnmatch.fnmatch(lFile, "[he]%04d*.png" % pIdx) or \
                     fnmatch.fnmatch(lFile, "s%04d*.png" % pIdx):
-                lFiles.append(lFile)
+                lFiles.append(pOut + os.sep + pDir + os.sep + lFile)
 
         # determine begin and end frames
         lSortedFiles = sorted(lFiles)
 
+        # TODO check file size if it is a realistic value
         if len(lSortedFiles) > 0:
             pFrag.mPicEnd = lSortedFiles[-1]
         if pFrag.mIsHeader == False:
@@ -119,7 +120,7 @@ class CReassembly:
             lSortedFiles.remove(pFrag.mPicBegin)
 
         for lFile in lSortedFiles:
-            os.remove(pOut + os.sep + pDir + os.sep + lFile)
+            os.remove(lFile)
 
     @staticmethod
     def __decodeVideo(pOffset, pOut, pDir, pIdx, pLen, 
