@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Fri Aug  5 11:25:58 2011
+# Created: Fri Aug  5 13:31:47 2011
 #      by: pyside-uic 0.2.11 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -117,10 +117,10 @@ class Ui_filecarvingWidget(object):
         self.label_9 = QtGui.QLabel(self.groupBox)
         self.label_9.setObjectName("label_9")
         self.videoparamLayout.addWidget(self.label_9, 0, 4, 1, 1)
-        self.lineEdit = QtGui.QLineEdit(self.groupBox)
-        self.lineEdit.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.lineEdit.setObjectName("lineEdit")
-        self.videoparamLayout.addWidget(self.lineEdit, 0, 5, 1, 1)
+        self.minPicSize = QtGui.QLineEdit(self.groupBox)
+        self.minPicSize.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.minPicSize.setObjectName("minPicSize")
+        self.videoparamLayout.addWidget(self.minPicSize, 0, 5, 1, 1)
         self.verticalLayout.addWidget(self.groupBox)
         self.resultTable = QtGui.QTableWidget(filecarvingWidget)
         self.resultTable.setObjectName("resultTable")
@@ -190,7 +190,7 @@ class Ui_filecarvingWidget(object):
         self.extractSize.setText(QtGui.QApplication.translate("filecarvingWidget", "90", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("filecarvingWidget", "Assembly Method", None, QtGui.QApplication.UnicodeUTF8))
         self.label_9.setText(QtGui.QApplication.translate("filecarvingWidget", "MinPicSize (%)", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit.setText(QtGui.QApplication.translate("filecarvingWidget", "20", None, QtGui.QApplication.UnicodeUTF8))
+        self.minPicSize.setText(QtGui.QApplication.translate("filecarvingWidget", "20", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
         self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))
         self.reassembleButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Reassemble", None, QtGui.QApplication.UnicodeUTF8))

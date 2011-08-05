@@ -1,4 +1,5 @@
 import os
+import os.path
 import itertools
 import subprocess
 import fnmatch
@@ -50,7 +51,7 @@ class CReassembly:
                         pOptions.output, "hdr", lCntHdr, lFragHeader.mSize, lHdrData,
                         CReassembly.FRG_HDR, lRecoverFH)
                 lFragHeader.mIsSmall = True
-            CReassembly.__determineCut(pOptions.output, "hdr", lFragHeader, lCntHdr)
+            CReassembly.__determineCut(pOptions.output, "hdr", lFragHeader, lCntHdr, pOptions.minpicsize)
 
             # extract fragments frames
             # TODO check if fragment has already been decoded successfully
@@ -74,7 +75,7 @@ class CReassembly:
                             lCntFrg, lFrag.mSize, lHdrData, CReassembly.FRG_SMALL,
                             lRecoverFH)
                     lFrag.mIsSmall = True
-                CReassembly.__determineCut(pOptions.output, "frg", lFrag, lCntFrg)
+                CReassembly.__determineCut(pOptions.output, "frg", lFrag, lCntFrg, pOptions.minpicsize)
                 lCntFrg += 1
             
             lCntHdr += 1
@@ -92,35 +93,34 @@ class CReassembly:
         pCaller.progressCallback(100)
 
     @staticmethod
-    def __determineCut(pOut, pDir, pFrag, pIdx):
+    def __determineCut(pOut, pDir, pFrag, pIdx, pMinPicSize):
         # determine relevant files
         lFiles = []
         for lFile in os.listdir(pOut + os.sep + pDir):
             if fnmatch.fnmatch(lFile, "b%04d*.png" % pIdx) or \
                     fnmatch.fnmatch(lFile, "[he]%04d*.png" % pIdx) or \
                     fnmatch.fnmatch(lFile, "s%04d*.png" % pIdx):
-                lFiles.append(pOut + os.sep + pDir + os.sep + lFile)
+                lFilename = pOut + os.sep + pDir + os.sep + lFile
+                lFiles.append((lFilename, os.path.getsize(lFilename)))
 
         # determine begin and end frames
-        lSortedFiles = sorted(lFiles)
+        lSortedFiles = sorted(lFiles, key=lambda lFile: lFile[0])
 
-        # TODO check file size if it is a realistic value
-        if len(lSortedFiles) > 0:
-            pFrag.mPicEnd = lSortedFiles[-1]
+        lRefSize = max(lSortedFiles, key = lambda lFile:lFile[1])[1]
+        for lFile in reversed(lSortedFiles):
+            if lFile[1] > (lRefSize * pMinPicSize/100):
+                pFrag.mPicEnd = lFile[0]
+                lSortedFiles.remove(lFile)
+                break
         if pFrag.mIsHeader == False:
-            if len(lSortedFiles) > 9:
-                pFrag.mPicBegin = lSortedFiles[9]
-            elif len(lSortedFiles) > 0:
-                pFrag.mPicBegin = lSortedFiles[-1]
-
-        # remove all other frames
-        if pFrag.mPicEnd != "" and pFrag.mPicEnd in lSortedFiles:
-            lSortedFiles.remove(pFrag.mPicEnd)
-        if pFrag.mPicBegin != "" and pFrag.mPicBegin in lSortedFiles:
-            lSortedFiles.remove(pFrag.mPicBegin)
+            for lFile in lSortedFiles:
+                if lFile[1] > (lRefSize * pMinPicSize/100):
+                    pFrag.mPicBegin = lFile[0]
+                    lSortedFiles.remove(lFile)
+                    break
 
         for lFile in lSortedFiles:
-            os.remove(lFile)
+            os.remove(lFile[0])
 
     @staticmethod
     def __decodeVideo(pOffset, pOut, pDir, pIdx, pLen, 

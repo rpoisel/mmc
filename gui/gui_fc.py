@@ -251,6 +251,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.hdrsize = int(self.customwidget.headerSize.text())
         lOptions.extractsize = int(self.customwidget.extractSize.text()) * 1024
         lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
+        lOptions.minpicsize = int(self.customwidget.minPicSize.text())
         lOptions.verbose = False
         return lOptions
 
