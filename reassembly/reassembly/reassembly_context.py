@@ -38,7 +38,6 @@ class CReassembly:
         # extract headers frames
         lCntHdr = 0
         for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
-            print("Processing header: " + str(lFragHeader))
             lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if lFragHeader.mSize > pOptions.extractsize:
@@ -57,7 +56,6 @@ class CReassembly:
             # TODO check if fragment has already been decoded successfully
             lCntFrg = 0
             for lFrag in pSortedFrags[pIdxNoHeader:]:
-                print("Processing fragment: " + str(lFrag))
                 # extract begin
                 lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                 if lFrag.mSize > pOptions.extractsize:
@@ -79,13 +77,14 @@ class CReassembly:
                 CReassembly.__determineCut(pOptions.output, "frg", lFrag, lCntFrg)
                 lCntFrg += 1
             
-            print("Finished header processing: " + str(lFragHeader))
             lCntHdr += 1
             pCaller.progressCallback(100 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
 
         # check for similarities
+        print("8<=============== FRAGS ==============")
         for lFrag in pSortedFrags:
             print lFrag
+        print("8<=============== FRAGS ==============")
 
         # extract determined videos
 
@@ -94,41 +93,37 @@ class CReassembly:
 
     @staticmethod
     def __determineCut(pOut, pDir, pFrag, pIdx):
-        if pFrag.mIsSmall == True and pFrag.mIsHeader == False:
-            lFiles = []
-            for lFile in os.listdir(pOut + os.sep + pDir):
-                if fnmatch.fnmatch(lFile, "s%04d*.png" % pIdx):
-                    lFiles.append(lFile)
-            lSortedFiles = sorted(lFiles)
-            if len(lSortedFiles) > 0:
-                pFrag.mPicEnd = lSortedFiles[-1]
-                if len(lSortedFiles) > 9:
-                    pFrag.mPicBegin = lSortedFiles[9]
-                else:
-                    pFrag.mPicBegin = lSortedFiles[-1]
-        else:
-            lFilesBegin = []
-            lFilesEnd = []
-            print pOut + os.sep + pDir + " => " + str(pIdx)
-            for lFile in os.listdir(pOut + os.sep + pDir):
-                if fnmatch.fnmatch(lFile, "b%04d*.png" % pIdx):
-                    lFilesBegin.append(lFile)
-                if fnmatch.fnmatch(lFile, "[he]%04d*.png" % pIdx):
-                    lFilesEnd.append(lFile)
+        # determine relevant files
+        lFiles = []
+        for lFile in os.listdir(pOut + os.sep + pDir):
+            if fnmatch.fnmatch(lFile, "b%04d*.png" % pIdx) or \
+                    fnmatch.fnmatch(lFile, "[he]%04d*.png" % pIdx) or \
+                    fnmatch.fnmatch(lFile, "s%04d*.png" % pIdx):
+                lFiles.append(lFile)
 
-            lSortedFilesBegin = sorted(lFilesBegin)
-            lSortedFilesEnd = sorted(lFilesEnd)
+        # determine begin and end frames
+        lSortedFiles = sorted(lFiles)
 
-            # TODO check if index exists
-            if len(lSortedFilesEnd) > 0:
-                pFrag.mPicEnd = lSortedFilesEnd[-1]
-            if len(lSortedFilesBegin) > 9:
-                pFrag.mPicBegin = lSortedFilesBegin[9]
-            elif len(lSortedFilesBegin) > 0:
-                pFrag.mPicBegin = lSortedFilesBegin[-1]
+        if len(lSortedFiles) > 0:
+            pFrag.mPicEnd = lSortedFiles[-1]
+        if pFrag.mIsHeader == False:
+            if len(lSortedFiles) > 9:
+                pFrag.mPicBegin = lSortedFiles[9]
+            elif len(lSortedFiles) > 0:
+                pFrag.mPicBegin = lSortedFiles[-1]
+
+        # remove all other frames
+        if pFrag.mPicEnd != "" and pFrag.mPicEnd in lSortedFiles:
+            lSortedFiles.remove(pFrag.mPicEnd)
+        if pFrag.mPicBegin != "" and pFrag.mPicBegin in lSortedFiles:
+            lSortedFiles.remove(pFrag.mPicBegin)
+
+        for lFile in lSortedFiles:
+            os.remove(pOut + os.sep + pDir + os.sep + lFile)
 
     @staticmethod
-    def __decodeVideo(pOffset, pOut, pDir, pIdx, pLen, pHdrData, pWhence, pFH):
+    def __decodeVideo(pOffset, pOut, pDir, pIdx, pLen, 
+            pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
         lFilename = pOut + os.sep + pDir + os.sep
         if pWhence == CReassembly.FRG_HDR:
