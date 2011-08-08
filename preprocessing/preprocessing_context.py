@@ -7,6 +7,8 @@ from collating.fragment import fragment_context
 from collating.magic import magic_context
 from lib import frags
 
+#from PySide import QtCore
+
 
 class CPreprocessing:
 
@@ -34,7 +36,9 @@ class CPreprocessing:
         # lBlock[0] ... offset
         # lBlock[1] ... bytes/data
         for lBlock in self.__mPreprocessor.getGenerator():
-            pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal())
+            #QtCore.QCoreApplication.processEvents()
+            if 100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal() % 10 == 0:
+                pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal())
             # check for beginning of files using libmagic(3)
             if self.__mMagic.determineMagicH264(lBlock[1]) == True:
                 print("Found H.264-Header fragment.")
