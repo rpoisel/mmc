@@ -55,11 +55,14 @@ class CContext:
             self.mH264Fragments = lFragmentizer.defrag(lProcessor.getVideoBlocks(), 
                     pOptions.fragmentsize, pOptions.blockgap,
                     pOptions.minfragsize)
-            for lH264Fragment in self.mH264Fragments:
-                print(lH264Fragment)
+            print("8<=============== FRAGMENTs ==============")
+            for lIdx in xrange(len(self.mH264Fragments)):
+                lH264Fragment = self.mH264Fragments[lIdx]
+                print("FragmentIdx %04d" % lIdx + ": " + str(lH264Fragment))
                 pCaller.resultCallback(lH264Fragment.mIsHeader, \
                         lH264Fragment.mOffset,
                         lH264Fragment.mSize)
+            print("8<=============== FRAGMENTs ==============")
 
             pCaller.finishedCallback()
 
