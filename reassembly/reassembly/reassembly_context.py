@@ -83,6 +83,11 @@ class CReassembly:
             lCntHdr += 1
             pCaller.progressCallback(50 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
 
+        # remove those fragments which could not be decoded
+        pSortedFrags = [lFrag for lFrag in pSortedFrags if \
+                (lFrag.mIsHeader == True) or \
+                (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and lFrag.mPicEnd != "")]
+
         # check for similarities
         lNumFrg = len(pSortedFrags) - pIdxNoHeader
         lPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
@@ -93,7 +98,8 @@ class CReassembly:
                 for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
                     if pSortedFrags[lIdxFrag].mNextIdx == -1 and lIdxHead != lIdxFrag:
                         lCmp = CReassembly.__diffFrames(pSortedFrags[lIdxHead].mPicEnd, \
-                                pSortedFrags[lIdxFrag].mPicBegin)
+                                pSortedFrags[lIdxFrag].mPicBegin, \
+                                pOptions.similarity)
                         if lCmp > lBestResult['cmp']:
                             lBestResult = {'idxHead':lIdxHead, 'idxFrag':lIdxFrag, 'idxHdr':lIdxHdr, 'cmp':lCmp}
             # check for ambiguous result
@@ -127,7 +133,7 @@ class CReassembly:
         pCaller.progressCallback(100)
 
     @staticmethod
-    def __diffFrames(pPath1, pPath2):
+    def __diffFrames(pPath1, pPath2, pDiff):
         lImage1 = Image.open(pPath1, "r")
         lImage2 = Image.open(pPath2, "r")
         
@@ -135,15 +141,17 @@ class CReassembly:
         if lImage1.size != lImage2.size or lImage1.mode != 'RGB' or lImage2.mode != 'RGB':
             return -1
 
-        # histogrum intersection
+        # histogram intersection
         lReturn = 0
         lHist1 = lImage1.histogram()
         lHist2 = lImage2.histogram()
         for lChannel in xrange(3):
             for lIntensity in xrange(256):
                 lIdx = lChannel * 256 + lIntensity
-                if abs(lHist1[lIdx] - lHist2[lIdx]) < 10:
+                if abs(lHist1[lIdx] - lHist2[lIdx]) < pDiff:
                     lReturn += 1 
+
+        print("Value for " + pPath1 + " <=> " + pPath2 + ": " + str(lReturn))
 
         return lReturn
 

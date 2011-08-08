@@ -252,6 +252,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.extractsize = int(self.customwidget.extractSize.text()) * 1024
         lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
         lOptions.minpicsize = int(self.customwidget.minPicSize.text())
+        lOptions.similarity = int(self.customwidget.similarity.text())
         lOptions.verbose = False
         return lOptions
 
