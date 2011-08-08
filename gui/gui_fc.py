@@ -230,7 +230,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.__mWorker.sResult.connect(self.on_result_callback, \
                 QtCore.Qt.QueuedConnection)
         self.__enableElements(False)
-        self.__mWorker.start()
+        self.__mWorker.start(QtCore.QThread.IdlePriority)
 
     def __getOptions(self):
         lOptions = CGuiOptions()
