@@ -5,6 +5,8 @@ import subprocess
 import fnmatch
 import shutil
 
+import Image
+
 class CReassembly:
 
     FRG_HDR = 0
@@ -90,9 +92,13 @@ class CReassembly:
                 lIdxHead = lPaths[lIdxHdr]
                 for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
                     if pSortedFrags[lIdxFrag].mNextIdx == -1 and lIdxHead != lIdxFrag:
-                        lCmp = CReassembly.__diffFrames(pSortedFrags[lIdxHead], pSortedFrags[lIdxFrag])
+                        lCmp = CReassembly.__diffFrames(pSortedFrags[lIdxHead].mPicEnd, \
+                                pSortedFrags[lIdxFrag].mPicBegin)
                         if lCmp > lBestResult['cmp']:
                             lBestResult = {'idxHead':lIdxHead, 'idxFrag':lIdxFrag, 'idxHdr':lIdxHdr, 'cmp':lCmp}
+            # check for ambiguous result
+            if lBestResult['cmp'] == 0:
+                break
             pSortedFrags[lBestResult['idxHead']].mNextIdx = lBestResult['idxFrag']
             lPaths[lBestResult['idxHdr']] = lBestResult['idxFrag']
             lNumFrg -= 1
@@ -100,12 +106,21 @@ class CReassembly:
         # extract determined videos
         print("8<=============== FRAGMENT PATHs ==============")
         for lIdxHdr in xrange(pIdxNoHeader):
+            lDir = pOptions.output + os.sep + str(lIdxHdr)
+            if not os.path.exists(lDir):
+                os.makedirs(lDir)
+            lFFMpeg = subprocess.Popen(
+                    ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
+                    bufsize = 512, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
             lFrag = pSortedFrags[lIdxHdr]
             while True:
+                lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
+                lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
                 print("Current Fragment: " + str(lFrag))
                 if lFrag.mNextIdx == -1:
                     break
                 lFrag = pSortedFrags[lFrag.mNextIdx]
+            lFFMpeg.communicate()
         print("8<=============== FRAGMENT PATHs ==============")
 
         lRecoverFH.close()
@@ -113,8 +128,24 @@ class CReassembly:
 
     @staticmethod
     def __diffFrames(pPath1, pPath2):
-        # TODO implement this ;-)
-        return 1
+        lImage1 = Image.open(pPath1, "r")
+        lImage2 = Image.open(pPath2, "r")
+        
+        # size check
+        if lImage1.size != lImage2.size or lImage1.mode != 'RGB' or lImage2.mode != 'RGB':
+            return -1
+
+        # histogrum intersection
+        lReturn = 0
+        lHist1 = lImage1.histogram()
+        lHist2 = lImage2.histogram()
+        for lChannel in xrange(3):
+            for lIntensity in xrange(256):
+                lIdx = lChannel * 256 + lIntensity
+                if abs(lHist1[lIdx] - lHist2[lIdx]) < 10:
+                    lReturn += 1 
+
+        return lReturn
 
     @staticmethod
     def __determineCut(pOut, pDir, pFrag, pIdx, pMinPicSize):
@@ -176,7 +207,7 @@ class CReassembly:
         lCntHdr = 0
         print("Trying combinations... ")
         for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
-            lDir = pOptions.output + "/" + str(lCntHdr)
+            lDir = pOptions.output + os.sep + str(lCntHdr)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
             lRecoverFH = open(pOptions.imagefile, "rb")
