@@ -119,33 +119,22 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.progressBar.setMinimum(0)
 
         # actions
-        self.connect(self.ui.actionExit, QtCore.SIGNAL("triggered(bool)"),
-                self.on_actionExit_triggered)
-        self.connect(self.ui.actionAbout, QtCore.SIGNAL("triggered(bool)"),
-                self.on_actionAbout_triggered)
-        self.connect(self.ui.actionChooseOutputDir, QtCore.SIGNAL("triggered(bool)"),
-                self.on_outputDirButton_clicked)
-        self.connect(self.ui.actionOpenImage, QtCore.SIGNAL("triggered(bool)"),
-                self.on_inputFileButton_clicked)
-        self.connect(self.customwidget.classifyButton, QtCore.SIGNAL("clicked(bool)"),
-                self.on_classifyButton_clicked)
-        self.connect(self.customwidget.reassembleButton, QtCore.SIGNAL("clicked(bool)"),
-                self.on_reassembleButton_clicked)
-        self.connect(self.customwidget.processButton, QtCore.SIGNAL("clicked(bool)"),
-                self.on_processButton_clicked)
-        self.connect(self.customwidget.inputFileButton, QtCore.SIGNAL("clicked(bool)"),
-                self.on_inputFileButton_clicked)
-        self.connect(self.customwidget.outputDirButton, QtCore.SIGNAL("clicked(bool)"),
-                self.on_outputDirButton_clicked)
+        self.ui.actionExit.triggered.connect(self.on_actionExit_triggered)
+        self.ui.actionAbout.triggered.connect(self.on_actionAbout_triggered)
+        self.ui.actionChooseOutputDir.triggered.connect(self.on_outputDirButton_clicked)
+        self.ui.actionOpenImage.triggered.connect(self.on_inputFileButton_clicked)
+        self.customwidget.classifyButton.clicked.connect(self.on_classifyButton_clicked)
+        self.customwidget.reassembleButton.clicked.connect(self.on_reassembleButton_clicked)
+        self.customwidget.processButton.clicked.connect(self.on_processButton_clicked)
+        self.customwidget.inputFileButton.clicked.connect(self.on_inputFileButton_clicked)
+        self.customwidget.outputDirButton.clicked.connect(self.on_outputDirButton_clicked)
         self.customwidget.inputFile.textChanged.connect(self.on_inputFile_changed)
 
         # init values
         self.customwidget.inputFile.setText("data/image_ref_h264_ntfs.img")
         self.customwidget.outputDir.setText("/tmp/temp")
 
-    def on_actionExit_triggered(self, pChecked=None):
-        if pChecked is None:
-            return
+    def on_actionExit_triggered(self): 
         self.close()
 
     def on_inputFile_changed(self, pPath):
@@ -157,7 +146,7 @@ class Gui_Qt(QtGui.QMainWindow):
             self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
             self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
         else:
-            self.customwidget.fsInfo.setText("<html><font color=\"#FF0000\">File does not exist.</font></html>")
+            self.customwidget.fsInfo.setText("<html><font color=\"#FF0000\">Imagefile does not exist.</font></html>")
 
     def on_actionAbout_triggered(self, pChecked=None):
         QtGui.QMessageBox.about(self, "Multimedia File Carver",
@@ -170,12 +159,12 @@ class Gui_Qt(QtGui.QMainWindow):
                 "All Files (*)")
         if lFilename[0] != "":
             self.customwidget.inputFile.setText(lFilename[0])
-            lOptions = self.__getOptions()
-            lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
-            print("FS Info: " + str(lGeometry))
-            self.customwidget.offset.setText(str(lGeometry.offset))
-            self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
-            self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
+            #lOptions = self.__getOptions()
+            #lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
+            #print("FS Info: " + str(lGeometry))
+            #self.customwidget.offset.setText(str(lGeometry.offset))
+            #self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
+            #self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
 
     def on_outputDirButton_clicked(self, pChecked=None):
         lDialog = QtGui.QFileDialog()
