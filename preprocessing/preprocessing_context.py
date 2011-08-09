@@ -36,6 +36,7 @@ class CPreprocessing:
         # lBlock[0] ... offset
         # lBlock[1] ... bytes/data
         for lBlock in self.__mPreprocessor.getGenerator():
+            #print(lBlock)
             #QtCore.QCoreApplication.processEvents()
             if 100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal() % 10 == 0:
                 pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal())

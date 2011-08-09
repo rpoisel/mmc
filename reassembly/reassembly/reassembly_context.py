@@ -244,10 +244,11 @@ class CReassembly:
 
     @staticmethod
     def getAssemblyMethods():
-        return CReassembly.sReassemblyMethods.keys()
+        return sorted(CReassembly.sReassemblyMethods.keys())
 
-    sReassemblyMethods = {'permutations':{'name':'permutations', 'func':__assemble_permutations},\
-            'image processor':{'name':'image processor', 'func':__assemble_imageproc}}
+    sReassemblyMethods = {'image processor':{'name':'image processor', 'func':__assemble_imageproc}, \
+            'permutations':{'name':'permutations', 'func':__assemble_permutations}}
+            
 
     def __init__(self):
         pass

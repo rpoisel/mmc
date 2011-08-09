@@ -20,7 +20,7 @@
 #if TEST_NCD == 1
 #include "ncd.h"
 #define MAX_NUM_FILE_TYPES 16
-#define NUM_FRAGS_PER_FILE_TYPE 10
+#define NUM_FRAGS_PER_FILE_TYPE 5
 #define FRAGS_REF_DIR "./data/frags_ref"
 #define MAX_DIR_ENT 256
 #endif
@@ -41,8 +41,6 @@ struct SNearest
     double mValNearest;
 };
 #endif
-
-/* static const char *sTypes[] = { ".txt", "" }; */
 
 #if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 

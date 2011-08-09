@@ -32,7 +32,7 @@ class CFragmentizer:
         lH264Fragments = []
         # only do this if we found some video fragments
         if len(pVideoBlocks.getBlocks()) == 0:
-            return
+            return lH264Fragments
 
         # first do the block building
         lFragmentCur = CFragment(pBlockSize)

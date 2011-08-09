@@ -5,6 +5,7 @@
 
 import os
 import sys
+import datetime
 # PyQt4, PySide stuff
 from qtimport import *
 
@@ -34,6 +35,7 @@ class CThreadWorker(QtCore.QThread):
         self.mContext = pContext
         self.mJobs = pJobs
         self.mRunningJob = Jobs.NONE
+        self.mLastTs = datetime.datetime.now()
 
     def progressCallback(self, pProgress):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY \
@@ -104,6 +106,9 @@ class Gui_Qt(QtGui.QMainWindow):
         for lAssembly in reassembly_context.CReassembly.getAssemblyMethods():
             self.customwidget.assemblyMethod.addItem(lAssembly)
 
+        self.customwidget.blockStatus.addItem("allocated")
+        self.customwidget.blockStatus.addItem("unallocated")
+
         self.customwidget.resultTable.setColumnCount(4)
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
         self.customwidget.resultTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -132,11 +137,27 @@ class Gui_Qt(QtGui.QMainWindow):
                 self.on_inputFileButton_clicked)
         self.connect(self.customwidget.outputDirButton, QtCore.SIGNAL("clicked(bool)"),
                 self.on_outputDirButton_clicked)
+        self.customwidget.inputFile.textChanged.connect(self.on_inputFile_changed)
+
+        # init values
+        self.customwidget.inputFile.setText("data/image_ref_h264_ntfs.img")
+        self.customwidget.outputDir.setText("/tmp/temp")
 
     def on_actionExit_triggered(self, pChecked=None):
         if pChecked is None:
             return
         self.close()
+
+    def on_inputFile_changed(self, pPath):
+        if os.path.exists(pPath):
+            lOptions = self.__getOptions()
+            lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
+            print("FS Info: " + str(lGeometry))
+            self.customwidget.offset.setText(str(lGeometry.offset))
+            self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
+            self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
+        else:
+            self.customwidget.fsInfo.setText("<html><font color=\"#FF0000\">File does not exist.</font></html>")
 
     def on_actionAbout_triggered(self, pChecked=None):
         QtGui.QMessageBox.about(self, "Multimedia File Carver",
@@ -176,6 +197,7 @@ class Gui_Qt(QtGui.QMainWindow):
                 "Please make sure that your output directory exists.")
             return
         elif self.__mLock.tryLock() == True:
+            self.mLastTs = datetime.datetime.now()
             self.mContext = CContext()
             self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
@@ -186,6 +208,7 @@ class Gui_Qt(QtGui.QMainWindow):
             QtGui.QMessageBox.about(self, "Error",
                 "What would you like to reassemble? No H.264 headers have been classified yet!")
         elif self.__mLock.tryLock() == True:
+            self.mLastTs = datetime.datetime.now()
             #self.mContext = CContext()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.REASSEMBLE)
@@ -200,6 +223,7 @@ class Gui_Qt(QtGui.QMainWindow):
                 "Please make sure that your output directory exists.")
             return
         elif self.__mLock.tryLock() == True:
+            self.mLastTs = datetime.datetime.now()
             self.mContext = CContext()
             self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
@@ -253,6 +277,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
         lOptions.minpicsize = int(self.customwidget.minPicSize.text())
         lOptions.similarity = int(self.customwidget.similarity.text())
+        lOptions.blockstatus = self.customwidget.blockStatus.currentText()
         lOptions.verbose = False
         return lOptions
 
@@ -283,10 +308,14 @@ class Gui_Qt(QtGui.QMainWindow):
         self.numRowsResult += 1
 
     def on_progress_callback(self, pValue):
+        lDelta = datetime.datetime.now() - self.mLastTs
+        self.customwidget.duration.setText(str(lDelta))
         if 0 <= pValue <= 100:
             self.customwidget.progressBar.setValue(pValue)
 
     def on_finished_callback(self):
+        lDelta = datetime.datetime.now() - self.mLastTs
+        self.customwidget.duration.setText(str(lDelta))
         self.__mLock.unlock()
         self.__enableElements(True)
 
