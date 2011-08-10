@@ -84,22 +84,3 @@ class CPreprocessing:
         for lBlock in lBlocks.getBlocks():
             pBlocksList.append(lBlock)
         self.__mLock.release()
-
-    def __classifyStub(self):
-        # lBlock[0] ... offset
-        # lBlock[1] ... bytes/data
-        for lBlock in self.__mPreprocessor.getGenerator():
-            #print(lBlock)
-            #QtCore.QCoreApplication.processEvents()
-            if 100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal() % 10 == 0:
-                pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead() / self.__mPreprocessor.getFragsTotal())
-            # check for beginning of files using libmagic(3)
-            if self.__mMagic.determineMagicH264(lBlock[1]) == True:
-                print("Found H.264-Header fragment.")
-                self.__mVideoBlocks.addHeader(lBlock[0])
-
-            # TODO ignore header fragments from other identifiable file types
-
-            # generate a map of filetypes of fragments
-            elif self.__mH264FC.classify(lBlock[1]) > 0:
-                self.__mVideoBlocks.addBlock(lBlock[0])
