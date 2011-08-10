@@ -33,6 +33,10 @@ class CPreprocessing:
         return self.__mVideoBlocks
 
     def classify(self, pCaller = None):
+        # TODO convert to multiprocessing
+        #      move usage of generators back into the specific contexts {tsk,plain}_context
+        #      only start the classification process here
+
         # lBlock[0] ... offset
         # lBlock[1] ... bytes/data
         for lBlock in self.__mPreprocessor.getGenerator():
