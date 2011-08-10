@@ -6,7 +6,7 @@ import os.path
 import subprocess
 import traceback
 import logging
-import threading
+import multiprocessing
 
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
@@ -33,6 +33,10 @@ class CContext:
 
     def getH264Fragments(self):
         return self.mH264Fragments
+
+    @staticmethod
+    def getCPUs():
+        return multiprocessing.cpu_count()
 
     def runClassify(self, pOptions, pCaller):
         try:

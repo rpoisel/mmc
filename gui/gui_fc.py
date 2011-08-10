@@ -103,6 +103,9 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.outputformat.addItem("JPEG")
         self.customwidget.outputformat.addItem("PNG")
 
+        for lCPU in reversed(range(CContext.getCPUs())):
+            self.customwidget.maxCPUs.addItem(str(lCPU + 1))
+
         for lAssembly in reassembly_context.CReassembly.getAssemblyMethods():
             self.customwidget.assemblyMethod.addItem(lAssembly)
 
@@ -267,6 +270,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.minpicsize = int(self.customwidget.minPicSize.text())
         lOptions.similarity = int(self.customwidget.similarity.text())
         lOptions.blockstatus = self.customwidget.blockStatus.currentText()
+        lOptions.maxcpus = int(self.customwidget.maxCPUs.currentText())
         lOptions.verbose = False
         return lOptions
 

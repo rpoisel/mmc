@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Tue Aug  9 16:33:35 2011
+# Created: Wed Aug 10 22:26:39 2011
 #      by: pyside-uic 0.2.12 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -73,6 +73,20 @@ class Ui_filecarvingWidget(object):
         self.outputformat.setObjectName("outputformat")
         self.outformatLayout.addWidget(self.outputformat)
         self.verticalLayout_2.addLayout(self.outformatLayout)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.label_13 = QtGui.QLabel(self.tab_general)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_13.sizePolicy().hasHeightForWidth())
+        self.label_13.setSizePolicy(sizePolicy)
+        self.label_13.setObjectName("label_13")
+        self.horizontalLayout_3.addWidget(self.label_13)
+        self.maxCPUs = QtGui.QComboBox(self.tab_general)
+        self.maxCPUs.setObjectName("maxCPUs")
+        self.horizontalLayout_3.addWidget(self.maxCPUs)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         self.actionLayout = QtGui.QHBoxLayout()
         self.actionLayout.setObjectName("actionLayout")
         self.classifyButton = QtGui.QPushButton(self.tab_general)
@@ -216,6 +230,7 @@ class Ui_filecarvingWidget(object):
         self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
         self.duration.setText(QtGui.QApplication.translate("filecarvingWidget", "00:00:00", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_13.setText(QtGui.QApplication.translate("filecarvingWidget", "Max CPUs:", None, QtGui.QApplication.UnicodeUTF8))
         self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))
         self.reassembleButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Reassemble", None, QtGui.QApplication.UnicodeUTF8))
         self.processButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Process (do it all)", None, QtGui.QApplication.UnicodeUTF8))
