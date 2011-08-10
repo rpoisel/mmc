@@ -45,7 +45,7 @@ class CPreprocessing:
         lProcesses = []
 
         for lCnt in range(self.__mNumCPUs):
-            lProcess = multiprocessing.Process(target=self.__classifyCore, args=(lCnt, lHeadersList, lBlocksList))
+            lProcess = multiprocessing.Process(target=self.__classifyCore, args=(lCnt, lHeadersList, lBlocksList, pCaller))
             lProcesses.append(lProcess)
             lProcess.start()
 
@@ -54,7 +54,7 @@ class CPreprocessing:
 
         self.__mVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)
 
-    def __classifyCore(self, pPid, pHeadersList, pBlocksList):
+    def __classifyCore(self, pPid, pHeadersList, pBlocksList, pCaller):
         print("Classifying Process (%02d): PID " % pPid + str(os.getpid()))
         
         # data structure for temporary storage of results
@@ -63,8 +63,9 @@ class CPreprocessing:
         # lBlock[0] ... offset
         # lBlock[1] ... bytes/data
         for lBlock in self.__mPreprocessor.getGenerator(pPid):
-            #if 100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid) % 10 == 0:
-                #pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid))
+            #if pPid == 0:
+                #if 100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid) % 10 == 0:
+                    #pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid))
             # check for beginning of files using libmagic(3)
             if self.__mMagic.determineMagicH264(lBlock[1]) == True:
                 print("Found H.264-Header fragment.")
