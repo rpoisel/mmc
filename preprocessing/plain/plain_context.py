@@ -11,6 +11,8 @@ class CGeneratorContext:
         self.__mIncrementSize = pIncrementSize
         self.__mFragsChecked = 0
         self.__mFragsTotal = 0
+        print("Offset = " + str(self.__mOffset) + ", Size = " + \
+                str(self.__mSize))
 
     def __del__(self):
         self.__mImage.close()
@@ -57,6 +59,7 @@ class CPlainImgProcessor:
     def __init__(self, pOptions):
         self.__mGenerators = []
         lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
+        print("Size = " + str(lSize))
         for lPid in range(pOptions.maxcpus):
             self.__mGenerators.append(CGeneratorContext(
                 pOptions.imagefile, \
