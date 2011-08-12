@@ -6,6 +6,7 @@ import os.path
 import subprocess
 import traceback
 import logging
+import datetime
 import multiprocessing
 
 # import only if necessary
@@ -42,23 +43,37 @@ class CContext:
         try:
 
             # initialize preprocessor
+            #lProcessor = preprocessing_context.CPreprocessing(pOptions)
+            #lProcessor.classify(pCaller)
             lProcessor = preprocessing_context.CPreprocessing(pOptions)
-            lProcessor.classify(pCaller)
+            lVideoBlocks = lProcessor.classify(pOptions, pCaller)
+            print(str(datetime.datetime.now()) + " Back to the main context.")
 
-            if pOptions.verbose is True:
-                lFragments = lProcessor.getVideoBlocks().getBlocks()
-                print("Number of frags tested %d / Number of H.264 fragments %d" % 
-                        len(lProcessor.getVideoBlocks()), (len(lFragments)))
-                for lH264Header in lFragments:
-                    print("Fragment offset: " + str(lH264Header))
+            #if pOptions.verbose is True:
+            if True:
+                lBlocks = lVideoBlocks.getBlocks()
+                lHeaders = lVideoBlocks.getHeaders()
+                print("Number of H.264 fragments %d" % 
+                        len(lVideoBlocks.getBlocks()))
+                print("8<============ Headers ==============")
+                for lH264Header in lHeaders:
+                    print(str(lH264Header))
+                print("8<============ Blocks ==============")
+                for lH264Block in lBlocks:
+                    print(str(lH264Block))
 
             # initialize fragmentizer with parameters that describe
             # the most important properties for blocks => fragments
             # conversions
+            print(str(datetime.datetime.now()) + " Starting fragmentizing.")
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            self.mH264Fragments = lFragmentizer.defrag(lProcessor.getVideoBlocks(), 
-                    pOptions.fragmentsize, pOptions.blockgap,
-                    pOptions.minfragsize)
+            if False: # TODO uncomment!
+                self.mH264Fragments = lFragmentizer.defrag(lVideoBlocks, 
+                        pOptions.fragmentsize, pOptions.blockgap,
+                        pOptions.minfragsize)
+            else:
+                self.mH264Fragments = []
+            print(str(datetime.datetime.now()) + " Finished fragmentizing.")
             print("8<=============== FRAGMENTs ==============")
             for lIdx in xrange(len(self.mH264Fragments)):
                 lH264Fragment = self.mH264Fragments[lIdx]

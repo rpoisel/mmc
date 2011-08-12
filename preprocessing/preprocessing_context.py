@@ -1,5 +1,7 @@
 import os
+import math
 import multiprocessing
+import datetime
 
 from preprocessing.tsk import tsk_context
 from preprocessing.plain import plain_context
@@ -19,12 +21,17 @@ class CPreprocessing:
         return [{'name':'plain'}, {'name':'sleuthkit'}]
 
     def __init__(self, pOptions):
-        self.__mVideoBlocks = None #frags.CFrags()
         self.__mMagic = magic_context.CMagic()
         self.__mH264FC = fragment_context.CFragmentClassifier(pOptions.imagefile,
                 pOptions.fragmentsize)
-        self.__mNumCPUs = pOptions.maxcpus
         self.__mLock = multiprocessing.Lock()
+
+    #def getVideoBlocks(self):
+        #return self.__mVideoBlocks
+
+    def classify(self, pOptions, pCaller = None):
+        lVideoBlocks = None #frags.CFrags()
+        lNumCPUs = pOptions.maxcpus
         
         # TODO load dynamically
         if pOptions.preprocess == "sleuthkit":
@@ -32,19 +39,15 @@ class CPreprocessing:
         else:
             self.__mPreprocessor = plain_context.CPlainImgProcessor(pOptions)
 
-    def getVideoBlocks(self):
-        return self.__mVideoBlocks
 
-    def classify(self, pCaller = None):
-        # TODO convert to multiprocessing
-        #      move usage of generators back into the specific contexts {tsk,plain}_context
-        #      only start the classification process here
+        lLast = datetime.datetime.now()
+        print(str(lLast) + " Start classifying.")
         lManager = multiprocessing.Manager()
         lHeadersList = lManager.list()
         lBlocksList = lManager.list()
         lProcesses = []
 
-        for lCnt in range(self.__mNumCPUs):
+        for lCnt in range(self.__mPreprocessor.getNumParallel()):
             lProcess = multiprocessing.Process(target=self.__classifyCore, args=(lCnt, lHeadersList, lBlocksList, pCaller))
             lProcesses.append(lProcess)
             lProcess.start()
@@ -52,13 +55,18 @@ class CPreprocessing:
         for lProcess in lProcesses:
             lProcess.join(10000000000L)
 
-        self.__mVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)
+        print(str(datetime.datetime.now()) + " Start gathering results ...")
+        lVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)
+        #lVideoBlocks = frags.CFrags()
+        lNow = datetime.datetime.now()
+        print(str(lNow) + " Finished gathering results.")
+        print(str(lNow) + " Finished classifying. Duration: " + str(lNow - lLast))
+        return lVideoBlocks
 
     def __classifyCore(self, pPid, pHeadersList, pBlocksList, pCaller):
-        print("Classifying Process (%02d): PID " % pPid + str(os.getpid()))
-        
         # data structure for temporary storage of results
         lBlocks = frags.CFrags()
+        lDebug = []
 
         # lBlock[0] ... offset
         # lBlock[1] ... bytes/data
@@ -66,9 +74,10 @@ class CPreprocessing:
             #if pPid == 0:
                 #if 100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid) % 10 == 0:
                     #pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid))
+            lDebug.append(lBlock)
             # check for beginning of files using libmagic(3)
             if self.__mMagic.determineMagicH264(lBlock[1]) == True:
-                print("Found H.264-Header fragment.")
+                #print("Found H.264-Header fragment.")
                 lBlocks.addHeader(lBlock[0])
 
             # TODO ignore header fragments from other identifiable file types
@@ -77,6 +86,7 @@ class CPreprocessing:
             elif self.__mH264FC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
+        print(str(datetime.datetime.now()) + " Process " + str(pPid) + " finished classifying")
         self.__mLock.acquire()
         # gather results (append to shared memory list)
         for lHeader in lBlocks.getHeaders():
@@ -84,3 +94,4 @@ class CPreprocessing:
         for lBlock in lBlocks.getBlocks():
             pBlocksList.append(lBlock)
         self.__mLock.release()
+        print(str(datetime.datetime.now()) + " Process " + str(pPid) + " finished returning results")
