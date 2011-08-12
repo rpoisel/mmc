@@ -67,7 +67,7 @@ class CContext:
             # conversions
             print(str(datetime.datetime.now()) + " Starting fragmentizing.")
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            if False: # TODO uncomment!
+            if True: # TODO uncomment!
                 self.mH264Fragments = lFragmentizer.defrag(lVideoBlocks, 
                         pOptions.fragmentsize, pOptions.blockgap,
                         pOptions.minfragsize)
