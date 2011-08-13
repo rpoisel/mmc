@@ -47,6 +47,8 @@ class CPreprocessing:
         lBlocksList = lManager.list()
         lProcesses = []
 
+        lProgress = 0
+
         for lCnt in range(self.__mPreprocessor.getNumParallel()):
             lProcess = multiprocessing.Process(target=self.__classifyCore, args=(lCnt, lHeadersList, lBlocksList, pCaller))
             lProcesses.append(lProcess)
@@ -54,6 +56,8 @@ class CPreprocessing:
 
         for lProcess in lProcesses:
             lProcess.join(10000000000L)
+            lProgress += (90 / len(lProcesses))
+            pCaller.progressCallback(lProgress)
 
         print(str(datetime.datetime.now()) + " Start gathering results ...")
         lVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)

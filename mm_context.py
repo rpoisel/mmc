@@ -66,12 +66,9 @@ class CContext:
             # conversions
             print(str(datetime.datetime.now()) + " Starting fragmentizing.")
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            if True: # TODO uncomment!
-                self.mH264Fragments = lFragmentizer.defrag(lVideoBlocks, 
-                        pOptions.fragmentsize, pOptions.blockgap,
-                        pOptions.minfragsize)
-            else:
-                self.mH264Fragments = []
+            self.mH264Fragments = lFragmentizer.defrag(lVideoBlocks, 
+                    pOptions.fragmentsize, pOptions.blockgap,
+                    pOptions.minfragsize)
             print(str(datetime.datetime.now()) + " Finished fragmentizing.")
             print("8<=============== FRAGMENTs ==============")
             for lIdx in xrange(len(self.mH264Fragments)):
@@ -82,6 +79,7 @@ class CContext:
                         lH264Fragment.mSize)
             print("8<=============== FRAGMENTs ==============")
 
+            pCaller.progressCallback(100)
             pCaller.finishedCallback()
 
         except LookupError, pExc:
