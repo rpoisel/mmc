@@ -11,7 +11,7 @@
 #include "fragment_classifier.h"
 
 /* turn to 1 for verbose messages */
-#define VERBOSE 1
+#define VERBOSE 0
 /* set to 0 to turn off ncd testing */
 #define TEST_NCD 1
 
@@ -21,7 +21,7 @@
 #include "ncd.h"
 #define MAX_NUM_FILE_TYPES 16
 #define NUM_FRAGS_PER_FILE_TYPE 5
-#define FRAGS_REF_DIR "./data/frags_ref"
+/* #define FRAGS_REF_DIR "./data/frags_ref" */
 #define MAX_DIR_ENT 256
 #endif
 
@@ -49,7 +49,7 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
 int readRandFrag(unsigned char*, int, const char*, const char*);
 #endif
 
-FragmentClassifier* fragment_classifier_new(const char* pFilename, 
+FragmentClassifier* fragment_classifier_new(const char* pRefDir, 
         unsigned int pFragmentSize)
 {
 #if TEST_NCD == 1
@@ -71,7 +71,7 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
             lHandle->mReferenceFrags[lCntX][lCntY] = 
                 (unsigned char*)malloc(sizeof(unsigned char) * pFragmentSize);
             /* randomly open file, random seek, read reference fragment */
-            readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, FRAGS_REF_DIR, sTypes[lCntX]); 
+            readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, pRefDir, sTypes[lCntX]); 
         }
     }
 #endif

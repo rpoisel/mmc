@@ -134,10 +134,13 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.outputDirButton.clicked.connect(self.on_outputDirButton_clicked)
         self.customwidget.inputFile.textChanged.connect(self.on_inputFile_changed)
         self.customwidget.outputDir.textChanged.connect(self.on_outputDir_changed)
+        self.customwidget.refFrags.textChanged.connect(self.on_refFrags_changed)
+        self.customwidget.refFragsButton.clicked.connect(self.on_refFragsButton_clicked)
 
         # init values
         self.customwidget.inputFile.setText("data/image_ref_h264_ntfs.img")
         self.customwidget.outputDir.setText("/tmp/temp")
+        self.customwidget.refFrags.setText("data/frags_ref")
 
     def on_actionExit_triggered(self): 
         self.close()
@@ -159,9 +162,22 @@ class Gui_Qt(QtGui.QMainWindow):
         else:
             self.customwidget.outputDirInfo.setText("<html><font color=\"#FF0000\">Output directory does not exist.</font></html>")
 
+    def on_refFrags_changed(self, pPath):
+        if os.path.isdir(pPath):
+            lNumFiles = len([lFile for lFile in os.listdir(pPath) if os.path.isfile(os.path.join(pPath, lFile))])
+            self.customwidget.refFragsInfo.setText("Reference fragment directory exists: " + str(lNumFiles) + " files.")
+        else:
+            self.customwidget.refFragsInfo.setText("<html><font color=\"#FF0000\">Reference fragment directory does not exist.</font></html>")
+
     def on_actionAbout_triggered(self, pChecked=None):
         QtGui.QMessageBox.about(self, "Multimedia File Carver",
-            "<html>Developed by Rainer Poisel, Vasileios Miskos and Manfred Ruzicka\n &copy; 2011 St. Poelten University of Applied Sciences</html>")
+            "<html>Key developers:  \
+            <ul> \
+                <li>Rainer Poisel</li> \
+                <li>Vasileios Miskos</li> \
+                <li>Manfred Ruzicka</li> \
+            </ul> \
+            &copy; 2011 St. Poelten University of Applied Sciences</html>")
 
     def on_inputFileButton_clicked(self, pChecked=None):
         lFilename = QtGui.QFileDialog.getOpenFileName(self, \
@@ -171,20 +187,34 @@ class Gui_Qt(QtGui.QMainWindow):
         if lFilename[0] != "":
             self.customwidget.inputFile.setText(lFilename[0])
 
-    def on_outputDirButton_clicked(self, pChecked=None):
+    def on_outputDirButton_clicked(self):
         lDialog = QtGui.QFileDialog()
         lDialog.setFileMode(QtGui.QFileDialog.Directory)
         lFilename = lDialog.getExistingDirectory(self, \
-                "Choose Output Directory", \
+                "Choose output directory", \
                 os.path.dirname(self.customwidget.outputDir.text()), \
                 QtGui.QFileDialog.ShowDirsOnly)
         if lFilename != "":
             self.customwidget.outputDir.setText(lFilename)
 
+    def on_refFragsButton_clicked(self):
+        lDialog = QtGui.QFileDialog()
+        lDialog.setFileMode(QtGui.QFileDialog.Directory)
+        lFilename = lDialog.getExistingDirectory(self, \
+                "Choose reference fragments directory", \
+                os.path.dirname(self.customwidget.refFrags.text()), \
+                QtGui.QFileDialog.ShowDirsOnly)
+        if lFilename != "":
+            self.customwidget.refFrags.setText(lFilename)
+
     def on_processButton_clicked(self, pChecked=None):
         if not os.path.exists(self.customwidget.inputFile.text()):
             QtGui.QMessageBox.about(self, "Error",
                 "Please make sure that your input file exists.")
+            return
+        elif not os.path.isdir(self.customwidget.refFrags.text()):
+            QtGui.QMessageBox.about(self, "Error",
+                "Please make sure that your reference fragment directory exists.")
             return
         elif not os.path.isdir(self.customwidget.outputDir.text()):
             if self.__outputDirProblem() == False:
@@ -217,7 +247,10 @@ class Gui_Qt(QtGui.QMainWindow):
         if len(self.mContext.getH264Fragments()) is 0:
             QtGui.QMessageBox.about(self, "Error",
                 "What would you like to reassemble? No H.264 headers have been classified yet!")
-        elif self.__mLock.tryLock() == True:
+        elif not os.path.isdir(self.customwidget.outputDir.text()):
+            if self.__outputDirProblem() == False:
+                return
+        if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
             #self.mContext = CContext()
             self.customwidget.progressBar.setValue(0)
@@ -227,6 +260,10 @@ class Gui_Qt(QtGui.QMainWindow):
         if not os.path.exists(self.customwidget.inputFile.text()):
             QtGui.QMessageBox.about(self, "Error",
                 "Please make sure that your input file exists.")
+            return
+        elif not os.path.isdir(self.customwidget.refFrags.text()):
+            QtGui.QMessageBox.about(self, "Error",
+                "Please make sure that your reference fragment directory exists.")
             return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
@@ -280,6 +317,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.minfragsize = int(self.customwidget.minimumFragmentSize.text())
         lOptions.hdrsize = int(self.customwidget.headerSize.text())
         lOptions.extractsize = int(self.customwidget.extractSize.text()) * 1024
+        lOptions.reffragsdir = self.customwidget.refFrags.text()
         lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
         lOptions.minpicsize = int(self.customwidget.minPicSize.text())
         lOptions.similarity = int(self.customwidget.similarity.text())

@@ -23,15 +23,12 @@ class CPreprocessing:
 
     def __init__(self, pOptions):
         self.__mMagic = magic_context.CMagic()
-        self.__mH264FC = fragment_context.CFragmentClassifier(pOptions.imagefile,
+        self.__mH264FC = fragment_context.CFragmentClassifier(
+                pOptions.reffragsdir,
                 pOptions.fragmentsize)
         self.__mLock = multiprocessing.Lock()
 
-    #def getVideoBlocks(self):
-        #return self.__mVideoBlocks
-
     def classify(self, pOptions, pCaller = None):
-        lVideoBlocks = None #frags.CFrags()
         lNumCPUs = pOptions.maxcpus
         
         # TODO load dynamically
@@ -62,7 +59,6 @@ class CPreprocessing:
 
         logging.info("Start gathering results ...")
         lVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)
-        #lVideoBlocks = frags.CFrags()
         lNow = datetime.datetime.now()
         logging.info("Finished gathering results.")
         logging.info("Finished classifying. Duration: " + str(lNow - lLast))

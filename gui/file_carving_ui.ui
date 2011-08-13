@@ -274,6 +274,27 @@
         </widget>
        </item>
        <item>
+        <layout class="QGridLayout" name="collatingLayout">
+         <item row="1" column="0">
+          <widget class="QLineEdit" name="refFrags"/>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="refFragsButton">
+           <property name="text">
+            <string>Reference Frags</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="refFragsInfo">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
           <widget class="QLabel" name="label_5">

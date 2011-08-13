@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Sat Aug 13 11:16:17 2011
+# Created: Sat Aug 13 12:29:14 2011
 #      by: pyside-uic 0.2.12 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -148,6 +148,18 @@ class Ui_filecarvingWidget(object):
         self.minimumFragmentSize.setObjectName("minimumFragmentSize")
         self.fragmentizerLayout.addWidget(self.minimumFragmentSize, 0, 3, 1, 1)
         self.verticalLayout_3.addWidget(self.groupBox_2)
+        self.collatingLayout = QtGui.QGridLayout()
+        self.collatingLayout.setObjectName("collatingLayout")
+        self.refFrags = QtGui.QLineEdit(self.tab_preprocessing)
+        self.refFrags.setObjectName("refFrags")
+        self.collatingLayout.addWidget(self.refFrags, 1, 0, 1, 1)
+        self.refFragsButton = QtGui.QPushButton(self.tab_preprocessing)
+        self.refFragsButton.setObjectName("refFragsButton")
+        self.collatingLayout.addWidget(self.refFragsButton, 1, 1, 1, 1)
+        self.refFragsInfo = QtGui.QLabel(self.tab_preprocessing)
+        self.refFragsInfo.setObjectName("refFragsInfo")
+        self.collatingLayout.addWidget(self.refFragsInfo, 2, 0, 1, 1)
+        self.verticalLayout_3.addLayout(self.collatingLayout)
         self.gridLayout_2 = QtGui.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.label_5 = QtGui.QLabel(self.tab_preprocessing)
@@ -250,6 +262,8 @@ class Ui_filecarvingWidget(object):
         self.label_10.setText(QtGui.QApplication.translate("filecarvingWidget", "Minimum Fragment Size", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Minimum fragment size in blocks", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "4", None, QtGui.QApplication.UnicodeUTF8))
+        self.refFragsButton.setText(QtGui.QApplication.translate("filecarvingWidget", "Reference Frags", None, QtGui.QApplication.UnicodeUTF8))
+        self.refFragsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("filecarvingWidget", "Preprocessing: ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_12.setText(QtGui.QApplication.translate("filecarvingWidget", "Block status: ", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_preprocessing), QtGui.QApplication.translate("filecarvingWidget", "Preprocessing", None, QtGui.QApplication.UnicodeUTF8))
