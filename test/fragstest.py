@@ -1,10 +1,12 @@
 import sys
+import logging
 import datetime
 
 from lib import frags
 from reassembly.fragmentizer import fragmentizer_context
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
 
     lHeadersTxt = sys.argv[1]
     lBlocksTxt = sys.argv[2]
@@ -25,17 +27,17 @@ if __name__ == "__main__":
             break
         lFrags.addBlock(int(lLine.strip()))
     
-    print(str(datetime.datetime.now()) + " Starting fragmentizing.")
+    logging.info("Starting fragmentizing.")
     lFragmentizer = fragmentizer_context.CFragmentizer()
     lH264Fragments = lFragmentizer.defrag(lFrags, 
             512, 16384,
             4)
-    print(str(datetime.datetime.now()) + " Finished fragmentizing.")
-    print("8<=============== FRAGMENTs ==============")
+    logging.info("Finished fragmentizing.")
+    logging.info("8<=============== FRAGMENTs ==============")
     for lIdx in xrange(len(lH264Fragments)):
         lH264Fragment = lH264Fragments[lIdx]
-        print("FragmentIdx %04d" % lIdx + ": " + str(lH264Fragment))
-    print("8<=============== FRAGMENTs ==============")
+        logging.info("FragmentIdx %04d" % lIdx + ": " + str(lH264Fragment))
+    logging.info("8<=============== FRAGMENTs ==============")
 
     lHeadersFH.close()
     lBlocksFH.close()

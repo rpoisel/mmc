@@ -47,56 +47,56 @@ class CContext:
             #lProcessor.classify(pCaller)
             lProcessor = preprocessing_context.CPreprocessing(pOptions)
             lVideoBlocks = lProcessor.classify(pOptions, pCaller)
-            print(str(datetime.datetime.now()) + " Back to the main context.")
+            logging.info("Back to the main context.")
 
             if pOptions.verbose is True:
                 lBlocks = lVideoBlocks.getBlocks()
                 lHeaders = lVideoBlocks.getHeaders()
-                print("Number of H.264 fragments %d" % 
+                logging.info("Number of H.264 fragments %d" % 
                         len(lVideoBlocks.getBlocks()))
-                print("8<============ Headers ==============")
+                logging.info("8<============ Headers ==============")
                 for lH264Header in lHeaders:
-                    print(str(lH264Header))
-                print("8<============ Blocks ==============")
+                    logging.info(str(lH264Header))
+                logging.info("8<============ Blocks ==============")
                 for lH264Block in lBlocks:
-                    print(str(lH264Block))
+                    logging.info(str(lH264Block))
 
             # initialize fragmentizer with parameters that describe
             # the most important properties for blocks => fragments
             # conversions
-            print(str(datetime.datetime.now()) + " Starting fragmentizing.")
+            logging.info("Starting fragmentizing.")
             lFragmentizer = fragmentizer_context.CFragmentizer()
             self.mH264Fragments = lFragmentizer.defrag(lVideoBlocks, 
                     pOptions.fragmentsize, pOptions.blockgap,
                     pOptions.minfragsize)
-            print(str(datetime.datetime.now()) + " Finished fragmentizing.")
-            print("8<=============== FRAGMENTs ==============")
+            logging.info("Finished fragmentizing.")
+            logging.info("8<=============== FRAGMENTs ==============")
             for lIdx in xrange(len(self.mH264Fragments)):
                 lH264Fragment = self.mH264Fragments[lIdx]
-                print("FragmentIdx %04d" % lIdx + ": " + str(lH264Fragment))
+                logging.info("FragmentIdx %04d" % lIdx + ": " + str(lH264Fragment))
                 pCaller.resultCallback(lH264Fragment.mIsHeader, \
                         lH264Fragment.mOffset,
                         lH264Fragment.mSize)
-            print("8<=============== FRAGMENTs ==============")
+            logging.info("8<=============== FRAGMENTs ==============")
 
             pCaller.progressCallback(100)
             pCaller.finishedCallback()
 
         except LookupError, pExc:
-            print("LookupError: " + str(pExc))
-            traceback.print_exc()
+            logging.error("LookupError: " + str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-1)
         except NameError, pExc:
-            print("NameError: " + str(pExc))
-            traceback.print_exc()
+            logging.error("NameError: " + str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-2)
         except EOFError, pExc:
-            print("EOFError: " + str(pExc))
-            traceback.print_exc()
+            logging.error("EOFError: " + str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-3)
         except Exception, pExc:
-            print("Error: " + str(pExc))
-            traceback.print_exc()
+            logging.error(str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-4)
 
     def runReassembly(self, pOptions, pCaller):
@@ -106,18 +106,18 @@ class CContext:
             lReassembly.assemble(pOptions, self.mH264Fragments, lFFMpeg, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:
-            print("LookupError: " + str(pExc))
-            traceback.print_exc()
+            logging.error("LookupError: " + str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-1)
         except NameError, pExc:
-            print("NameError: " + str(pExc))
-            traceback.print_exc()
+            logging.error("NameError: " + str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-2)
         except EOFError, pExc:
-            print("EOFError: " + str(pExc))
-            traceback.print_exc()
+            logging.error("EOFError: " + str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-3)
         except Exception, pExc:
-            print("Error: " + str(pExc))
-            traceback.print_exc()
+            logging.error(str(pExc))
+            traceback.logging.info_exc()
             sys.exit(-4)

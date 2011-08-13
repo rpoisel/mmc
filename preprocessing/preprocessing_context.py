@@ -1,5 +1,6 @@
 import os
 import math
+import logging
 import multiprocessing
 import datetime
 
@@ -41,7 +42,7 @@ class CPreprocessing:
 
 
         lLast = datetime.datetime.now()
-        print(str(lLast) + " Start classifying.")
+        logging.info(str(lLast) + " Start classifying.")
         lManager = multiprocessing.Manager()
         lHeadersList = lManager.list()
         lBlocksList = lManager.list()
@@ -59,12 +60,12 @@ class CPreprocessing:
             lProgress += (90 / len(lProcesses))
             pCaller.progressCallback(lProgress)
 
-        print(str(datetime.datetime.now()) + " Start gathering results ...")
+        logging.info("Start gathering results ...")
         lVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)
         #lVideoBlocks = frags.CFrags()
         lNow = datetime.datetime.now()
-        print(str(lNow) + " Finished gathering results.")
-        print(str(lNow) + " Finished classifying. Duration: " + str(lNow - lLast))
+        logging.info("Finished gathering results.")
+        logging.info("Finished classifying. Duration: " + str(lNow - lLast))
         return lVideoBlocks
 
     def __classifyCore(self, pPid, pHeadersList, pBlocksList, pCaller):
@@ -90,7 +91,7 @@ class CPreprocessing:
             elif self.__mH264FC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
-        print(str(datetime.datetime.now()) + " Process " + str(pPid) + " finished classifying")
+        logging.info("Process " + str(pPid) + " finished classifying")
         self.__mLock.acquire()
         # gather results (append to shared memory list)
         for lHeader in lBlocks.getHeaders():
@@ -98,4 +99,4 @@ class CPreprocessing:
         for lBlock in lBlocks.getBlocks():
             pBlocksList.append(lBlock)
         self.__mLock.release()
-        print(str(datetime.datetime.now()) + " Process " + str(pPid) + " finished returning results")
+        logging.info("Process " + str(pPid) + " finished returning results")

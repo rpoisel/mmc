@@ -1,14 +1,16 @@
 import os
 import os.path
+import logging
 import sys
 
 import magic
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
     lMagic = magic.open(magic.MAGIC_NONE)
     lMagic.load()
     if len(sys.argv) < 3 or len(sys.argv) > 4:
-        print("Usage: " + sys.argv[0] + " <dir> <file-type> <action>")
+        logging.info("Usage: " + sys.argv[0] + " <dir> <file-type> <action>")
         sys.exit(-1)
     lDir = sys.argv[1]
     lFiletype = sys.argv[2]
@@ -21,4 +23,4 @@ if __name__ == "__main__":
             if lAction == '-d':
                 os.remove(lPath)
             else:
-                print("Not removing: " + lPath)
+                logging.info("Not removing: " + lPath)

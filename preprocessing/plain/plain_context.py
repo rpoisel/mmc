@@ -1,46 +1,40 @@
 import os
+import logging
+import math
 
 from collating.fragment import fragment_context
 
 class CGeneratorContext:
-    def __init__(self, pPathImage, pOffset, pSize, pFragmentSize, pIncrementSize):
+    def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset, \
+            pFragmentSize, pIncrementSize):
         self.__mImage = open(pPathImage, "rb")
         self.__mOffset = pOffset
-        self.__mSize = pSize
+        self.__mNumFrags = pNumFrags
+        self.__mFragmentOffset = pFragmentOffset
         self.__mFragmentSize = pFragmentSize
         self.__mIncrementSize = pIncrementSize
-        self.__mFragsChecked = 0
-        self.__mFragsTotal = 0
-        print("Offset = " + str(self.__mOffset) + ", Size = " + \
-                str(self.__mSize))
+        logging.info("Offset = " + str(self.__mFragmentOffset) + ", NumFrags = " + \
+                str(self.__mNumFrags))
 
     def __del__(self):
         self.__mImage.close()
 
     def __createGenerator(self):
         # calculate size of investigated data area
-        lSize = self.__mSize
-        lOffset = self.__mOffset
+        lOffset = self.__mOffset + self.__mFragmentOffset * self.__mFragmentSize
         # TODO catch IOError if illegal offset has been given
         self.__mImage.seek(lOffset, os.SEEK_SET)
-
-        # collating: walk through fragments of the file
-        self.__mFragsTotal = lSize / self.__mFragmentSize
-        if lSize % self.__mFragmentSize != 0:
-            self.__mFragsTotal += 1
 
         lCntFrag = 0
 
         while True:
-            if lCntFrag >= self.__mFragsTotal:
+            if lCntFrag >= self.__mNumFrags:
                 break
             lCntFrag += 1
             lBuffer = self.__mImage.read(self.__mFragmentSize)
             if lBuffer == "":
                 break
             
-            self.__mFragsChecked += 1
-
             yield (lOffset, lBuffer)
 
             lOffset += self.__mIncrementSize
@@ -58,15 +52,25 @@ class CGeneratorContext:
 class CPlainImgProcessor:
     def __init__(self, pOptions):
         self.__mGenerators = []
+        self.__mNumParallel = pOptions.maxcpus
         lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
-        print("Size = " + str(lSize))
-        for lPid in range(pOptions.maxcpus):
+        # collating: walk through fragments of the file
+        lFragsTotal = lSize / pOptions.fragmentsize
+        if lSize % pOptions.fragmentsize != 0:
+            lFragsTotal += 1
+        lFragsPerCpu = int(math.ceil(float(lFragsTotal)/self.__mNumParallel))
+        lFragsPerCpuR = lFragsTotal % lFragsPerCpu
+        for lPid in range(self.__mNumParallel):
             self.__mGenerators.append(CGeneratorContext(
                 pOptions.imagefile, \
-                pOptions.offset  + lPid * lSize / pOptions.maxcpus, \
-                lSize / pOptions.maxcpus, \
+                pOptions.offset, \
+                lFragsPerCpuR if lPid is (self.__mNumParallel - 1) and lFragsPerCpuR > 0 else lFragsPerCpu, \
+                lFragsPerCpu * lPid, 
                 pOptions.fragmentsize, \
                 pOptions.incrementsize))
+
+    def getNumParallel(self):
+        return self.__mNumParallel
 
     def getFragsRead(self, pPid):
         return self.__mGenerators[pPid].getFragsRead()

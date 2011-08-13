@@ -5,6 +5,7 @@
 
 import os
 import sys
+import logging
 import datetime
 # PyQt4, PySide stuff
 from qtimport import *
@@ -144,7 +145,7 @@ class Gui_Qt(QtGui.QMainWindow):
         if os.path.exists(pPath):
             lOptions = self.__getOptions()
             lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
-            print("FS Info: " + str(lGeometry))
+            logging.info("FS Info: " + str(lGeometry))
             self.customwidget.offset.setText(str(lGeometry.offset))
             self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
             self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
@@ -162,12 +163,6 @@ class Gui_Qt(QtGui.QMainWindow):
                 "All Files (*)")
         if lFilename[0] != "":
             self.customwidget.inputFile.setText(lFilename[0])
-            #lOptions = self.__getOptions()
-            #lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
-            #print("FS Info: " + str(lGeometry))
-            #self.customwidget.offset.setText(str(lGeometry.offset))
-            #self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
-            #self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
 
     def on_outputDirButton_clicked(self, pChecked=None):
         lDialog = QtGui.QFileDialog()
@@ -315,6 +310,7 @@ class Gui_Qt(QtGui.QMainWindow):
 
 class CMain:
     def __init__(self):
+        logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
         self.__mApp = QtGui.QApplication(sys.argv)
         self.__mWindow = Gui_Qt()
 

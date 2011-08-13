@@ -1,5 +1,6 @@
 import os
 import os.path
+import logging
 import itertools
 import subprocess
 import fnmatch
@@ -110,7 +111,7 @@ class CReassembly:
             lNumFrg -= 1
 
         # extract determined videos
-        print("8<=============== FRAGMENT PATHs ==============")
+        logging.info("8<=============== FRAGMENT PATHs ==============")
         for lIdxHdr in xrange(pIdxNoHeader):
             lDir = pOptions.output + os.sep + str(lIdxHdr)
             if not os.path.exists(lDir):
@@ -122,12 +123,12 @@ class CReassembly:
             while True:
                 lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                 lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
-                print("Current Fragment: " + str(lFrag))
+                logging.info("Current Fragment: " + str(lFrag))
                 if lFrag.mNextIdx == -1:
                     break
                 lFrag = pSortedFrags[lFrag.mNextIdx]
             lFFMpeg.communicate()
-        print("8<=============== FRAGMENT PATHs ==============")
+        logging.info("8<=============== FRAGMENT PATHs ==============")
 
         lRecoverFH.close()
         pCaller.progressCallback(100)
@@ -151,7 +152,7 @@ class CReassembly:
                 if abs(lHist1[lIdx] - lHist2[lIdx]) < pDiff:
                     lReturn += 1 
 
-        print("Value for " + pPath1 + " <=> " + pPath2 + ": " + str(lReturn))
+        logging.info("Value for " + pPath1 + " <=> " + pPath2 + ": " + str(lReturn))
 
         return lReturn
 
@@ -213,7 +214,7 @@ class CReassembly:
     @staticmethod
     def __assemble_permutations(pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         lCntHdr = 0
-        print("Trying combinations... ")
+        logging.info("Trying combinations... ")
         for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
             lDir = pOptions.output + os.sep + str(lCntHdr)
             if not os.path.exists(lDir):
@@ -222,7 +223,7 @@ class CReassembly:
             for lCnt in xrange(len(pSortedFrags[pIdxNoHeader:])+1):
                 try:
                     for lPermutation in itertools.permutations(pSortedFrags[pIdxNoHeader:], lCnt):
-                        print("Trying permutation: " + str(lFragHeader) + ' ' + \
+                        logging.info("Trying permutation: " + str(lFragHeader) + ' ' + \
                                 ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
                         lFFMpeg = subprocess.Popen(
                                 ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
@@ -239,7 +240,7 @@ class CReassembly:
             lRecoverFH.close()
             lCntHdr += 1
             pCaller.progressCallback(100 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
-        print("... Finished!")
+        logging.info("... Finished!")
         pCaller.progressCallback(100)
 
     @staticmethod
