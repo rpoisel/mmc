@@ -49,8 +49,7 @@ class CContext:
             lVideoBlocks = lProcessor.classify(pOptions, pCaller)
             print(str(datetime.datetime.now()) + " Back to the main context.")
 
-            #if pOptions.verbose is True:
-            if True:
+            if pOptions.verbose is True:
                 lBlocks = lVideoBlocks.getBlocks()
                 lHeaders = lVideoBlocks.getHeaders()
                 print("Number of H.264 fragments %d" % 
