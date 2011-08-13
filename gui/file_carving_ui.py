@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Wed Aug 10 22:26:39 2011
+# Created: Sat Aug 13 11:16:17 2011
 #      by: pyside-uic 0.2.12 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,21 +28,24 @@ class Ui_filecarvingWidget(object):
         self.inputFile.setEnabled(True)
         self.inputFile.setText("")
         self.inputFile.setObjectName("inputFile")
-        self.srcdstLayout.addWidget(self.inputFile, 0, 0, 1, 1)
+        self.srcdstLayout.addWidget(self.inputFile, 1, 0, 1, 1)
         self.inputFileButton = QtGui.QPushButton(self.tab_general)
         self.inputFileButton.setObjectName("inputFileButton")
-        self.srcdstLayout.addWidget(self.inputFileButton, 0, 1, 1, 1)
+        self.srcdstLayout.addWidget(self.inputFileButton, 1, 1, 1, 1)
         self.outputDirButton = QtGui.QPushButton(self.tab_general)
         self.outputDirButton.setObjectName("outputDirButton")
-        self.srcdstLayout.addWidget(self.outputDirButton, 2, 1, 1, 1)
+        self.srcdstLayout.addWidget(self.outputDirButton, 3, 1, 1, 1)
         self.outputDir = QtGui.QLineEdit(self.tab_general)
         self.outputDir.setEnabled(True)
         self.outputDir.setText("")
         self.outputDir.setObjectName("outputDir")
-        self.srcdstLayout.addWidget(self.outputDir, 2, 0, 1, 1)
+        self.srcdstLayout.addWidget(self.outputDir, 3, 0, 1, 1)
         self.fsInfo = QtGui.QLabel(self.tab_general)
         self.fsInfo.setObjectName("fsInfo")
-        self.srcdstLayout.addWidget(self.fsInfo, 1, 0, 1, 1)
+        self.srcdstLayout.addWidget(self.fsInfo, 2, 0, 1, 1)
+        self.outputDirInfo = QtGui.QLabel(self.tab_general)
+        self.outputDirInfo.setObjectName("outputDirInfo")
+        self.srcdstLayout.addWidget(self.outputDirInfo, 4, 0, 1, 1)
         self.verticalLayout_2.addLayout(self.srcdstLayout)
         self.resultTable = QtGui.QTableWidget(self.tab_general)
         self.resultTable.setObjectName("resultTable")
@@ -228,6 +231,7 @@ class Ui_filecarvingWidget(object):
         self.inputFileButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Data Source", None, QtGui.QApplication.UnicodeUTF8))
         self.outputDirButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Export Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
+        self.outputDirInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.duration.setText(QtGui.QApplication.translate("filecarvingWidget", "00:00:00", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_13.setText(QtGui.QApplication.translate("filecarvingWidget", "Max CPUs:", None, QtGui.QApplication.UnicodeUTF8))

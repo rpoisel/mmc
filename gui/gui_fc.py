@@ -133,6 +133,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.inputFileButton.clicked.connect(self.on_inputFileButton_clicked)
         self.customwidget.outputDirButton.clicked.connect(self.on_outputDirButton_clicked)
         self.customwidget.inputFile.textChanged.connect(self.on_inputFile_changed)
+        self.customwidget.outputDir.textChanged.connect(self.on_outputDir_changed)
 
         # init values
         self.customwidget.inputFile.setText("data/image_ref_h264_ntfs.img")
@@ -151,6 +152,12 @@ class Gui_Qt(QtGui.QMainWindow):
             self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
         else:
             self.customwidget.fsInfo.setText("<html><font color=\"#FF0000\">Imagefile does not exist.</font></html>")
+
+    def on_outputDir_changed(self, pPath):
+        if os.path.isdir(pPath):
+            self.customwidget.outputDirInfo.setText("Output directory exists.")
+        else:
+            self.customwidget.outputDirInfo.setText("<html><font color=\"#FF0000\">Output directory does not exist.</font></html>")
 
     def on_actionAbout_triggered(self, pChecked=None):
         QtGui.QMessageBox.about(self, "Multimedia File Carver",
@@ -180,15 +187,31 @@ class Gui_Qt(QtGui.QMainWindow):
                 "Please make sure that your input file exists.")
             return
         elif not os.path.isdir(self.customwidget.outputDir.text()):
-            QtGui.QMessageBox.about(self, "Error",
-                "Please make sure that your output directory exists.")
-            return
-        elif self.__mLock.tryLock() == True:
+            if self.__outputDirProblem() == False:
+                return
+        if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
             self.mContext = CContext()
             self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.CLASSIFY|Jobs.REASSEMBLE)
+
+    def __outputDirProblem(self):
+        lMsgBox = QtGui.QMessageBox()
+        lMsgBox.setText("The specified output directory does not exist. ")
+        lMsgBox.setInformativeText("Do you want to create it?")
+        lCreateButton = lMsgBox.addButton(self.tr("Create directory"), QtGui.QMessageBox.ActionRole)
+        lCancelButton = lMsgBox.addButton(QtGui.QMessageBox.Abort)
+        lMsgBox.exec_()
+        if lMsgBox.clickedButton() == lCreateButton:
+            try:
+                os.makedirs(self.customwidget.outputDir.text())
+            except OSError, pExc:
+                QtGui.QMessageBox.about(self, "Error",
+                        "Could not create directory: \n" + str(pExc))
+                return False
+            return True
+        return False
 
     def on_reassembleButton_clicked(self, pChecked=None):
         if len(self.mContext.getH264Fragments()) is 0:
@@ -205,11 +228,7 @@ class Gui_Qt(QtGui.QMainWindow):
             QtGui.QMessageBox.about(self, "Error",
                 "Please make sure that your input file exists.")
             return
-        elif not os.path.isdir(self.customwidget.outputDir.text()):
-            QtGui.QMessageBox.about(self, "Error",
-                "Please make sure that your output directory exists.")
-            return
-        elif self.__mLock.tryLock() == True:
+        if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
             self.mContext = CContext()
             self.__clearFragments()
