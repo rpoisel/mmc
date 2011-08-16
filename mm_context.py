@@ -84,19 +84,19 @@ class CContext:
 
         except LookupError, pExc:
             logging.error("LookupError: " + str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-1)
         except NameError, pExc:
             logging.error("NameError: " + str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-2)
         except EOFError, pExc:
             logging.error("EOFError: " + str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-3)
         except Exception, pExc:
             logging.error(str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-4)
 
     def runReassembly(self, pOptions, pCaller):
@@ -107,17 +107,17 @@ class CContext:
             pCaller.finishedCallback()
         except LookupError, pExc:
             logging.error("LookupError: " + str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-1)
         except NameError, pExc:
             logging.error("NameError: " + str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-2)
         except EOFError, pExc:
             logging.error("EOFError: " + str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-3)
         except Exception, pExc:
             logging.error(str(pExc))
-            traceback.logging.info_exc()
+            traceback.print_exc()
             sys.exit(-4)

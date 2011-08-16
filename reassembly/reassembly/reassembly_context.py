@@ -5,6 +5,7 @@ import itertools
 import subprocess
 import fnmatch
 import shutil
+import platform
 
 import Image
 
@@ -42,6 +43,7 @@ class CReassembly:
         # extract headers frames
         lCntHdr = 0
         for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
+            logging.info("Extracting header: " + str(lFragHeader))
             lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if lFragHeader.mSize > pOptions.extractsize:
@@ -60,6 +62,7 @@ class CReassembly:
             # TODO check if fragment has already been decoded successfully
             lCntFrg = 0
             for lFrag in pSortedFrags[pIdxNoHeader:]:
+                logging.info("Extracting fragment: " + str(lFrag))
                 # extract begin
                 lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                 if lFrag.mSize > pOptions.extractsize:
@@ -111,23 +114,43 @@ class CReassembly:
             lNumFrg -= 1
 
         # extract determined videos
+        lFH = None
         logging.info("8<=============== FRAGMENT PATHs ==============")
         for lIdxHdr in xrange(pIdxNoHeader):
             lDir = pOptions.output + os.sep + str(lIdxHdr)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
-            lFFMpeg = subprocess.Popen(
-                    ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
-                    bufsize = 512, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            lFFMpeg = None
+            if platform.system().lower() == "linux":
+                lFH = open("/dev/null", "w")
+                lFFMpeg = subprocess.Popen(
+                        ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
+                        bufsize = 512, stdin = subprocess.PIPE, stdout = lFH.fileno(), 
+                        stderr = lFH.fileno()) #, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            else:
+                lFFMpeg = subprocess.Popen(
+                        ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
+                        bufsize = 512, stdin = subprocess.PIPE, stdout = None, stderr = None)
             lFrag = pSortedFrags[lIdxHdr]
             while True:
                 lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
-                lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
+                try:
+                    lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
+                except IOError:
+                    pass
                 logging.info("Current Fragment: " + str(lFrag))
                 if lFrag.mNextIdx == -1:
                     break
                 lFrag = pSortedFrags[lFrag.mNextIdx]
+            logging.info("Quitting recovery process (ffmpeg): " + str(lFFMpeg.pid))
             lFFMpeg.communicate()
+            try:
+                lFFMpeg.kill()
+            except OSError:
+                pass
+
+        if lFH != None:
+            lFH.close()
         logging.info("8<=============== FRAGMENT PATHs ==============")
 
         lRecoverFH.close()
@@ -207,8 +230,12 @@ class CReassembly:
                 ["ffmpeg", "-y", "-i", "-", lFilename],
                 bufsize = 512, stdin = subprocess.PIPE,
                 stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        lFFMpeg.stdin.write(pHdrData)
-        lFFMpeg.stdin.write(pFH.read(pLen))
+        try:
+            lFFMpeg.stdin.write(pHdrData)
+            lFFMpeg.stdin.write(pFH.read(pLen))
+        except IOError, pExc:
+            logging.error("Filehandle is already closed! Headerfragment not correctly detected.")
+            return False
         lFFMpeg.communicate()
 
     @staticmethod

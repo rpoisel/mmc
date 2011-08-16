@@ -399,7 +399,7 @@
             <string>Size of the header in bytes</string>
            </property>
            <property name="text">
-            <string>32</string>
+            <string>256</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

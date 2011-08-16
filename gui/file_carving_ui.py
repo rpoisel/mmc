@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Sat Aug 13 12:29:14 2011
+# Created: Tue Aug 16 14:20:26 2011
 #      by: pyside-uic 0.2.12 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -274,7 +274,7 @@ class Ui_filecarvingWidget(object):
         self.similarity.setText(QtGui.QApplication.translate("filecarvingWidget", "10", None, QtGui.QApplication.UnicodeUTF8))
         self.label_8.setText(QtGui.QApplication.translate("filecarvingWidget", "Header Size (bytes)", None, QtGui.QApplication.UnicodeUTF8))
         self.headerSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Size of the header in bytes", None, QtGui.QApplication.UnicodeUTF8))
-        self.headerSize.setText(QtGui.QApplication.translate("filecarvingWidget", "32", None, QtGui.QApplication.UnicodeUTF8))
+        self.headerSize.setText(QtGui.QApplication.translate("filecarvingWidget", "256", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("filecarvingWidget", "Extract Size (kB)", None, QtGui.QApplication.UnicodeUTF8))
         self.extractSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Size of the subfragment to forward to the decoder", None, QtGui.QApplication.UnicodeUTF8))
         self.extractSize.setText(QtGui.QApplication.translate("filecarvingWidget", "90", None, QtGui.QApplication.UnicodeUTF8))
