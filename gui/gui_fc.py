@@ -101,6 +101,7 @@ class Gui_Qt(QtGui.QMainWindow):
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
 
         self.customwidget.outputformat.addItem("MKV")
+        self.customwidget.outputformat.addItem("Copy")
         self.customwidget.outputformat.addItem("JPEG")
         self.customwidget.outputformat.addItem("PNG")
 
@@ -306,6 +307,8 @@ class Gui_Qt(QtGui.QMainWindow):
             lOptions.outputformat = "%08d.png"
         elif self.customwidget.outputformat.currentText() == "MKV":
             lOptions.outputformat = "movie.mkv"
+        elif self.customwidget.outputformat.currentText() == "Copy":
+            lOptions.outputformat = "movie.dd"
         else:
             lOptions.outputformat = "%08d.jpg"
         lOptions.imagefile = self.customwidget.inputFile.text()

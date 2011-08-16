@@ -9,6 +9,8 @@ import platform
 
 import Image
 
+import decoder
+
 class CReassembly:
 
     FRG_HDR = 0
@@ -120,34 +122,17 @@ class CReassembly:
             lDir = pOptions.output + os.sep + str(lIdxHdr)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
-            lFFMpeg = None
-            if platform.system().lower() == "linux":
-                lFH = open("/dev/null", "w")
-                lFFMpeg = subprocess.Popen(
-                        ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
-                        bufsize = 512, stdin = subprocess.PIPE, stdout = lFH.fileno(), 
-                        stderr = lFH.fileno()) #, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-            else:
-                lFFMpeg = subprocess.Popen(
-                        ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
-                        bufsize = 512, stdin = subprocess.PIPE, stdout = None, stderr = None)
+            lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
+            lDecoder.open(lDir + os.sep + pOptions.outputformat)
             lFrag = pSortedFrags[lIdxHdr]
             while True:
                 lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
-                try:
-                    lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
-                except IOError:
-                    pass
+                lDecoder.write(lRecoverFH.read(lFrag.mSize))
                 logging.info("Current Fragment: " + str(lFrag))
                 if lFrag.mNextIdx == -1:
                     break
                 lFrag = pSortedFrags[lFrag.mNextIdx]
-            logging.info("Quitting recovery process (ffmpeg): " + str(lFFMpeg.pid))
-            lFFMpeg.communicate()
-            try:
-                lFFMpeg.kill()
-            except OSError:
-                pass
+            lDecoder.close()
 
         if lFH != None:
             lFH.close()
@@ -226,17 +211,11 @@ class CReassembly:
         else:
             lFilename += "e"
         lFilename += "%04d" % (pIdx) + "%04d.png"
-        lFFMpeg = subprocess.Popen(
-                ["ffmpeg", "-y", "-i", "-", lFilename],
-                bufsize = 512, stdin = subprocess.PIPE,
-                stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        try:
-            lFFMpeg.stdin.write(pHdrData)
-            lFFMpeg.stdin.write(pFH.read(pLen))
-        except IOError, pExc:
-            logging.error("Filehandle is already closed! Headerfragment not correctly detected.")
-            return False
-        lFFMpeg.communicate()
+        lDecoder = decoder.CDecoder.getDecoder(lFilename)
+        lDecoder.open(lFilename)
+        lDecoder.write(pHdrData)
+        lDecoder.write(pFH.read(pLen))
+        lDecoder.close()
 
     @staticmethod
     def __assemble_permutations(pOptions, pSortedFrags, pIdxNoHeader, pCaller):
@@ -248,22 +227,16 @@ class CReassembly:
                 os.makedirs(lDir)
             lRecoverFH = open(pOptions.imagefile, "rb")
             for lCnt in xrange(len(pSortedFrags[pIdxNoHeader:])+1):
-                try:
-                    for lPermutation in itertools.permutations(pSortedFrags[pIdxNoHeader:], lCnt):
-                        logging.info("Trying permutation: " + str(lFragHeader) + ' ' + \
-                                ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
-                        lFFMpeg = subprocess.Popen(
-                                ["ffmpeg", "-y", "-i", "-", lDir + os.sep + pOptions.outputformat], 
-                                bufsize = 512, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-                        lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
-                        lFFMpeg.stdin.write(lRecoverFH.read(lFragHeader.mSize))
-                        for lFrag in lPermutation:
-                            lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
-                            lFFMpeg.stdin.write(lRecoverFH.read(lFrag.mSize))
-                        lFFMpeg.communicate()
-                except IOError:
-                    # TODO return error
-                    pass
+                for lPermutation in itertools.permutations(pSortedFrags[pIdxNoHeader:], lCnt):
+                    logging.info("Trying permutation: " + str(lFragHeader) + ' ' + \
+                            ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
+                    lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
+                    lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
+                    lDecoder.write(lRecoverFH.read(lFragHeader.mSize))
+                    for lFrag in lPermutation:
+                        lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
+                        lDecoder.write(lRecoverFH.read(lFrag.mSize))
+                    lDecoder.close()
             lRecoverFH.close()
             lCntHdr += 1
             pCaller.progressCallback(100 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
