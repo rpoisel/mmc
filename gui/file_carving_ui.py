@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Tue Aug 16 14:20:26 2011
+# Created: Thu Aug 18 07:58:19 2011
 #      by: pyside-uic 0.2.12 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_filecarvingWidget(object):
     def setupUi(self, filecarvingWidget):
         filecarvingWidget.setObjectName("filecarvingWidget")
-        filecarvingWidget.resize(667, 397)
+        filecarvingWidget.resize(667, 405)
         filecarvingWidget.setMinimumSize(QtCore.QSize(500, 0))
         self.horizontalLayout = QtGui.QHBoxLayout(filecarvingWidget)
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -75,6 +75,15 @@ class Ui_filecarvingWidget(object):
         self.outputformat = QtGui.QComboBox(self.tab_general)
         self.outputformat.setObjectName("outputformat")
         self.outformatLayout.addWidget(self.outputformat)
+        self.showResults = QtGui.QCheckBox(self.tab_general)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.showResults.sizePolicy().hasHeightForWidth())
+        self.showResults.setSizePolicy(sizePolicy)
+        self.showResults.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.showResults.setObjectName("showResults")
+        self.outformatLayout.addWidget(self.showResults)
         self.verticalLayout_2.addLayout(self.outformatLayout)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
@@ -246,6 +255,7 @@ class Ui_filecarvingWidget(object):
         self.outputDirInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.duration.setText(QtGui.QApplication.translate("filecarvingWidget", "00:00:00", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
+        self.showResults.setText(QtGui.QApplication.translate("filecarvingWidget", "Show Results: ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_13.setText(QtGui.QApplication.translate("filecarvingWidget", "Max CPUs:", None, QtGui.QApplication.UnicodeUTF8))
         self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))
         self.reassembleButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Reassemble", None, QtGui.QApplication.UnicodeUTF8))

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>667</width>
-    <height>397</height>
+    <height>405</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -120,6 +120,22 @@
          </item>
          <item>
           <widget class="QComboBox" name="outputformat"/>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="showResults">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::RightToLeft</enum>
+           </property>
+           <property name="text">
+            <string>Show Results: </string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

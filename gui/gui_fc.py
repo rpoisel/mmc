@@ -25,9 +25,10 @@ class Jobs:
     CLASSIFY=0x1
     REASSEMBLE=0x2
 
+
 class CThreadWorker(QtCore.QThread):
     sProgress = QtCore.Signal(int)
-    sFinished = QtCore.Signal()
+    sFinished = QtCore.Signal(int)
     sResult = QtCore.Signal(bool, int, int)
 
     def __init__(self, pOptions, pContext, pJobs):
@@ -50,8 +51,11 @@ class CThreadWorker(QtCore.QThread):
             self.sProgress.emit(pProgress)
 
     def finishedCallback(self):
-        #self.sProgress.emit(100)
-        self.sFinished.emit()
+        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY and \
+                self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE and \
+                self.mRunningJob == Jobs.CLASSIFY:
+                    return
+        self.sFinished.emit(self.mRunningJob)
 
     def resultCallback(self, pHeader, pOffset, pSize):
         self.sResult.emit(pHeader, pOffset, pSize)
@@ -288,9 +292,9 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.processButton.setEnabled(pEnabled)
         # TODO add all elements that should be deactivated
 
-    def __startWorker(self, pJob):
+    def __startWorker(self, pJobs):
         lOptions = self.__getOptions()
-        self.__mWorker = CThreadWorker(lOptions, self.mContext, pJob)
+        self.__mWorker = CThreadWorker(lOptions, self.mContext, pJobs)
         self.__mWorker.sProgress.connect(self.on_progress_callback, \
                 QtCore.Qt.QueuedConnection)
         self.__mWorker.sFinished.connect(self.on_finished_callback, \
@@ -311,6 +315,7 @@ class Gui_Qt(QtGui.QMainWindow):
             lOptions.outputformat = "movie.dd"
         else:
             lOptions.outputformat = "%08d.jpg"
+        lOptions.showResults = self.customwidget.showResults.isChecked()
         lOptions.imagefile = self.customwidget.inputFile.text()
         lOptions.output = self.customwidget.outputDir.text()
         lOptions.offset = int(self.customwidget.offset.text())
@@ -361,11 +366,15 @@ class Gui_Qt(QtGui.QMainWindow):
         if 0 <= pValue <= 100:
             self.customwidget.progressBar.setValue(pValue)
 
-    def on_finished_callback(self):
+    def on_finished_callback(self, pJob):
+        lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
         self.__mLock.unlock()
         self.__enableElements(True)
+        if pJob == Jobs.REASSEMBLE and \
+            lOptions.showResults == True:
+                QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://" + lOptions.output))
 
 
 class CMain:
