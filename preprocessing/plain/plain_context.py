@@ -2,7 +2,7 @@ import os
 import logging
 import math
 
-from collating.fragment import fragment_context
+#from collating.fragment import fragment_context
 
 class CGeneratorContext:
     def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset, \

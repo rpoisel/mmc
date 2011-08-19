@@ -100,6 +100,8 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.setupUi(self.centralwidget)
         self.setCentralWidget(self.centralwidget)
 
+        self.__mGeometry = None
+
         # adjust widget elements
         for lPreprocessor in preprocessing_context.CPreprocessing.getPreprocessors():
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
@@ -153,11 +155,11 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_inputFile_changed(self, pPath):
         if os.path.exists(pPath):
             lOptions = self.__getOptions()
-            lGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
-            logging.info("FS Info: " + str(lGeometry))
-            self.customwidget.offset.setText(str(lGeometry.offset))
-            self.customwidget.fragmentSize.setText(str(lGeometry.blocksize))
-            self.customwidget.fsInfo.setText("FS Info: " + str(lGeometry))
+            self.__mGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
+            logging.info("FS Info: " + str(self.__mGeometry))
+            self.customwidget.offset.setText(str(self.__mGeometry.offset))
+            self.customwidget.fragmentSize.setText(str(self.__mGeometry.blocksize))
+            self.customwidget.fsInfo.setText("FS Info: " + str(self.__mGeometry))
         else:
             self.customwidget.fsInfo.setText("<html><font color=\"#FF0000\">Imagefile does not exist.</font></html>")
 
@@ -305,6 +307,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.__mWorker.start(QtCore.QThread.IdlePriority)
 
     def __getOptions(self):
+        # TODO rename fragmentsize to blocksize
         lOptions = CGuiOptions()
         lOptions.preprocess = self.customwidget.preprocessing.currentText()
         if self.customwidget.outputformat.currentText() == "PNG":
@@ -319,6 +322,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.imagefile = self.customwidget.inputFile.text()
         lOptions.output = self.customwidget.outputDir.text()
         lOptions.offset = int(self.customwidget.offset.text())
+        lOptions.imageoffset = int(self.customwidget.partitionOffset.text())
         lOptions.fragmentsize = int(self.customwidget.fragmentSize.text())
         lOptions.incrementsize = lOptions.fragmentsize
         lOptions.blockgap = int(self.customwidget.blockGap.text())
@@ -331,6 +335,10 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.similarity = int(self.customwidget.similarity.text())
         lOptions.blockstatus = self.customwidget.blockStatus.currentText()
         lOptions.maxcpus = int(self.customwidget.maxCPUs.currentText())
+        if self.__mGeometry != None:
+            lOptions.fstype = self.__mGeometry.fstype
+        else:
+            lOptions.fstype = ''
         lOptions.verbose = False
         return lOptions
 

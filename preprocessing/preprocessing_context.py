@@ -33,7 +33,7 @@ class CPreprocessing:
         
         # TODO load dynamically
         if pOptions.preprocess == "sleuthkit":
-            self.__mPreprocessor = tsk_context.CTSKImgProcessor(pOptions)
+            self.__mPreprocessor = tsk_context.CTskImgProcessor(pOptions)
         else:
             self.__mPreprocessor = plain_context.CPlainImgProcessor(pOptions)
 

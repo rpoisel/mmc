@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Thu Aug 18 07:58:19 2011
+# Created: Fri Aug 19 13:30:52 2011
 #      by: pyside-uic 0.2.12 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -137,6 +137,13 @@ class Ui_filecarvingWidget(object):
         self.offset.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.offset.setObjectName("offset")
         self.fsLayout.addWidget(self.offset, 0, 4, 1, 1)
+        self.label_14 = QtGui.QLabel(self.groupBox_3)
+        self.label_14.setObjectName("label_14")
+        self.fsLayout.addWidget(self.label_14, 0, 5, 1, 1)
+        self.partitionOffset = QtGui.QLineEdit(self.groupBox_3)
+        self.partitionOffset.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.partitionOffset.setObjectName("partitionOffset")
+        self.fsLayout.addWidget(self.partitionOffset, 0, 6, 1, 1)
         self.verticalLayout_3.addWidget(self.groupBox_3)
         self.groupBox_2 = QtGui.QGroupBox(self.tab_preprocessing)
         self.groupBox_2.setObjectName("groupBox_2")
@@ -266,6 +273,8 @@ class Ui_filecarvingWidget(object):
         self.fragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "512", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("filecarvingWidget", "Offset", None, QtGui.QApplication.UnicodeUTF8))
         self.offset.setText(QtGui.QApplication.translate("filecarvingWidget", "0", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_14.setText(QtGui.QApplication.translate("filecarvingWidget", "Partition Offset", None, QtGui.QApplication.UnicodeUTF8))
+        self.partitionOffset.setText(QtGui.QApplication.translate("filecarvingWidget", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_2.setTitle(QtGui.QApplication.translate("filecarvingWidget", "Fragmentizer Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Gap", None, QtGui.QApplication.UnicodeUTF8))
         self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "16384", None, QtGui.QApplication.UnicodeUTF8))
