@@ -92,7 +92,6 @@ class CTskImgProcessor:
     def __init__(self, pOptions):
         self.__mGenerators = []
         self.__mNumParallel = pOptions.maxcpus
-        self.__mNumParallel = 1
 
         clusterrange = pOptions.tskProperties["Total Cluster Range"]
         lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
