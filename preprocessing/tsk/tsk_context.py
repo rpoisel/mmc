@@ -15,6 +15,8 @@ class CGeneratorContext:
         self.__mFragmentSize = pOptions.fragmentsize
         self.__mIncrementSize = pOptions.incrementsize
         self.__mFsType = pOptions.fstype
+        self.__start = pOptions.start
+        self.__stop = pOptions.stop
         #logging.info("Offset = " + str(self.__mFragmentOffset) + ", NumFrags = " + \
                 #str(self.__mNumFrags))
 
@@ -30,8 +32,8 @@ class CGeneratorContext:
         #lBlkLs.imagetype = ''
         lBlkLs.sectorsize = self.__mFragmentSize
         lBlkLs.list = True
-        lBlkLs.start = -1
-        lBlkLs.stop = -1
+        lBlkLs.start = self.__start
+        lBlkLs.stop = self.__stop
         command = lBlkLs.getAllocated()
         
         logging.info("Executing command: " + str(command))
@@ -89,24 +91,34 @@ class CGeneratorContext:
 class CTskImgProcessor:
     def __init__(self, pOptions):
         self.__mGenerators = []
-        #self.__mNumParallel = pOptions.maxcpus
+        self.__mNumParallel = pOptions.maxcpus
         self.__mNumParallel = 1
 
-#        lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
-#         collating: walk through fragments of the file
-#        lFragsTotal = lSize / pOptions.fragmentsize
-#        if lSize % pOptions.fragmentsize != 0:
-#            lFragsTotal += 1
-#        lFragsPerCpu = int(math.ceil(float(lFragsTotal)/self.__mNumParallel))
-#        lFragsPerCpuR = lFragsTotal % lFragsPerCpu
+        clusterrange = pOptions.tskProperties["Total Cluster Range"]
+        lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
+        
+        lBlockRange = lsize // self.__mNumParallel
+        ranges = []
+        for i in range(self.__mNumParallel):
+            ranges.append(lBlockRange * (i +1))
+        
+        rest = lsize % self.__mNumParallel
+        if rest > 0:
+            ranges[len(ranges)-1] += rest
+        
+        print ranges        
+        
+        rangeindex = 0
+        rangestart = 0
+        rangestop = 0
+        add = 1
         for lPid in range(self.__mNumParallel):
+            pOptions.start = rangestart
+            pOptions.stop = ranges[lPid] -1
+            rangestart = ranges[lPid]
+            
             self.__mGenerators.append(CGeneratorContext(pOptions))
-#                pOptions.imagefile, \
-#                pOptions.offset, \
-#                -1, #lFragsPerCpuR if lPid is (self.__mNumParallel - 1) and lFragsPerCpuR > 0 else lFragsPerCpu, \
-#                -1, #lFragsPerCpu * lPid, 
-#                pOptions.fragmentsize, \
-#                pOptions.incrementsize))
+
 
     def getNumParallel(self):
         return self.__mNumParallel

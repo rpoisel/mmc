@@ -41,7 +41,7 @@ class CTSKblkls(object):
         command.append(self.filename)
         
         if self.start > 0 and self.stop > 0:
-            command.append(str(self.start) + '-' + str(self.stop))
+            command.append(str(self.start) + "-" + str(self.stop))
         
         return command
     
@@ -72,6 +72,6 @@ class CTSKblkls(object):
         command.append(self.filename)
         
         if self.start >= 0 and self.stop >= 0:
-            command.append(str(self.start) + '-' + self.stop)
+            command.append(str(self.start) + '-' + str(self.stop))
         
         return command

@@ -3,12 +3,13 @@ import os.path
 
 class CFsOptions:
 
-    def __init__(self, pSize = 0, pOffset = 0, pIncrement = 512, pBlockSize = 512, pFsType = ''):
+    def __init__(self, pSize = 0, pOffset = 0, pIncrement = 512, pBlockSize = 512, pFsType = '', pTskProperties = {}):
         self.size = pSize
         self.offset = pOffset
         self.increment = pIncrement
         self.blocksize = pBlockSize
         self.fstype = pFsType
+        self.tskProperties = pTskProperties
 
     def __str__(self):
         lString = str(self.size) + " bytes, " + \
@@ -40,5 +41,6 @@ class CFsStatContext:
                 pOffset = lOffset,
                 pBlockSize = lBlockSize,
                 pIncrement = lBlockSize,
-                pFsType = lTskProperties["File System Type"] if "File System Type" in lTskProperties else '')
+                pFsType = lTskProperties["File System Type"] if "File System Type" in lTskProperties else '',
+                pTskProperties = lTskProperties)
 

@@ -337,6 +337,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions.maxcpus = int(self.customwidget.maxCPUs.currentText())
         if self.__mGeometry != None:
             lOptions.fstype = self.__mGeometry.fstype
+            lOptions.tskProperties = self.__mGeometry.tskProperties
         else:
             lOptions.fstype = ''
         lOptions.verbose = False
