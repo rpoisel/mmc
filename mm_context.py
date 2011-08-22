@@ -41,7 +41,9 @@ class CContext:
 
     def runClassify(self, pOptions, pCaller):
         try:
-
+            pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
+                    pOptions.offset,
+                    "")
             # initialize preprocessor
             #lProcessor = preprocessing_context.CPreprocessing(pOptions)
             #lProcessor.classify(pCaller)
@@ -101,6 +103,9 @@ class CContext:
 
     def runReassembly(self, pOptions, pCaller):
         try:
+            pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
+                    pOptions.offset,
+                    "")
             lFFMpeg = ffmpeg_context.CFFMpegContext()
             lReassembly = reassembly_context.CReassembly()
             lReassembly.assemble(pOptions, self.mH264Fragments, lFFMpeg, pCaller)

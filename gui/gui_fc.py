@@ -27,6 +27,7 @@ class Jobs:
 
 
 class CThreadWorker(QtCore.QThread):
+    sBegin = QtCore.Signal(int, int, int, str)
     sProgress = QtCore.Signal(int)
     sFinished = QtCore.Signal(int)
     sResult = QtCore.Signal(bool, int, int)
@@ -38,6 +39,9 @@ class CThreadWorker(QtCore.QThread):
         self.mJobs = pJobs
         self.mRunningJob = Jobs.NONE
         self.mLastTs = datetime.datetime.now()
+
+    def beginCallback(self, pSize, pOffset, pFsType):
+        self.sBegin.emit(self.mRunningJob, pSize, pOffset, pFsType)
 
     def progressCallback(self, pProgress):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY \
@@ -183,6 +187,7 @@ class Gui_Qt(QtGui.QMainWindow):
                 <li>Rainer Poisel</li> \
                 <li>Vasileios Miskos</li> \
                 <li>Manfred Ruzicka</li> \
+                <li>Markus Mannel</li> \
             </ul> \
             &copy; 2011 St. Poelten University of Applied Sciences</html>")
 
@@ -259,7 +264,6 @@ class Gui_Qt(QtGui.QMainWindow):
                 return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
-            #self.mContext = CContext()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.REASSEMBLE)
 
@@ -297,6 +301,8 @@ class Gui_Qt(QtGui.QMainWindow):
     def __startWorker(self, pJobs):
         lOptions = self.__getOptions()
         self.__mWorker = CThreadWorker(lOptions, self.mContext, pJobs)
+        self.__mWorker.sBegin.connect(self.on_begin_callback, \
+                QtCore.Qt.QueuedConnection)
         self.__mWorker.sProgress.connect(self.on_progress_callback, \
                 QtCore.Qt.QueuedConnection)
         self.__mWorker.sFinished.connect(self.on_finished_callback, \
@@ -342,6 +348,12 @@ class Gui_Qt(QtGui.QMainWindow):
             lOptions.fstype = ''
         lOptions.verbose = False
         return lOptions
+
+    def on_begin_callback(self, pJob, pSize, pOffset, pFsType):
+        if pJob == Jobs.CLASSIFY:
+            logging.info("Beginning classifying. Imagesize is " + str(pSize) + " bytes.")
+        elif pJob == Jobs.REASSEMBLE:
+            logging.info("Beginning reassembling.")
 
     def on_result_callback(self, pHeader, pOffset, pSize):
         self.customwidget.resultTable.insertRow(self.numRowsResult)
