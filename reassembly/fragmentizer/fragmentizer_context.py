@@ -1,27 +1,4 @@
-import copy
-
-class CFragment:
-    def __init__(self, pBlockSize):
-        self.mOffset = -1
-        self.mSize = pBlockSize
-        self.mIsHeader = False
-        self.mPicBegin = ""
-        self.mPicEnd = ""
-        self.mNextIdx = -1
-        self.mIsSmall = False
-
-
-    def __str__(self):
-        lString = str(self.mOffset) + " / " + str(self.mSize)
-        if self.mIsHeader:
-            lString += " | Header"
-        if self.mNextIdx >= 0:
-            lString += " | NextIdx " + str(self.mNextIdx)
-        if self.mPicBegin != "":
-            lString += " | PicBegin " + self.mPicBegin
-        if self.mPicEnd != "":
-            lString += " | PicEnd " + self.mPicEnd
-        return lString
+from lib.frags import CFragment
 
 class CFragmentizer:
     def __init__(self):

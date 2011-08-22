@@ -30,7 +30,7 @@ class CThreadWorker(QtCore.QThread):
     sBegin = QtCore.Signal(int, int, int, str)
     sProgress = QtCore.Signal(int)
     sFinished = QtCore.Signal(int)
-    sResult = QtCore.Signal(bool, int, int)
+    sResult = QtCore.Signal(object)
 
     def __init__(self, pOptions, pContext, pJobs):
         super(CThreadWorker, self).__init__()
@@ -61,8 +61,8 @@ class CThreadWorker(QtCore.QThread):
                     return
         self.sFinished.emit(self.mRunningJob)
 
-    def resultCallback(self, pHeader, pOffset, pSize):
-        self.sResult.emit(pHeader, pOffset, pSize)
+    def resultCallback(self, pFragment):
+        self.sResult.emit(pFragment)
 
     def run(self):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
@@ -355,10 +355,10 @@ class Gui_Qt(QtGui.QMainWindow):
         elif pJob == Jobs.REASSEMBLE:
             logging.info("Beginning reassembling.")
 
-    def on_result_callback(self, pHeader, pOffset, pSize):
+    def on_result_callback(self, pFragment):
         self.customwidget.resultTable.insertRow(self.numRowsResult)
 
-        if pHeader == True:
+        if pFragment.mIsHeader == True:
             lItem = QtGui.QTableWidgetItem("H")
         else:
             lItem = QtGui.QTableWidgetItem("")
@@ -371,11 +371,11 @@ class Gui_Qt(QtGui.QMainWindow):
         lItem.setTextAlignment(QtCore.Qt.AlignCenter)
         self.customwidget.resultTable.setItem(self.numRowsResult, 1, lItem)
 
-        lItem = QtGui.QTableWidgetItem(str(pOffset))
+        lItem = QtGui.QTableWidgetItem(str(pFragment.mOffset))
         lItem.setFlags(QtCore.Qt.ItemIsEnabled)
         self.customwidget.resultTable.setItem(self.numRowsResult, 2, lItem)
 
-        lItem = QtGui.QTableWidgetItem(str(pSize))
+        lItem = QtGui.QTableWidgetItem(str(pFragment.mSize))
         lItem.setFlags(QtCore.Qt.ItemIsEnabled)
         self.customwidget.resultTable.setItem(self.numRowsResult, 3, lItem)
 
