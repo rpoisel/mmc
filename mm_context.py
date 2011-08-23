@@ -32,7 +32,8 @@ class CContext:
     def __init__(self):
         self.mH264Fragments = []
 
-    def getH264Fragments(self):
+    @property
+    def h264fragments(self):
         return self.mH264Fragments
 
     @staticmethod
