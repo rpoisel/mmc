@@ -29,7 +29,7 @@ class Jobs:
 class CThreadWorker(QtCore.QThread):
     sBegin = QtCore.Signal(int, int, int, str)
     sProgress = QtCore.Signal(int)
-    sFinished = QtCore.Signal(int)
+    sFinished = QtCore.Signal(int, int)
 
     def __init__(self, pOptions, pContext, pJobs):
         super(CThreadWorker, self).__init__()
@@ -54,11 +54,11 @@ class CThreadWorker(QtCore.QThread):
             self.sProgress.emit(pProgress)
 
     def finishedCallback(self):
-        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY and \
-                self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE and \
-                self.mRunningJob == Jobs.CLASSIFY:
-                    return
-        self.sFinished.emit(self.mRunningJob)
+#        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY and \
+#                self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE and \
+#                self.mRunningJob == Jobs.CLASSIFY:
+#                    return
+        self.sFinished.emit(self.mRunningJob, self.mJobs)
 
     def run(self):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
@@ -346,6 +346,9 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_begin_callback(self, pJob, pSize, pOffset, pFsType):
         if pJob == Jobs.CLASSIFY:
             logging.info("Beginning classifying. Imagesize is " + str(pSize) + " bytes.")
+            # TODO create instance of image visualizer QGraphicsScene with
+            # self.mContext as parameter
+            # self.customwidget.imageView.setScene(lImageVisualizer)
         elif pJob == Jobs.REASSEMBLE:
             logging.info("Beginning reassembling.")
 
@@ -355,41 +358,46 @@ class Gui_Qt(QtGui.QMainWindow):
         if 0 <= pValue <= 100:
             self.customwidget.progressBar.setValue(pValue)
 
-    def on_finished_callback(self, pJob):
+    def on_finished_callback(self, pFinishedJob, pJobs):
         lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
-        lNumRowsResult = 0
-        for lFrag in self.mContext.h264fragments:
-            self.customwidget.resultTable.insertRow(lNumRowsResult)
+        if pFinishedJob == Jobs.CLASSIFY:
+            lNumRowsResult = 0
+            for lFrag in self.mContext.h264fragments:
+                self.customwidget.resultTable.insertRow(lNumRowsResult)
 
-            if lFrag.mIsHeader == True:
-                lItem = QtGui.QTableWidgetItem("H")
-            else:
-                lItem = QtGui.QTableWidgetItem("")
-            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-            lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-            self.customwidget.resultTable.setItem(lNumRowsResult, 0, lItem)
+                if lFrag.mIsHeader == True:
+                    lItem = QtGui.QTableWidgetItem("H")
+                else:
+                    lItem = QtGui.QTableWidgetItem("")
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 0, lItem)
 
-            lItem = QtGui.QTableWidgetItem("Fragment " + str(lNumRowsResult + 1))
-            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-            lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-            self.customwidget.resultTable.setItem(lNumRowsResult, 1, lItem)
+                lItem = QtGui.QTableWidgetItem("Fragment " + str(lNumRowsResult + 1))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 1, lItem)
 
-            lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
-            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-            lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
-            self.customwidget.resultTable.setItem(lNumRowsResult, 2, lItem)
+                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 2, lItem)
 
-            lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
-            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-            lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
-            self.customwidget.resultTable.setItem(lNumRowsResult, 3, lItem)
+                lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 3, lItem)
 
-            lNumRowsResult += 1
-        self.__mLock.unlock()
-        self.__enableElements(True)
-        if pJob == Jobs.REASSEMBLE and \
+                lNumRowsResult += 1
+            # TODO notify imagevisualizer
+        if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
+                or (pFinishedJob == Jobs.REASSEMBLE):
+            self.__mLock.unlock()
+            self.__enableElements(True)
+
+        if pFinishedJob == Jobs.REASSEMBLE and \
             lOptions.showResults == True:
                 QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://" + lOptions.output))
 

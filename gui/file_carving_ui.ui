@@ -361,7 +361,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QGraphicsView" name="graphicsView_2"/>
+        <widget class="QGraphicsView" name="imageView"/>
        </item>
       </layout>
      </widget>
