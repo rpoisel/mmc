@@ -1,4 +1,5 @@
 import os
+import sys
 import math
 import logging
 import multiprocessing
@@ -7,11 +8,14 @@ import datetime
 from preprocessing.tsk import tsk_context
 from preprocessing.plain import plain_context
 from preprocessing import fsstat_context
-from collating.fragment import fragment_context
+try:
+    from collating.fragment import fragment_context
+except ImportError, pExc:
+    logging.error("Problem with importing a library: " + str(pExc))
+    logging.error("Try making it with 'make' first.")
+    sys.exit(-1)
 from collating.magic import magic_context
 from lib import frags
-
-#from PySide import QtCore
 
 
 class CPreprocessing:

@@ -6,6 +6,7 @@
 import os
 import sys
 import logging
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
 import datetime
 # PyQt4, PySide stuff
 from qtimport import *
@@ -404,7 +405,6 @@ class Gui_Qt(QtGui.QMainWindow):
 
 class CMain:
     def __init__(self):
-        logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
         self.__mApp = QtGui.QApplication(sys.argv)
         self.__mWindow = Gui_Qt()
 
