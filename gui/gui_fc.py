@@ -245,6 +245,7 @@ class Gui_Qt(QtGui.QMainWindow):
         if lMsgBox.clickedButton() == lCreateButton:
             try:
                 os.makedirs(self.customwidget.outputDir.text())
+                self.on_outputDir_changed(self.customwidget.outputDir.text())
             except OSError, pExc:
                 QtGui.QMessageBox.about(self, "Error",
                         "Could not create directory: \n" + str(pExc))
