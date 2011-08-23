@@ -75,10 +75,6 @@ class CContext:
             for lIdx in xrange(len(self.mH264Fragments)):
                 lH264Fragment = self.mH264Fragments[lIdx]
                 logging.info("FragmentIdx %04d" % lIdx + ": " + str(lH264Fragment))
-                #pCaller.resultCallback(lH264Fragment.mIsHeader, \
-                        #lH264Fragment.mOffset,
-                        #lH264Fragment.mSize)
-                pCaller.resultCallback(lH264Fragment)
             logging.info("8<=============== FRAGMENTs ==============")
 
             pCaller.progressCallback(100)

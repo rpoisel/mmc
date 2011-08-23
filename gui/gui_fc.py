@@ -30,7 +30,6 @@ class CThreadWorker(QtCore.QThread):
     sBegin = QtCore.Signal(int, int, int, str)
     sProgress = QtCore.Signal(int)
     sFinished = QtCore.Signal(int)
-    sResult = QtCore.Signal(object)
 
     def __init__(self, pOptions, pContext, pJobs):
         super(CThreadWorker, self).__init__()
@@ -60,9 +59,6 @@ class CThreadWorker(QtCore.QThread):
                 self.mRunningJob == Jobs.CLASSIFY:
                     return
         self.sFinished.emit(self.mRunningJob)
-
-    def resultCallback(self, pFragment):
-        self.sResult.emit(pFragment)
 
     def run(self):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
@@ -105,6 +101,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.setCentralWidget(self.centralwidget)
 
         self.__mGeometry = None
+        self.mContext = None
 
         # adjust widget elements
         for lPreprocessor in preprocessing_context.CPreprocessing.getPreprocessors():
@@ -128,7 +125,6 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
         self.customwidget.resultTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
-        self.numRowsResult = 0
 
         self.customwidget.progressBar.setMaximum(100)
         self.customwidget.progressBar.setMinimum(0)
@@ -307,8 +303,6 @@ class Gui_Qt(QtGui.QMainWindow):
                 QtCore.Qt.QueuedConnection)
         self.__mWorker.sFinished.connect(self.on_finished_callback, \
                 QtCore.Qt.QueuedConnection)
-        self.__mWorker.sResult.connect(self.on_result_callback, \
-                QtCore.Qt.QueuedConnection)
         self.__enableElements(False)
         self.__mWorker.start(QtCore.QThread.IdlePriority)
 
@@ -355,32 +349,6 @@ class Gui_Qt(QtGui.QMainWindow):
         elif pJob == Jobs.REASSEMBLE:
             logging.info("Beginning reassembling.")
 
-    def on_result_callback(self, pFragment):
-        self.customwidget.resultTable.insertRow(self.numRowsResult)
-
-        if pFragment.mIsHeader == True:
-            lItem = QtGui.QTableWidgetItem("H")
-        else:
-            lItem = QtGui.QTableWidgetItem("")
-        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-        lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.customwidget.resultTable.setItem(self.numRowsResult, 0, lItem)
-
-        lItem = QtGui.QTableWidgetItem("Fragment " + str(self.numRowsResult + 1))
-        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-        lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-        self.customwidget.resultTable.setItem(self.numRowsResult, 1, lItem)
-
-        lItem = QtGui.QTableWidgetItem(str(pFragment.mOffset))
-        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-        self.customwidget.resultTable.setItem(self.numRowsResult, 2, lItem)
-
-        lItem = QtGui.QTableWidgetItem(str(pFragment.mSize))
-        lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-        self.customwidget.resultTable.setItem(self.numRowsResult, 3, lItem)
-
-        self.numRowsResult += 1
-
     def on_progress_callback(self, pValue):
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
@@ -391,6 +359,34 @@ class Gui_Qt(QtGui.QMainWindow):
         lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
+        lNumRowsResult = 0
+        for lFrag in self.mContext.h264fragments:
+            self.customwidget.resultTable.insertRow(lNumRowsResult)
+
+            if lFrag.mIsHeader == True:
+                lItem = QtGui.QTableWidgetItem("H")
+            else:
+                lItem = QtGui.QTableWidgetItem("")
+            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+            lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.customwidget.resultTable.setItem(lNumRowsResult, 0, lItem)
+
+            lItem = QtGui.QTableWidgetItem("Fragment " + str(lNumRowsResult + 1))
+            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+            lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.customwidget.resultTable.setItem(lNumRowsResult, 1, lItem)
+
+            lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
+            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+            lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+            self.customwidget.resultTable.setItem(lNumRowsResult, 2, lItem)
+
+            lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+            lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+            lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+            self.customwidget.resultTable.setItem(lNumRowsResult, 3, lItem)
+
+            lNumRowsResult += 1
         self.__mLock.unlock()
         self.__enableElements(True)
         if pJob == Jobs.REASSEMBLE and \
