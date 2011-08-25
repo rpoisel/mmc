@@ -21,6 +21,8 @@ from preprocessing import preprocessing_context
 from preprocessing import fsstat_context
 from reassembly.reassembly import reassembly_context
 
+from gui_imgvisualizer import CImgVisualizer
+
 class Jobs:
     NONE=0x0
     CLASSIFY=0x1
@@ -76,6 +78,7 @@ class Gui_Qt(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(Gui_Qt, self).__init__(parent)
 
+        self.__mImgVisualizer = None
         self.__mLock = QtCore.QMutex()
 
         #lLoader = QtUiTools.QUiLoader()
@@ -105,6 +108,8 @@ class Gui_Qt(QtGui.QMainWindow):
         self.mContext = None
 
         # adjust widget elements
+        self.customwidget.imageView.setMouseTracking(True)
+
         for lPreprocessor in preprocessing_context.CPreprocessing.getPreprocessors():
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
 
@@ -351,6 +356,8 @@ class Gui_Qt(QtGui.QMainWindow):
             # TODO create instance of image visualizer QGraphicsScene with
             # self.mContext as parameter
             # self.customwidget.imageView.setScene(lImageVisualizer)
+            self.__mImgVisualizer = CImgVisualizer(self.mContext, pSize, pOffset, pFsType, self.customwidget.imageView)
+            self.customwidget.imageView.setScene(self.__mImgVisualizer)
         elif pJob == Jobs.REASSEMBLE:
             logging.info("Beginning reassembling.")
 
@@ -367,8 +374,7 @@ class Gui_Qt(QtGui.QMainWindow):
         if pFinishedJob == Jobs.CLASSIFY:
             lNumRowsResult = 0
             for lFrag in self.mContext.h264fragments:
-                self.customwidget.resultTable.insertRow(lNumRowsResult)
-
+                self.customwidget.resultTable.insertRow(lNumRowsResult) 
                 if lFrag.mIsHeader == True:
                     lItem = QtGui.QTableWidgetItem("H")
                 else:
@@ -394,6 +400,11 @@ class Gui_Qt(QtGui.QMainWindow):
 
                 lNumRowsResult += 1
             # TODO notify imagevisualizer
+            #self.__mImgVisualizer.paintFragments()
+            # need to call update in order to refresh the display,
+            # if the user is at the img visualizer before 
+            # the classifier/reassembly is done
+            self.__mImgVisualizer.update()
         if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
                 or (pFinishedJob == Jobs.REASSEMBLE):
             self.__mLock.unlock()

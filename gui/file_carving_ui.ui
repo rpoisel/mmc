@@ -83,7 +83,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableWidget" name="resultTable"/>
+        <widget class="QGraphicsView" name="imageView"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -361,7 +361,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QGraphicsView" name="imageView"/>
+        <widget class="QTableWidget" name="resultTable"/>
        </item>
       </layout>
      </widget>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Tue Aug 23 09:37:25 2011
+# Created: Thu Aug 25 09:15:36 2011
 #      by: pyside-uic 0.2.12 running on PySide 1.0.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,11 +47,9 @@ class Ui_filecarvingWidget(object):
         self.outputDirInfo.setObjectName("outputDirInfo")
         self.srcdstLayout.addWidget(self.outputDirInfo, 4, 0, 1, 1)
         self.verticalLayout_2.addLayout(self.srcdstLayout)
-        self.resultTable = QtGui.QTableWidget(self.tab_general)
-        self.resultTable.setObjectName("resultTable")
-        self.resultTable.setColumnCount(0)
-        self.resultTable.setRowCount(0)
-        self.verticalLayout_2.addWidget(self.resultTable)
+        self.imageView = QtGui.QGraphicsView(self.tab_general)
+        self.imageView.setObjectName("imageView")
+        self.verticalLayout_2.addWidget(self.imageView)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.progressBar = QtGui.QProgressBar(self.tab_general)
@@ -197,9 +195,11 @@ class Ui_filecarvingWidget(object):
         self.label_12.setObjectName("label_12")
         self.gridLayout_2.addWidget(self.label_12, 1, 0, 1, 1)
         self.verticalLayout_3.addLayout(self.gridLayout_2)
-        self.imageView = QtGui.QGraphicsView(self.tab_preprocessing)
-        self.imageView.setObjectName("imageView")
-        self.verticalLayout_3.addWidget(self.imageView)
+        self.resultTable = QtGui.QTableWidget(self.tab_preprocessing)
+        self.resultTable.setObjectName("resultTable")
+        self.resultTable.setColumnCount(0)
+        self.resultTable.setRowCount(0)
+        self.verticalLayout_3.addWidget(self.resultTable)
         self.tabWidget.addTab(self.tab_preprocessing, "")
         self.tab_video = QtGui.QWidget()
         self.tab_video.setObjectName("tab_video")
