@@ -19,9 +19,6 @@ class CImgVisualizer(QGraphicsScene):
     in a nice way
     """
 
-    sDefaultFragmentWidth = 2
-    sDefaultFragmentHeight = 2
-
     def __init__(self, ctx, pSize, pOffset, pFsType, parent=None):
         """ 
         @param ctx - CContext containing fragment informations
@@ -46,10 +43,17 @@ class CImgVisualizer(QGraphicsScene):
         logging.info('Created CImgVisualizer')
       
     def mouseMoveEvent(self, pMouseEvent):
+        """
+        Overridden mouseMoveEvent
+        @param pMouseEvent QMouseEvent
+        """
         lPos = pMouseEvent.scenePos()
         self.updateHover(lPos)        
 
     def updateHover(self, pPos):
+        """
+        @param pPos - position (mouse position) where to check if a fragment is underneath
+        """
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
         #calculate the fragment under cursor
         lWidth = lSceneWidth / float(self.__mSize) #w of 1 fragment
@@ -66,6 +70,10 @@ class CImgVisualizer(QGraphicsScene):
         self.update()
 
     def paintTooltip(self, pPainter, pRect):
+        """
+        @param pPainter QPainter used to draw
+        @param pRect QRect not used - artifact of previous version
+        """
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
         # if one pic is shown only, center the one at the mouse x
         # if two pics are shown, center both at the mouse x
@@ -122,6 +130,11 @@ class CImgVisualizer(QGraphicsScene):
                 pPainter.drawImage(lEndX, lY, lImgEnd)
 
     def drawBackground(self, pPainter, pRect):
+        """
+        This method draws the fragments according to given offsets
+        @param pPainter QPainter used to draw
+        @param pRect not used - artifact from previous version
+        """
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
         self.setSceneRect(lSceneX, lSceneY, lSceneWidth, lSceneHeight)
         #pPainter.fillRect(lSceneX, lSceneY, lSceneWidth, lSceneHeight,Qt.cyan)
@@ -144,15 +157,20 @@ class CImgVisualizer(QGraphicsScene):
             pPainter.fillRect(lSceneX + (lFrag.mOffset * lWidth)+1, lSceneY+1, lFrameWidth, lHeight-1, lColor)
         
     def drawForeground(self, pPainter, pRect):
+        """
+        This method draws the scale and the tooltips
+        @param pPainter QPainter used to draw
+        @param pRect QRect passed to CImgVisualizer#paintTooltip(object, object)
+        """
         self.paintScale(pPainter)
         self.paintTooltip(pPainter, pRect)
 
     def paintScale(self, pPainter):
+        """
+        This method draws a scale at the bottom
+        @param pPainter QPainter used to draw the scale
+        """
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
-        #TODO: drawText at the appropiate position
-        #TODO: set the font size of the text according to the space left (lSceneY can be used since it is the px offset for the space at top and bottom!)
-        #pPainter.drawText(lSceneX, lSceneY+lSceneHeight, "Offset:")
-        #pPainter.drawText(lSceneX, lSceneY+lSceneHeight, str(self.__mOffset))
         pPainter.drawText(lSceneX-12, lSceneY+lSceneHeight+12, str(0))
         lStrWidth = pPainter.fontMetrics().width(str(self.__mSize)) / 2.0
         pPainter.drawText(lSceneX + lSceneWidth - lStrWidth, lSceneY + lSceneHeight + 12, str(self.__mSize))
@@ -163,7 +181,10 @@ class CImgVisualizer(QGraphicsScene):
 
 
     def getOffsets(self):
-        #lFontSize = pPainter.fontMetrics().height()
+        """
+        Calculates offsets used to paint everything at the right position
+        """
+        #TODO: change fontsize to varying if something looks awkward
         lFontSize = 32
         lSceneX = self.parent().size().width() * float(0.1)
         lSceneY = lFontSize #self.parent().size().height() + lFontSize
@@ -171,6 +192,7 @@ class CImgVisualizer(QGraphicsScene):
         lSceneHeight = self.parent().size().height() - lSceneY
         return (lSceneX, lSceneY, lSceneWidth, lSceneHeight)
 
+#Test - better do not try it ; ) was just for quick evaluating
 if __name__ == '__main__':
     import sys
 
