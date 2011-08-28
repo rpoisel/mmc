@@ -122,11 +122,18 @@ class CImgVisualizer(QGraphicsScene):
             elif lY < lSceneY:
                 lY = lSceneY+1
             elif lY + lTmpHeight > lSceneHeight+lSceneY:
-                lY = lSceneY + lSceneHeight - lTmpHeight - 1
+                lY = lSceneY + lSceneHeight - lTmpHeight
+
 
             if not lImgBegin == None:
+                # adjust x position
+                if lBeginX > (lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()):
+                    lBeginX = lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()
                 pPainter.drawImage(lBeginX, lY, lImgBegin)
             if not lImgEnd == None:
+                # adjust x position
+                if lEndX > (lSceneX + lSceneWidth - lImgEnd.width()):
+                    lEndX = lSceneX + lSceneWidth - lImgEnd.width()
                 pPainter.drawImage(lEndX, lY, lImgEnd)
 
     def drawBackground(self, pPainter, pRect):
