@@ -57,10 +57,6 @@ class CThreadWorker(QtCore.QThread):
             self.sProgress.emit(pProgress)
 
     def finishedCallback(self):
-#        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY and \
-#                self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE and \
-#                self.mRunningJob == Jobs.CLASSIFY:
-#                    return
         self.sFinished.emit(self.mRunningJob, self.mJobs)
 
     def run(self):
@@ -73,36 +69,31 @@ class CThreadWorker(QtCore.QThread):
 
 
 # Create a class for our main window
-class Gui_Qt(QtGui.QMainWindow):
+class CMain(object):
 
     def __init__(self, parent=None):
-        super(Gui_Qt, self).__init__(parent)
+        super(CMain, self).__init__()
+
+        self.__mApp = QtGui.QApplication(sys.argv)
 
         self.__mImgVisualizer = None
         self.__mLock = QtCore.QMutex()
 
-        #lLoader = QtUiTools.QUiLoader()
-        #lFile = QtCore.QFile(":/images/icon_mm_carver.png")
-        #lFile.open(QtCore.QFile.ReadOnly)
-        #lIcon = lLoader.load(lFile, self)
-        #self.customwidget = lLoader.load(lFile, self)
-        #lFile.close()
+        lLoader = QtUiTools.QUiLoader()
 
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        #self.setWindowIcon(lIcon)
-        
-        #lLoader = QtUiTools.QUiLoader()
-        #lFile = QtCore.QFile(":/forms/file_carving_ui.ui")
-        #lFile.open(QtCore.QFile.ReadOnly)
-        #self.customwidget = lLoader.load(lFile, self)
-        #lFile.close()
-        #self.setCentralWidget(self.customwidget)
+        lFile = QtCore.QFile(":/forms/mainwindow.ui")
+        lFile.open(QtCore.QFile.ReadOnly)
+        self.ui = lLoader.load(lFile)#, self)
+        lFile.close()
 
-        self.centralwidget = QtGui.QWidget()
-        self.customwidget = Ui_filecarvingWidget()
-        self.customwidget.setupUi(self.centralwidget)
-        self.setCentralWidget(self.centralwidget)
+        self.mIcon = QtGui.QIcon(":/images/icon_mm_carver.png")
+        self.ui.setWindowIcon(self.mIcon)
+
+        lFile = QtCore.QFile(":/forms/file_carving_ui.ui")
+        lFile.open(QtCore.QFile.ReadOnly)
+        self.customwidget = lLoader.load(lFile)#, self)
+        lFile.close()
+        self.ui.setCentralWidget(self.customwidget)
 
         self.__mGeometry = None
         self.mContext = None
@@ -156,7 +147,7 @@ class Gui_Qt(QtGui.QMainWindow):
         self.customwidget.refFrags.setText("data/frags_ref")
 
     def on_actionExit_triggered(self): 
-        self.close()
+        self.ui.close()
 
     def on_inputFile_changed(self, pPath):
         if os.path.exists(pPath):
@@ -183,7 +174,7 @@ class Gui_Qt(QtGui.QMainWindow):
             self.customwidget.refFragsInfo.setText("<html><font color=\"#FF0000\">Reference fragment directory does not exist.</font></html>")
 
     def on_actionAbout_triggered(self, pChecked=None):
-        QtGui.QMessageBox.about(self, "Multimedia File Carver",
+        QtGui.QMessageBox.about(self.ui, "Multimedia File Carver",
             "<html>Key developers:  \
             <ul> \
                 <li>Rainer Poisel</li> \
@@ -194,7 +185,7 @@ class Gui_Qt(QtGui.QMainWindow):
             &copy; 2011 St. Poelten University of Applied Sciences</html>")
 
     def on_inputFileButton_clicked(self, pChecked=None):
-        lFilename = QtGui.QFileDialog.getOpenFileName(self, \
+        lFilename = QtGui.QFileDialog.getOpenFileName(self.ui, \
                 "Choose Image", \
                 os.path.dirname(self.customwidget.inputFile.text()), \
                 "All Files (*)")
@@ -204,7 +195,7 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_outputDirButton_clicked(self):
         lDialog = QtGui.QFileDialog()
         lDialog.setFileMode(QtGui.QFileDialog.Directory)
-        lFilename = lDialog.getExistingDirectory(self, \
+        lFilename = lDialog.getExistingDirectory(self.ui, \
                 "Choose output directory", \
                 os.path.dirname(self.customwidget.outputDir.text()), \
                 QtGui.QFileDialog.ShowDirsOnly)
@@ -214,7 +205,7 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_refFragsButton_clicked(self):
         lDialog = QtGui.QFileDialog()
         lDialog.setFileMode(QtGui.QFileDialog.Directory)
-        lFilename = lDialog.getExistingDirectory(self, \
+        lFilename = lDialog.getExistingDirectory(self.ui, \
                 "Choose reference fragments directory", \
                 os.path.dirname(self.customwidget.refFrags.text()), \
                 QtGui.QFileDialog.ShowDirsOnly)
@@ -223,11 +214,11 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def on_processButton_clicked(self, pChecked=None):
         if not os.path.exists(self.customwidget.inputFile.text()):
-            QtGui.QMessageBox.about(self, "Error",
+            QtGui.QMessageBox.about(self.ui, "Error",
                 "Please make sure that your input file exists.")
             return
         elif not os.path.isdir(self.customwidget.refFrags.text()):
-            QtGui.QMessageBox.about(self, "Error",
+            QtGui.QMessageBox.about(self.ui, "Error",
                 "Please make sure that your reference fragment directory exists.")
             return
         elif not os.path.isdir(self.customwidget.outputDir.text()):
@@ -244,7 +235,7 @@ class Gui_Qt(QtGui.QMainWindow):
         lMsgBox = QtGui.QMessageBox()
         lMsgBox.setText("The specified output directory does not exist. ")
         lMsgBox.setInformativeText("Do you want to create it?")
-        lCreateButton = lMsgBox.addButton(self.tr("Create directory"), QtGui.QMessageBox.ActionRole)
+        lCreateButton = lMsgBox.addButton(self.ui.tr("Create directory"), QtGui.QMessageBox.ActionRole)
         lCancelButton = lMsgBox.addButton(QtGui.QMessageBox.Abort)
         lMsgBox.exec_()
         if lMsgBox.clickedButton() == lCreateButton:
@@ -252,7 +243,7 @@ class Gui_Qt(QtGui.QMainWindow):
                 os.makedirs(self.customwidget.outputDir.text())
                 self.on_outputDir_changed(self.customwidget.outputDir.text())
             except OSError, pExc:
-                QtGui.QMessageBox.about(self, "Error",
+                QtGui.QMessageBox.about(self.ui, "Error",
                         "Could not create directory: \n" + str(pExc))
                 return False
             return True
@@ -260,7 +251,7 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def on_reassembleButton_clicked(self, pChecked=None):
         if len(self.mContext.h264fragments) is 0:
-            QtGui.QMessageBox.about(self, "Error",
+            QtGui.QMessageBox.about(self.ui, "Error",
                 "What would you like to reassemble? No H.264 headers have been classified yet!")
         elif not os.path.isdir(self.customwidget.outputDir.text()):
             if self.__outputDirProblem() == False:
@@ -272,11 +263,11 @@ class Gui_Qt(QtGui.QMainWindow):
 
     def on_classifyButton_clicked(self, pChecked=None):
         if not os.path.exists(self.customwidget.inputFile.text()):
-            QtGui.QMessageBox.about(self, "Error",
+            QtGui.QMessageBox.about(self.ui, "Error",
                 "Please make sure that your input file exists.")
             return
         elif not os.path.isdir(self.customwidget.refFrags.text()):
-            QtGui.QMessageBox.about(self, "Error",
+            QtGui.QMessageBox.about(self.ui, "Error",
                 "Please make sure that your reference fragment directory exists.")
             return
         if self.__mLock.tryLock() == True:
@@ -353,9 +344,6 @@ class Gui_Qt(QtGui.QMainWindow):
     def on_begin_callback(self, pJob, pSize, pOffset, pFsType):
         if pJob == Jobs.CLASSIFY:
             logging.info("Beginning classifying. Imagesize is " + str(pSize) + " bytes.")
-            # TODO create instance of image visualizer QGraphicsScene with
-            # self.mContext as parameter
-            # self.customwidget.imageView.setScene(lImageVisualizer)
             self.__mImgVisualizer = CImgVisualizer(self.mContext, pSize, pOffset, pFsType, self.customwidget.imageView)
             self.customwidget.imageView.setScene(self.__mImgVisualizer)
         elif pJob == Jobs.REASSEMBLE:
@@ -399,11 +387,6 @@ class Gui_Qt(QtGui.QMainWindow):
                 self.customwidget.resultTable.setItem(lNumRowsResult, 3, lItem)
 
                 lNumRowsResult += 1
-            # TODO notify imagevisualizer
-            #self.__mImgVisualizer.paintFragments()
-            # need to call update in order to refresh the display,
-            # if the user is at the img visualizer before 
-            # the classifier/reassembly is done
             self.__mImgVisualizer.update()
         if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
                 or (pFinishedJob == Jobs.REASSEMBLE):
@@ -414,14 +397,9 @@ class Gui_Qt(QtGui.QMainWindow):
             lOptions.showResults == True:
                 QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://" + lOptions.output))
 
-
-class CMain:
-    def __init__(self):
-        self.__mApp = QtGui.QApplication(sys.argv)
-        self.__mWindow = Gui_Qt()
-
     def run(self):
-        self.__mWindow.show()
+        #self.__mWindow.show()
+        self.ui.show()
         lReturn = self.__mApp.exec_()
         sys.exit(lReturn)
 
