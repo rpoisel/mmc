@@ -4,6 +4,9 @@ import math
 import logging
 import multiprocessing
 import datetime
+import threading
+import time
+import Queue
 
 from preprocessing.tsk import tsk_context
 from preprocessing.plain import plain_context
@@ -16,6 +19,30 @@ except ImportError, pExc:
     sys.exit(-1)
 from collating.magic import magic_context
 from lib import frags
+
+
+class CResultThread(threading.Thread):
+
+    def __init__(self, pCaller, pResultArray, pQueue):
+        super(CResultThread, self).__init__()
+        self.__mCaller = pCaller
+        self.__mResultArray = pResultArray
+        self.__mQueue = pQueue
+
+    def run(self):
+        while True:
+            lResults = 0
+            for lResult in self.__mResultArray:
+                lResults += lResult
+            self.__mCaller.progressCallback(lResults / len(self.__mResultArray))
+            time.sleep(1)
+            lStop = False
+            try:
+                lStop = self.__mQueue.get_nowait()
+            except Queue.Empty:
+                pass
+            if lStop == True:
+                break
 
 
 class CPreprocessing:
@@ -31,8 +58,9 @@ class CPreprocessing:
                 pOptions.reffragsdir,
                 pOptions.fragmentsize)
         self.__mLock = multiprocessing.Lock()
+        self.__mResultArray = None
 
-    def classify(self, pOptions, pCaller = None):
+    def classify(self, pOptions, pCaller):
         lNumCPUs = pOptions.maxcpus
         
         # TODO load dynamically
@@ -44,7 +72,6 @@ class CPreprocessing:
         else:
             self.__mPreprocessor = plain_context.CPlainImgProcessor(pOptions)
 
-
         lLast = datetime.datetime.now()
         logging.info(str(lLast) + " Start classifying.")
         lManager = multiprocessing.Manager()
@@ -52,17 +79,19 @@ class CPreprocessing:
         lBlocksList = lManager.list()
         lProcesses = []
 
-        lProgress = 0
-
+        lQueue = Queue.Queue()
+        lResultArray = multiprocessing.Array('i', [0 for i in range(self.__mPreprocessor.getNumParallel())])
+        lResultThread = CResultThread(pCaller, lResultArray, lQueue)
+        lResultThread.start()
         for lCnt in range(self.__mPreprocessor.getNumParallel()):
-            lProcess = multiprocessing.Process(target=self.__classifyCore, args=(lCnt, lHeadersList, lBlocksList, pCaller))
+            lProcess = multiprocessing.Process(target=self.__classifyCore, args=(lCnt, lHeadersList, lBlocksList, lResultArray))
             lProcesses.append(lProcess)
             lProcess.start()
 
         for lProcess in lProcesses:
             lProcess.join(10000000000L)
-            lProgress += (90 / len(lProcesses))
-            pCaller.progressCallback(lProgress)
+        lQueue.put(True)
+        lResultThread.join()
 
         logging.info("Start gathering results ...")
         lVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)
@@ -71,21 +100,16 @@ class CPreprocessing:
         logging.info("Finished classifying. Duration: " + str(lNow - lLast))
         return lVideoBlocks
 
-    def __classifyCore(self, pPid, pHeadersList, pBlocksList, pCaller):
+    def __classifyCore(self, pPid, pHeadersList, pBlocksList, pResultArray):
         # data structure for temporary storage of results
         lBlocks = frags.CFrags()
-        lDebug = []
 
         # lBlock[0] ... offset
         # lBlock[1] ... bytes/data
         for lBlock in self.__mPreprocessor.getGenerator(pPid):
-            #if pPid == 0:
-                #if 100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid) % 10 == 0:
-                    #pCaller.progressCallback(100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid))
-            lDebug.append(lBlock)
+            pResultArray[pPid] = 100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid)
             # check for beginning of files using libmagic(3)
             if self.__mMagic.determineMagicH264(lBlock[1]) == True:
-                #print("Found H.264-Header fragment.")
                 lBlocks.addHeader(lBlock[0])
 
             # TODO ignore header fragments from other identifiable file types

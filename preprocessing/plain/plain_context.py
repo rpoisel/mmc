@@ -15,6 +15,7 @@ class CGeneratorContext:
         self.__mIncrementSize = pIncrementSize
         logging.info("Offset = " + str(self.__mFragmentOffset) + ", NumFrags = " + \
                 str(self.__mNumFrags))
+        self.__mCntFrag = 0
 
     def __del__(self):
         self.__mImage.close()
@@ -25,12 +26,10 @@ class CGeneratorContext:
         # TODO catch IOError if illegal offset has been given
         self.__mImage.seek(lOffset, os.SEEK_SET)
 
-        lCntFrag = 0
-
         while True:
-            if lCntFrag >= self.__mNumFrags:
+            if self.__mCntFrag >= self.__mNumFrags:
                 break
-            lCntFrag += 1
+            self.__mCntFrag += 1
             lBuffer = self.__mImage.read(self.__mFragmentSize)
             if lBuffer == "":
                 break
@@ -41,10 +40,10 @@ class CGeneratorContext:
             self.__mImage.seek(lOffset, os.SEEK_SET)
 
     def getFragsRead(self): 
-        return self.__mFragsChecked
+        return self.__mCntFrag
 
-    def getFragsTotal(self): 
-        return self.__mFragsTotal
+    def getFragsTotal(self):
+        return self.__mNumFrags
 
     def getGenerator(self): 
         return self.__createGenerator()
@@ -55,11 +54,11 @@ class CPlainImgProcessor:
         self.__mNumParallel = pOptions.maxcpus
         lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
         # collating: walk through fragments of the file
-        lFragsTotal = lSize / pOptions.fragmentsize
+        self.__mFragsTotal = lSize / pOptions.fragmentsize
         if lSize % pOptions.fragmentsize != 0:
-            lFragsTotal += 1
-        lFragsPerCpu = int(math.ceil(float(lFragsTotal)/self.__mNumParallel))
-        lFragsPerCpuR = lFragsTotal % lFragsPerCpu
+            self.__mFragsTotal += 1
+        lFragsPerCpu = int(math.ceil(float(self.__mFragsTotal)/self.__mNumParallel))
+        lFragsPerCpuR = self.__mFragsTotal % lFragsPerCpu
         for lPid in range(self.__mNumParallel):
             self.__mGenerators.append(CGeneratorContext(
                 pOptions.imagefile, \
