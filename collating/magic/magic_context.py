@@ -11,6 +11,7 @@ class CMagic:
 
     def determineMagicH264(self, pBuffer):
         lType = self.determineMagicType(pBuffer)
-        if type(lType) == str and lType.find("H.264") >= 0 and lType.find("video") >= 0:
-            return True
+        if type(lType) == str:
+            if lType.lower().find("video") >= 0:
+                return True
         return False
