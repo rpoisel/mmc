@@ -231,6 +231,7 @@ class CReassembly:
                     logging.info("Trying permutation: " + str(lFragHeader) + ' ' + \
                             ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
                     lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
+                    lDecoder.open(lDir + os.sep + pOptions.outputformat)
                     lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
                     lDecoder.write(lRecoverFH.read(lFragHeader.mSize))
                     for lFrag in lPermutation:
