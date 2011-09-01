@@ -17,6 +17,19 @@ class CGeneratorContext:
         self.__mFsType = pOptions.fstype
         self.__start = pOptions.start
         self.__stop = pOptions.stop
+        self.__tskoptions = pOptions.tskProperties
+        
+        self.__clusterarea = 0
+        self.__rootdir = 0
+        
+        for key in pOptions.tskProperties.iterkeys():
+            if key.lower().find("cluster area") >= 0:
+                self.__clusterarea = pOptions.tskProperties[key][:pOptions.tskProperties[key].find(" ")]
+            if key.lower().find("root directory") >= 0:
+                self.__rootdir = pOptions.tskProperties[key][:pOptions.tskProperties[key].find(" ")]
+
+
+        
         #logging.info("Offset = " + str(self.__mFragmentOffset) + ", NumFrags = " + \
                 #str(self.__mNumFrags))
 
@@ -65,8 +78,12 @@ class CGeneratorContext:
                 #self.__mFragsChecked += 1
                 #self.__mFragsTotal += 1
 
-    def __getOffsetFat(self, line):
-        return (int(line[:line.find('|')])) * self.__mFragmentSize + (self.__mOffset - self.__mFragmentSize)
+    def __getOffsetFat12(self, line):      
+        return (int(line[:line.find('|')])-2) * self.__mFragmentSize + int(self.__clusterarea) * 512
+    
+    def __getOffsetFat16(self, line):
+        return (int(line[:line.find('|')])-2) * self.__mFragmentSize + int(self.__clusterarea) * 512
+    
     
     def __getOffsetNtfs(self, line):
         return (int(line[:line.find('|')])) * self.__mFragmentSize
@@ -74,8 +91,10 @@ class CGeneratorContext:
     def __getOffset(self, line, filesystem):
         if self.__mFsType.lower().find("ntfs") >= 0:
             return self.__getOffsetNtfs(line)
-        elif self.__mFsType.lower().find("fat") >= 0:
-            return self.__getOffsetFat(line)
+        elif self.__mFsType.lower().find("fat12") >= 0:
+            return self.__getOffsetFat12(line)
+        elif self.__mFsType.lower().find("fat16") >= 0:
+            return self.__getOffsetFat16(line)
 
     def getFragsRead(self): 
         #return self.__mFragsChecked
@@ -92,11 +111,17 @@ class CTskImgProcessor:
     def __init__(self, pOptions):
         self.__mGenerators = []
         self.__mNumParallel = pOptions.maxcpus
-
-        clusterrange = pOptions.tskProperties["Total Cluster Range"]
-        lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
+        self.__mFsType = pOptions.fstype
         
+        if self.__mFsType.lower().find("ntfs") >= 0:
+            clusterrange = pOptions.tskProperties["Total Cluster Range"]
+            lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
+        elif self.__mFsType.lower().find("fat") >= 0:
+            clusterrange = pOptions.tskProperties["* Data Area"]
+            lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
+
         lBlockRange = lsize // self.__mNumParallel
+        
         ranges = []
         for i in range(self.__mNumParallel):
             ranges.append(lBlockRange * (i +1))
