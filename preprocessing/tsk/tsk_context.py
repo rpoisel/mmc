@@ -119,6 +119,11 @@ class CTskImgProcessor:
         elif self.__mFsType.lower().find("fat") >= 0:
             clusterrange = pOptions.tskProperties["* Data Area"]
             lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
+        else:
+            pOptions.start = 0
+            pOptions.stop = 1
+            self.__mGenerators.append(CGeneratorContext(pOptions))
+            return
 
         lBlockRange = lsize // self.__mNumParallel
         
