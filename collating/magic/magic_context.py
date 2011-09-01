@@ -14,4 +14,6 @@ class CMagic:
         if type(lType) == str:
             if lType.lower().find("video") >= 0:
                 return True
+            elif lType.find("MPEG v4 system") >= 0:
+                return True
         return False
