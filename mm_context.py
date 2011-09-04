@@ -101,9 +101,8 @@ class CContext:
             pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
                     pOptions.offset,
                     "")
-            lFFMpeg = ffmpeg_context.CFFMpegContext()
             lReassembly = reassembly_context.CReassembly()
-            lReassembly.assemble(pOptions, self.mH264Fragments, lFFMpeg, pCaller)
+            lReassembly.assemble(pOptions, self.mH264Fragments, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:
             logging.error("LookupError: " + str(pExc))

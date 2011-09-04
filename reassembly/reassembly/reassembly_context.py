@@ -19,7 +19,7 @@ class CReassembly:
     FRG_SMALL = 3
 
     @staticmethod
-    def assemble(pOptions, pFragments, pValidator, pCaller):
+    def assemble(pOptions, pFragments, pCaller):
         # sort list so that header fragments are at the beginning
         lSortedFrags = sorted(pFragments, key=lambda lFrag: lFrag.mIsHeader, reverse = True)
         lIdxNoHeader = 0
