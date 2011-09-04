@@ -2,5 +2,5 @@
 
 INSTALL_PATH=.
 
-PYTHONPATH="${INSTALL_PATH}/collating/fragment:." LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment" env python gui/gui_fc.py $*
+PYTHONPATH="${INSTALL_PATH}/collating/fragment:${INSTALL_PATH}" LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment" env python gui/gui_fc.py $*
 
