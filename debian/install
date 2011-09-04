@@ -1,7 +1,7 @@
 mmc_gui usr/bin
 mm_context.py usr/lib/mmc
 preprocessing/* usr/lib/mmc/preprocessing
-collating/__init__.py usr/lib/mcc/collating
+collating/__init__.py usr/lib/mmc/collating
 collating/magic/* usr/lib/mmc/collating/magic
 collating/fragment/fragment_context.so usr/lib/mmc/collating/fragment
 collating/fragment/libfragment_classifier.so usr/lib/mmc/collating/fragment
