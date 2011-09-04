@@ -24,8 +24,8 @@ deb:
 	-(cd $(WORK_DIR)/$(PROG_NAME)-$(VERSION)-$(SUB_VER) && dh_make -e rpoisel@fhstp.ac.at -c lgpl3 -s -p $(PROG_NAME)-$(VERSION) -f ../$(PROG_NAME)-$(VERSION)-$(SUB_VER).tar.gz)
 	(cd $(WORK_DIR)/$(PROG_NAME)-$(VERSION)-$(SUB_VER) && debuild -uc -us)
 
-distclean:
-	#-rm -rf $(WORK_DIR)/$(PROG_NAME)*
+debclean:
+	-rm -rf $(WORK_DIR)/$(PROG_NAME)*
 
 clean:
 	$(MAKE) -C $(DIR_FRAG_MM_META) clean
