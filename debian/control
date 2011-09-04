@@ -10,7 +10,7 @@ Homepage: http://www.digitalforensics.at
 
 Package: mmc-0.8
 Architecture: amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends} python-magic, ffmpeg, sleuthkit, zlib1g, python-imaging, python-pyside (>= 1.0.6)
 Description: MultiMedia Carver
  Lorem ipsum dolor, bla bla
  .
