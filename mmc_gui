@@ -4,5 +4,4 @@ export INSTALL_PATH=/usr/lib/mmc
 export PYTHONPATH="${INSTALL_PATH}"
 export LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment"
 
-env python ${INSTALL_PATH}/gui/gui_fc.py $*
-
+(cd ${INSTALL_PATH} && env python ${INSTALL_PATH}/gui/gui_fc.py $*)
