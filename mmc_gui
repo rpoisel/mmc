@@ -1,6 +1,8 @@
 #!/bin/sh
 
-INSTALL_PATH=/usr/lib/mmc
+export INSTALL_PATH=/usr/lib/mmc
+export PYTHONPATH="${INSTALL_PATH}"
+export LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment"
 
-PYTHONPATH="${INSTALL_PATH}/collating/fragment:${INSTALL_PATH}" LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment" env python ${INSTALL_PATH}/gui/gui_fc.py $*
+env python ${INSTALL_PATH}/gui/gui_fc.py $*
 
