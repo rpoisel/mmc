@@ -1,4 +1,4 @@
-mmc_gui.install usr/bin/mmc_gui
+mmc_gui usr/bin
 mm_context.py usr/lib/mmc/mm_context.py
 preprocessing/* usr/lib/mmc/preprocessing
 collating/magic/* usr/lib/mmc/collating/magic
@@ -6,6 +6,6 @@ collating/fragment/fragment_context.so usr/lib/mmc/collating/fragment/fragment_c
 collating/fragment/libfragment_classifier.so usr/lib/mmc/collating/fragment/libfragment_classifier.so
 reassembly/reassembly/* usr/lib/mmc/reassembly/reassembly
 reassembly/fragmentizer/* usr/lib/mmc/reassembly/fragmentizer
-data/*.py usr/lib/mmc/data
+data/* usr/lib/mmc/data
 lib/*.py usr/lib/mmc/lib
 gui/*.py usr/lib/mmc/gui
