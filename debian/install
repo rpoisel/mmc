@@ -5,6 +5,7 @@ collating/__init__.py usr/lib/mcc/collating
 collating/magic/* usr/lib/mmc/collating/magic
 collating/fragment/fragment_context.so usr/lib/mmc/collating/fragment
 collating/fragment/libfragment_classifier.so usr/lib/mmc/collating/fragment
+collating/fragment/__init__.py usr/lib/mmc/collating/fragment
 reassembly/__init__.py usr/lib/mmc/reassembly
 reassembly/reassembly/* usr/lib/mmc/reassembly/reassembly
 reassembly/fragmentizer/* usr/lib/mmc/reassembly/fragmentizer

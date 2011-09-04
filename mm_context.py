@@ -15,7 +15,6 @@ from preprocessing import preprocessing_context
 from collating.magic import magic_context
 from reassembly.reassembly import reassembly_context
 from reassembly.fragmentizer import fragmentizer_context
-from reassembly.ffmpeg import ffmpeg_context
 from lib import datatypes
 
 
