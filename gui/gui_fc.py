@@ -81,18 +81,11 @@ class CMain(object):
 
         lLoader = QtUiTools.QUiLoader()
 
-        lFile = QtCore.QFile(":/forms/mainwindow.ui")
-        lFile.open(QtCore.QFile.ReadOnly)
-        self.ui = lLoader.load(lFile)#, self)
-        lFile.close()
-
+        self.ui = lLoader.load(":/forms/mainwindow.ui")
+        self.customwidget = lLoader.load(":/forms/file_carving_ui.ui")
         self.mIcon = QtGui.QIcon(":/images/icon_mm_carver.png")
-        self.ui.setWindowIcon(self.mIcon)
 
-        lFile = QtCore.QFile(":/forms/file_carving_ui.ui")
-        lFile.open(QtCore.QFile.ReadOnly)
-        self.customwidget = lLoader.load(lFile)#, self)
-        lFile.close()
+        self.ui.setWindowIcon(self.mIcon)
         self.ui.setCentralWidget(self.customwidget)
 
         self.mLoadMovie = QtGui.QMovie(":/images/loadinfo.gif")
