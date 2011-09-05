@@ -88,6 +88,13 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
+          <widget class="QLabel" name="progressLabel">
+           <property name="text">
+            <string>progressLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QProgressBar" name="progressBar">
            <property name="value">
             <number>0</number>

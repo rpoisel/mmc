@@ -95,6 +95,10 @@ class CMain(object):
         lFile.close()
         self.ui.setCentralWidget(self.customwidget)
 
+        self.mLoadMovie = QtGui.QMovie(":/images/loadinfo.gif")
+        self.customwidget.progressLabel.setMovie(self.mLoadMovie)
+        self.mLoadMovie.jumpToNextFrame()
+
         self.__mGeometry = None
         self.mContext = None
 
@@ -291,6 +295,11 @@ class CMain(object):
         self.customwidget.reassembleButton.setEnabled(pEnabled)
         self.customwidget.processButton.setEnabled(pEnabled)
         # TODO add all elements that should be deactivated
+        if pEnabled == True:
+            self.mLoadMovie.stop()
+            self.mLoadMovie.jumpToFrame(0)
+        else:
+            self.mLoadMovie.start()
 
     def __startWorker(self, pJobs):
         lOptions = self.__getOptions()
