@@ -1,8 +1,7 @@
 WORK_DIR=/tmp
 PROG_NAME=mmc
 VERSION=0.8
-SUB_VER=-1
-#SUB_VER=
+SUB_VER=-2
 
 all: fragment_context 
 #all: frag_mm_meta fragment_context 
