@@ -1,7 +1,7 @@
 Source: mmc
 Section: science
 Priority: optional
-Maintainer: Rainer Poisel <rpoisel@fhstp.ac.at>, Markus Mannel <ptmmannel@fhstp.ac.at>
+Maintainer: Rainer Poisel <rpoisel@fhstp.ac.at>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.2
 Homepage: http://www.digitalforensics.at
@@ -12,15 +12,19 @@ Package: mmc
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-magic, ffmpeg, sleuthkit, zlib1g, python-imaging, python-pyside (>= 1.0.6)
 Description: MultiMedia Carver
- Lorem ipsum dolor, bla bla
+ Lorem ipsum dolor, 
  .
- Bla bla, bla, bla, bla, bla, bla, bla
- Bla bla, bla, bla, bla, bla, bla, bla
- Bla bla, bla, bla, bla, bla, bla, bla
- Bla bla, bla, bla, bla, bla, bla, bla
- Bla bla, bla, bla, bla, bla, bla, bla
+ Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+ Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+ when an unknown printer took a galley of type and scrambled it to make a type
+ specimen book. It has survived not only five centuries, but also the leap into
+ electronic typesetting, remaining essentially unchanged. It was popularised in
+ the 1960s with the release of Letraset sheets containing Lorem Ipsum passages,
+ and more recently with desktop publishing software like Aldus PageMaker
+ including versions of Lorem Ipsum.
 
 Package: mmc-doc
+Section: doc
 Architecture: all
 Description: Documentation for MMC
  Bla, I'm the documentation. You want more?

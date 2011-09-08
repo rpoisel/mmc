@@ -1,3 +1,4 @@
+debian/copyright usr/share/doc/mmc
 mmc_gui usr/bin
 mm_context.py usr/lib/mmc
 preprocessing/* usr/lib/mmc/preprocessing
