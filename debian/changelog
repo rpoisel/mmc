@@ -1,3 +1,9 @@
+mmc (0.8-3) unstable; urgency=low
+
+  * Icons and menu support added
+
+ -- Rainer Poisel <rpoisel@fhstp.ac.at>  Mon, 19 Sep 2011 18:30:00 +0200
+
 mmc (0.8-2) unstable; urgency=low
 
   * Debian infrastructure improved and made more compliant with Debian Package

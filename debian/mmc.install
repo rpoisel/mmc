@@ -1,4 +1,11 @@
 debian/copyright usr/share/doc/mmc
+resources/icons/8x8/* usr/share/icons/gnome/8x8/apps
+resources/icons/16x16/* usr/share/icons/gnome/16x16/apps
+resources/icons/22x22/* usr/share/icons/gnome/22x22/apps
+resources/icons/24x24/* usr/share/icons/gnome/24x24/apps
+resources/icons/32x32/* usr/share/icons/gnome/32x32/apps
+resources/icons/48x48/* usr/share/icons/gnome/48x48/apps
+resources/*.desktop usr/share/applications
 mmc_gui usr/bin
 mm_context.py usr/lib/mmc
 preprocessing/* usr/lib/mmc/preprocessing
