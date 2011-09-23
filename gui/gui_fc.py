@@ -139,7 +139,7 @@ class CMain(object):
         self.customwidget.refFragsButton.clicked.connect(self.on_refFragsButton_clicked)
 
         # init values
-        self.customwidget.inputFile.setText("data/image_ref_h264_ntfs.img")
+        self.customwidget.inputFile.setText("data/image_ref_h264_ntfs_formatted.img")
         self.customwidget.outputDir.setText("/tmp/temp")
         self.customwidget.refFrags.setText("data/frags_ref")
 
