@@ -1,12 +1,17 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
+
+#ifdef _MSC_VER
+#include "inttypes.h"
+#else
+#include <stdint.h>
+#endif
 
 #include "fragment_classifier.h"
 
