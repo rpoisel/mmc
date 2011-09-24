@@ -9,6 +9,7 @@
 #ifdef _MSC_VER
 #include "inttypes.h"
 #include "dirent_ms.h"
+#define INFINITY 0xFFFFFFFF
 #else
 #include <stdint.h>
 #include <dirent.h>
