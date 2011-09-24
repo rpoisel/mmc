@@ -2,15 +2,16 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <dirent.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
 
 #ifdef _MSC_VER
 #include "inttypes.h"
+#include "dirent_ms.h"
 #else
 #include <stdint.h>
+#include <dirent.h>
 #endif
 
 #include "fragment_classifier.h"
