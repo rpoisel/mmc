@@ -36,7 +36,8 @@ class CGeneratorContext:
         self._mCntFrag = pDict['_mCntFrag']
  
     def __del__(self):
-        if hasattr(self, '_mImage') and self._mImage.closed is False:
+        if hasattr(self, '_mImage') and self._mImage != None and \
+            self._mImage.closed is False:
                 logging.info("Closing file object: " + str(self._mImage))
                 self._mImage.close()
 
