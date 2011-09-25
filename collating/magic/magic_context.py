@@ -1,19 +1,22 @@
-import magic
+
+
+class FTypes:
+    UNKNOWN=0x0
+    VIDEO=0x1
+    TEXT=0x2
 
 
 class CMagic:
     def __init__(self):
-        self.__mMagic = magic.open(magic.MAGIC_NONE)
-        self.__mMagic.load()
+        pass
 
     def determineMagicType(self, pBuffer):
-        return self.__mMagic.buffer(pBuffer)
+        if pBuffer[0:4] == '\x00\x00\x00\x01' and ord(pBuffer[4])&0x1F == 0x07:
+            return FTypes.VIDEO
+        return FTypes.UNKNOWN
 
     def determineMagicH264(self, pBuffer):
         lType = self.determineMagicType(pBuffer)
-        if type(lType) == str:
-            if lType.lower().find("video") >= 0:
-                return True
-            elif lType.find("MPEG v4 system") >= 0:
-                return True
+        if lType == FTypes.VIDEO:
+            return True
         return False

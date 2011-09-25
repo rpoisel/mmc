@@ -12,7 +12,7 @@ import multiprocessing
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
 from preprocessing import preprocessing_context
-from collating.magic import magic_context
+#from collating.magic import magic_context
 from reassembly.reassembly import reassembly_context
 from reassembly.fragmentizer import fragmentizer_context
 from lib import datatypes
