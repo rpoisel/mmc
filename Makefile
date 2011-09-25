@@ -13,7 +13,7 @@ frag_mm_meta:
 	$(MAKE) -C $(DIR_FRAG_MM_META)
 
 fragment_context:
-	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT)
+	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT) -f Makefile_lnx.mk
 
 .PHONY: clean fragment_context
 #.PHONY: clean fragment_context frag_mm_meta
@@ -29,4 +29,4 @@ debclean:
 
 clean:
 	$(MAKE) -C $(DIR_FRAG_MM_META) clean
-	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT) clean
+	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT) -f Makefile_lnx.mk clean

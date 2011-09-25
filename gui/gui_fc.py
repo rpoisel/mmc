@@ -5,6 +5,7 @@
 
 import os
 import sys
+import platform
 import logging
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
 import datetime
@@ -139,9 +140,9 @@ class CMain(object):
         self.customwidget.refFragsButton.clicked.connect(self.on_refFragsButton_clicked)
 
         # init values
-        self.customwidget.inputFile.setText("data/image_ref_h264_ntfs_formatted.img")
-        self.customwidget.outputDir.setText("/tmp/temp")
-        self.customwidget.refFrags.setText("data/frags_ref")
+        self.customwidget.inputFile.setText(os.getcwd() + os.sep + "data" + os.sep + "image_ref_h264_ntfs_formatted.img")
+        self.customwidget.outputDir.setText(r"c:\temp" if platform.system().lower() == "windows" else "/tmp/temp")
+        self.customwidget.refFrags.setText(os.getcwd() + os.sep + "data" + os.sep + "frags_ref")
 
     def on_actionExit_triggered(self): 
         self.ui.close()
@@ -154,6 +155,7 @@ class CMain(object):
             self.customwidget.offset.setText(str(self.__mGeometry.offset))
             self.customwidget.fragmentSize.setText(str(self.__mGeometry.blocksize))
             self.customwidget.fsInfo.setText("FS Info: " + str(self.__mGeometry))
+            pass
         else:
             self.customwidget.fsInfo.setText("<html><font color=\"#FF0000\">Imagefile does not exist.</font></html>")
 

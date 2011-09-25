@@ -2,8 +2,14 @@
 
 #include <string.h>
 #include <assert.h>
-#include <zlib.h>
 #include <stdio.h>
+
+#ifdef _MSC_VER
+#include "lib\\zlib-1.2.5\\zlib.h"
+#define ZLIB_WINAPI
+#else
+#include <zlib.h>
+#endif
 
 #define LEVEL 9
 #define MIN(a,b) ((a)>(b)?(b):(a))

@@ -10,6 +10,7 @@
 #include "inttypes.h"
 #include "dirent_ms.h"
 #define INFINITY 0xFFFFFFFF
+void initlibfragment_classifier(void) {};
 #else
 #include <stdint.h>
 #include <dirent.h>
@@ -70,7 +71,11 @@ FragmentClassifier* fragment_classifier_new(const char* pRefDir,
     lHandle->mFragmentSize = pFragmentSize;
 
 #if TEST_NCD == 1
+#ifdef _MSC_VER
+    srand((unsigned)time(NULL));
+#else
     srandom(time(NULL));
+#endif
     for (lCntX = 0; lCntX < MAX_NUM_FILE_TYPES && strlen(sTypes[lCntX]) > 0 ; lCntX++)
     {
         for (lCntY = 0; lCntY < NUM_FRAGS_PER_FILE_TYPE; lCntY++)
@@ -213,7 +218,11 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
         else
         {
             strcpy(lFullPath, pDir);
+#ifdef _MSC_VER
+            strcat(lFullPath, "\\");
+#else
             strcat(lFullPath, "/");
+#endif
             strcat(lFullPath, lCurDir->d_name);
 
             if (stat(lFullPath, &lInfo) == -1)
@@ -236,10 +245,18 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
 
     if (lCnt > 0)
     {
+#ifdef _MSC_VER
+        lRandIdx = rand() % lCnt;
+#else
         lRandIdx = random() % lCnt;
+#endif
 
         strcpy(lFullPath, pDir);
+#ifdef _MSC_VER
+        strcat(lFullPath, "\\");
+#else
         strcat(lFullPath, "/");
+#endif
         strcat(lFullPath, lDirEnts[lRandIdx].d_name);
         lRandomFH = fopen(lFullPath, "rb");
 
@@ -250,7 +267,11 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
         {
             lNumFrags++;
         }
+#ifdef _MSC_VER
+        fseek(lRandomFH, (rand() % (lNumFrags - 2) + 1) * pFragmentSize, SEEK_SET);
+#else
         fseek(lRandomFH, (random() % (lNumFrags - 2) + 1) * pFragmentSize, SEEK_SET);
+#endif
         fread(pBuf, 1, pFragmentSize, lRandomFH);
         
         fclose(lRandomFH);

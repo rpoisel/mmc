@@ -1,4 +1,5 @@
 import subprocess
+import os
 import platform
 
 class CDecoder:
@@ -26,9 +27,11 @@ class CFFMpegDecoder(CDecoder):
                     bufsize = 512, stdin = subprocess.PIPE, stdout = self.__mFH.fileno(), 
                     stderr = self.__mFH.fileno())
         else:
+            self.__mFH = open("NUL", "w")
             self.__mFFMpeg = subprocess.Popen(
-                    ["ffmpeg", "-y", "-i", "-", pPath], 
-                    bufsize = 512, stdin = subprocess.PIPE, stdout = None, stderr = None)
+                    ["bin" + os.sep + "ffmpeg.exe", "-y", "-i", "-", pPath], 
+                    bufsize = 512, stdin = subprocess.PIPE, stdout = self.__mFH.fileno(), 
+                    stderr = self.__mFH.fileno())
 
     def write(self, pData):
         try:

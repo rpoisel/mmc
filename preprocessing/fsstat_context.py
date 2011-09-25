@@ -1,5 +1,7 @@
 import subprocess
+import os
 import os.path
+import platform
 
 class CFsOptions:
 
@@ -23,7 +25,11 @@ class CFsStatContext:
     def getFsGeometry(pOptions):
         lSize = os.path.getsize(pOptions.imagefile)
         # dirty hack
-        lTsk = subprocess.Popen(['fsstat', pOptions.imagefile], bufsize=512, stdout=subprocess.PIPE)
+        lTsk = None
+        if platform.system().lower() == 'windows':
+            lTsk = subprocess.Popen(['bin' + os.sep + 'fsstat.exe', pOptions.imagefile], bufsize=512, stdout=subprocess.PIPE)
+        else:
+            lTsk = subprocess.Popen(['fsstat', pOptions.imagefile], bufsize=512, stdout=subprocess.PIPE)
         lTskOutput = lTsk.communicate()
         lTskProperties = {}
         for lPair in [lElem for lElem in [lLine.split(': ') for lLine in lTskOutput[0].split('\n')] if len(lElem) == 2]:

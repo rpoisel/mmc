@@ -1,52 +1,72 @@
 import os
 import logging
 import math
+import platform
 
 #from collating.fragment import fragment_context
 
 class CGeneratorContext:
     def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset, \
             pFragmentSize, pIncrementSize):
-        self.__mImage = open(pPathImage, "rb")
-        self.__mOffset = pOffset
-        self.__mNumFrags = pNumFrags
-        self.__mFragmentOffset = pFragmentOffset
-        self.__mFragmentSize = pFragmentSize
-        self.__mIncrementSize = pIncrementSize
-        logging.info("Offset = " + str(self.__mFragmentOffset) + ", NumFrags = " + \
-                str(self.__mNumFrags))
-        self.__mCntFrag = 0
+        self._mPathImage = pPathImage
+        # TODO dirty hack to make it working with linux
+        self._mImage = None
+        if platform.system().lower() == "linux":
+            self._mImage = open(self._mPathImage, "rb")
+        self._mOffset = pOffset
+        self._mNumFrags = pNumFrags
+        self._mFragmentOffset = pFragmentOffset
+        self._mFragmentSize = pFragmentSize
+        self._mIncrementSize = pIncrementSize
+        logging.info("Offset = " + str(self._mFragmentOffset) + ", NumFrags = " + \
+                str(self._mNumFrags))
+        self._mCntFrag = 0
 
+    def __getstate__(self):
+        return self.__dict__
+        
+    def __setstate__(self, pDict):
+        logging.info("Setting state.")
+        self._mImage = open(pDict['_mPathImage'], "rb")
+        self._mOffset = pDict['_mOffset']
+        self._mNumFrags = pDict['_mNumFrags']
+        self._mFragmentOffset = pDict['_mFragmentOffset']
+        self._mFragmentSize = pDict['_mFragmentSize']
+        self._mIncrementSize = pDict['_mIncrementSize']
+        self._mCntFrag = pDict['_mCntFrag']
+ 
     def __del__(self):
-        self.__mImage.close()
+        if hasattr(self, '_mImage') and self._mImage.closed is False:
+                logging.info("Closing file object: " + str(self._mImage))
+                self._mImage.close()
 
-    def __createGenerator(self):
+    def _createGenerator(self):
         # calculate size of investigated data area
-        lOffset = self.__mOffset + self.__mFragmentOffset * self.__mFragmentSize
+        lOffset = self._mOffset + self._mFragmentOffset * self._mFragmentSize
         # TODO catch IOError if illegal offset has been given
-        self.__mImage.seek(lOffset, os.SEEK_SET)
+        self._mImage.seek(lOffset, os.SEEK_SET)
 
         while True:
-            if self.__mCntFrag >= self.__mNumFrags:
+            if self._mCntFrag >= self._mNumFrags:
                 break
-            self.__mCntFrag += 1
-            lBuffer = self.__mImage.read(self.__mFragmentSize)
+            self._mCntFrag += 1
+            lBuffer = self._mImage.read(self._mFragmentSize)
             if lBuffer == "":
                 break
             
             yield (lOffset, lBuffer)
 
-            lOffset += self.__mIncrementSize
-            self.__mImage.seek(lOffset, os.SEEK_SET)
+            lOffset += self._mIncrementSize
+            self._mImage.seek(lOffset, os.SEEK_SET)
 
     def getFragsRead(self): 
-        return self.__mCntFrag
+        return self._mCntFrag
 
     def getFragsTotal(self):
-        return self.__mNumFrags
+        return self._mNumFrags
 
     def getGenerator(self): 
-        return self.__createGenerator()
+        return self._createGenerator()
 
 class CPlainImgProcessor:
     def __init__(self, pOptions):
@@ -68,8 +88,8 @@ class CPlainImgProcessor:
                 pOptions.fragmentsize, \
                 pOptions.incrementsize))
 
-    def getNumParallel(self):
-        return self.__mNumParallel
+    def getNumParallel(self, pNumParallel):
+        return pNumParallel
 
     def getFragsRead(self, pPid):
         return self.__mGenerators[pPid].getFragsRead()

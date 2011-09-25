@@ -53,10 +53,6 @@ class CPreprocessing:
         return [{'name':'plain'}, {'name':'sleuthkit'}]
 
     def __init__(self, pOptions):
-        self.__mMagic = magic_context.CMagic()
-        self.__mH264FC = fragment_context.CFragmentClassifier(
-                pOptions.reffragsdir,
-                pOptions.fragmentsize)
         self.__mLock = multiprocessing.Lock()
         self.__mResultArray = None
 
@@ -66,12 +62,12 @@ class CPreprocessing:
         # TODO load dynamically
         if pOptions.preprocess == "sleuthkit":
             if pOptions.fstype != "":
-                self.__mPreprocessor = tsk_context.CTskImgProcessor(pOptions)
+                lPreprocessor = tsk_context.CTskImgProcessor(pOptions)
             else:
-                self.__mPreprocessor = plain_context.CPlainImgProcessor(pOptions)
+                lPreprocessor = plain_context.CPlainImgProcessor(pOptions)
         else:
-            self.__mPreprocessor = plain_context.CPlainImgProcessor(pOptions)
-
+            lPreprocessor = plain_context.CPlainImgProcessor(pOptions)
+        
         lLast = datetime.datetime.now()
         logging.info(str(lLast) + " Start classifying.")
         lManager = multiprocessing.Manager()
@@ -80,16 +76,17 @@ class CPreprocessing:
         lProcesses = []
 
         lQueue = Queue.Queue()
-        lResultArray = multiprocessing.Array('i', [0 for i in range(self.__mPreprocessor.getNumParallel())])
+        lResultArray = multiprocessing.Array('i', [0 for i in range(lPreprocessor.getNumParallel(pOptions.maxcpus))])
         lResultThread = CResultThread(pCaller, lResultArray, lQueue)
         lResultThread.start()
-        for lCnt in range(self.__mPreprocessor.getNumParallel()):
-            lProcess = multiprocessing.Process(target=self.__classifyCore, args=(lCnt, lHeadersList, lBlocksList, lResultArray))
+        for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
+            lProcess = multiprocessing.Process(target=self.classifyCore, args=(\
+              lCnt, lPreprocessor, lHeadersList, lBlocksList, lResultArray, pOptions.reffragsdir, pOptions.fragmentsize))
             lProcesses.append(lProcess)
             lProcess.start()
 
         for lProcess in lProcesses:
-            lProcess.join(10000000000L)
+            lProcess.join(1000000L)
         lQueue.put(True)
         lResultThread.join()
 
@@ -99,23 +96,28 @@ class CPreprocessing:
         logging.info("Finished gathering results.")
         logging.info("Finished classifying. Duration: " + str(lNow - lLast))
         return lVideoBlocks
-
-    def __classifyCore(self, pPid, pHeadersList, pBlocksList, pResultArray):
+        
+    def classifyCore(self, pPid, pPreprocessor, pHeadersList, pBlocksList, pResultArray, pRefFragsDir, pFragmentSize):
         # data structure for temporary storage of results
+        lMagic = magic_context.CMagic()
+        lH264FC = fragment_context.CFragmentClassifier(
+                pRefFragsDir,
+                pFragmentSize)
+        logging.info("PID " + str(pPid) + " | Initializing fragment classifier: reffragsdir " + pRefFragsDir + ", fragmentsize " + str(pFragmentSize))
         lBlocks = frags.CFrags()
 
         # lBlock[0] ... offset
         # lBlock[1] ... bytes/data
-        for lBlock in self.__mPreprocessor.getGenerator(pPid):
-            pResultArray[pPid] = 100 * self.__mPreprocessor.getFragsRead(pPid) / self.__mPreprocessor.getFragsTotal(pPid)
+        for lBlock in pPreprocessor.getGenerator(pPid):
+            pResultArray[pPid] = 100 * pPreprocessor.getFragsRead(pPid) / pPreprocessor.getFragsTotal(pPid)
             # check for beginning of files using libmagic(3)
-            if self.__mMagic.determineMagicH264(lBlock[1]) == True:
+            if lMagic.determineMagicH264(lBlock[1]) == True:
                 lBlocks.addHeader(lBlock[0])
 
             # TODO ignore header fragments from other identifiable file types
 
             # generate a map of filetypes of fragments
-            elif self.__mH264FC.classify(lBlock[1]) > 0:
+            elif lH264FC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
         logging.info("Process " + str(pPid) + " finished classifying")
