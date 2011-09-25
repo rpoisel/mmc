@@ -1,5 +1,7 @@
 # Set up the building environment as described in: 
 # http://wiki.cython.org/64BitCythonExtensionsOnWindows
+# C:\Program Files\Microsoft SDKs\Windows\v7.0>set DISTUTILS_USE_SDK=1
+# C:\Program Files\Microsoft SDKs\Windows\v7.0>setenv /x64 /release
 
 LIBFRAGMENT_CLASSIFIER=libfragment_classifier
 FRAGMENT_CONTEXT=fragment_context
