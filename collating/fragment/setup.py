@@ -9,13 +9,6 @@ setup(
         #ext_package='fragment_classifier',
         ext_modules=[
             Extension(
-            name="libfragment_classifier",
-            sources=["src" + os.sep + "fragment_classifier.c",
-                "src" + os.sep + "ncd.c"],
-            libraries=["z"],
-            library_dirs=["."],
-            include_dirs=["include"]),
-            Extension(
             name="fragment_context",
             sources=["fragment_context.pyx"],
             libraries=["fragment_classifier"],
