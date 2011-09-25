@@ -1,7 +1,6 @@
 #!/bin/sh
 
 export INSTALL_PATH=.
-export PYTHONPATH="${INSTALL_PATH}"
 export LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment"
 
 (cd ${INSTALL_PATH} && env python ${INSTALL_PATH}/gui/gui_fc.py $*)

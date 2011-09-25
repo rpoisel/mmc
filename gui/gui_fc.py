@@ -12,6 +12,8 @@ import datetime
 # PyQt4, PySide stuff
 from qtimport import *
 
+sys.path.append('.')
+
 # Import the compiled UI module
 import gui_resources
 from file_carving_ui import Ui_filecarvingWidget
