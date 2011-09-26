@@ -9,10 +9,7 @@ class CGeneratorContext:
     def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset, \
             pFragmentSize, pIncrementSize):
         self._mPathImage = pPathImage
-        # TODO dirty hack to make it working with linux
-        self._mImage = None
-        if platform.system().lower() == "linux":
-            self._mImage = open(self._mPathImage, "rb")
+        self._mImage = open(self._mPathImage, "rb")
         self._mOffset = pOffset
         self._mNumFrags = pNumFrags
         self._mFragmentOffset = pFragmentOffset
@@ -26,8 +23,9 @@ class CGeneratorContext:
         return self.__dict__
         
     def __setstate__(self, pDict):
-        logging.info("Setting state.")
-        self._mImage = open(pDict['_mPathImage'], "rb")
+        if hasattr(self, '_mImage') and self._mImage != None and \
+                self._mImage.closed is True:
+            self._mImage = open(pDict['_mPathImage'], "rb")
         self._mOffset = pDict['_mOffset']
         self._mNumFrags = pDict['_mNumFrags']
         self._mFragmentOffset = pDict['_mFragmentOffset']
