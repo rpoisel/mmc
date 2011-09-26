@@ -82,7 +82,9 @@ class CPlainImgProcessor:
             self.__mGenerators.append(CGeneratorContext(
                 pOptions.imagefile, \
                 pOptions.offset, \
-                lFragsPerCpuR if lPid is (self.__mNumParallel - 1) and lFragsPerCpuR > 0 else lFragsPerCpu, \
+                lFragsPerCpuR if lPid is \
+                    (self.__mNumParallel - 1) and lFragsPerCpuR > 0 \
+                    else lFragsPerCpu, \
                 lFragsPerCpu * lPid, 
                 pOptions.fragmentsize, \
                 pOptions.incrementsize))
