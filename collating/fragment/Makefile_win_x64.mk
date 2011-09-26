@@ -13,7 +13,7 @@ $(FRAGMENT_CONTEXT): $(LIBFRAGMENT_CLASSIFIER).dll
     python setup.py build_ext 
 
 $(LIBFRAGMENT_CLASSIFIER).dll: 
-    cl src\fragment_classifier.c src\ncd.c /Iinclude /I. lib\zlib-1.2.5\dllx64\zlibwapi.lib /link /DLL /out:$(LIBFRAGMENT_CLASSIFIER).dll
+    cl src\fragment_classifier.c src\ncd.c /Iinclude /I. lib\zlib\dllx64\zlibwapi.lib /link /DLL /out:$(LIBFRAGMENT_CLASSIFIER).dll
     
 clean:
     del $(LIBFRAGMENT_CLASSIFIER).* *.obj *.pyd
