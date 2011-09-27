@@ -23,8 +23,8 @@ class CGeneratorContext:
         return self.__dict__
         
     def __setstate__(self, pDict):
-        if hasattr(self, '_mImage') and self._mImage != None and \
-                self._mImage.closed is True:
+        # TODO workaround for windows
+        if platform.system().lower() == "windows":
             self._mImage = open(pDict['_mPathImage'], "rb")
         self._mOffset = pDict['_mOffset']
         self._mNumFrags = pDict['_mNumFrags']
