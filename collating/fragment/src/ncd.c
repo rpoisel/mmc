@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #ifdef _MSC_VER
-#include "lib\\zlib\\zlib.h"
+#include "zlib.h"
 #define ZLIB_WINAPI
 #else
 #include <zlib.h>

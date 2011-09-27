@@ -15,7 +15,7 @@ $(FRAGMENT_CONTEXT): $(LIBFRAGMENT_CLASSIFIER).dll
 
 $(LIBFRAGMENT_CLASSIFIER).dll: 
     cl /c src\fragment_classifier.c /Iinclude /I. 
-    cl /c src\ncd.c /Iinclude /I.   
+    cl /c src\ncd.c /Iinclude /I. /Ilib\zlib
     link fragment_classifier.obj ncd.obj lib\zlib\dllx64\zlibwapi.lib /DLL /out:$(LIBFRAGMENT_CLASSIFIER).dll 
     
 clean:
