@@ -8,6 +8,7 @@ FRAGMENT_CONTEXT=fragment_context
 
 all: $(FRAGMENT_CONTEXT)
     move build\lib.win32-2.7\fragment_context.pyd . 
+    copy lib\zlib\dll32\zlib1.dll .
 
 $(FRAGMENT_CONTEXT): $(LIBFRAGMENT_CLASSIFIER).dll
     python setup.py build_ext 
@@ -15,7 +16,7 @@ $(FRAGMENT_CONTEXT): $(LIBFRAGMENT_CLASSIFIER).dll
 $(LIBFRAGMENT_CLASSIFIER).dll: 
     cl /c src\fragment_classifier.c /Iinclude /I. 
     cl /c src\ncd.c /Iinclude /I.   
-    link fragment_classifier.obj ncd.obj zlib.lib /DLL /out:$(LIBFRAGMENT_CLASSIFIER).dll 
+    link fragment_classifier.obj ncd.obj lib\zlib\dll32\zlib.lib /DLL /out:$(LIBFRAGMENT_CLASSIFIER).dll 
     
 clean:
     del $(LIBFRAGMENT_CLASSIFIER).* *.obj *.pyd
