@@ -77,37 +77,37 @@ class CImgVisualizer(QGraphicsScene):
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
         # if one pic is shown only, center the one at the mouse x
         # if two pics are shown, center both at the mouse x
-        if not self.__mHoverFragment == None:
+        if not self.__mHoverFragment is None:
             lImgBegin = self.__mHoverFragment.mPicBegin
             lImgEnd = self.__mHoverFragment.mPicEnd
             lBeginX = self.__mHoverPosition.x()
             lEndX = self.__mHoverPosition.x()
             lY = self.__mHoverPosition.y()
         
-            if not lImgBegin == None and len(lImgBegin) > 0:
+            if not lImgBegin is None and len(lImgBegin) > 0:
                 lImgBegin = QImage(lImgBegin)
             else:
                 lImgBegin = None
-            if not lImgEnd == None and len(lImgEnd) > 0:
+            if not lImgEnd is None and len(lImgEnd) > 0:
                 lImgEnd = QImage(lImgEnd)
             else:
                 lImgEnd = None
             # adjust the pictures to center them around the mouse cursor
             #TODO: adjust to the right boundaries if the picture would be drawn outside of lSceneX+lSceneWidth
             lTmpHeight = 0
-            if not lImgBegin == None and lImgEnd == None:
+            if not lImgBegin is None and lImgEnd is None:
                 #logging.info("Adjust only begin pic")
                 lBeginX = lBeginX - lImgBegin.width() / 2.0
                 if lBeginX < lSceneX:
                     lBeginX = lSceneX + 1
                 lTmpHeight = lImgBegin.height()
-            elif lImgBegin == None and not lImgEnd == None:
+            elif lImgBegin is None and not lImgEnd is None:
                 #logging.info("Adjust only end pic")
                 lEndX = lEndX - lImgEnd.width() / 2.0
                 if lEndX < lSceneX:
                     lEndX = lSceneX + 1
                 lTmpHeight = lImgEnd.height()
-            elif not lImgBegin == None and not lImgEnd == None:
+            elif not lImgBegin is None and not lImgEnd is None:
                 #logging.info("Adjust begin and end pic")
                 lBeginX = lBeginX - lImgBegin.width()
                 if lBeginX < lSceneX:
@@ -125,12 +125,12 @@ class CImgVisualizer(QGraphicsScene):
                 lY = lSceneY + lSceneHeight - lTmpHeight
 
 
-            if not lImgBegin == None:
+            if not lImgBegin is None:
                 # adjust x position
                 if lBeginX > (lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()):
                     lBeginX = lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()
                 pPainter.drawImage(lBeginX, lY, lImgBegin)
-            if not lImgEnd == None:
+            if not lImgEnd is None:
                 # adjust x position
                 if lEndX > (lSceneX + lSceneWidth - lImgEnd.width()):
                     lEndX = lSceneX + lSceneWidth - lImgEnd.width()
