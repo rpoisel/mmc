@@ -3,35 +3,24 @@ import logging
 import subprocess
 import math
 from tsk import CTSKblkls
+from gui_options import CGuiOptions
 
 class CGeneratorContext:
-    def __init__(self, pOptions):
-        self.__mImage = open(pOptions.imagefile, "rb")
-        self.__mPathImage = pOptions.imagefile
-        self.__mImageOffset = pOptions.imageoffset
-        self.__mOffset = pOptions.offset
-        #self.__mNumFrags = pNumFrags
-        #self.__mFragmentOffset = pFragmentOffset
-        self.__mFragmentSize = pOptions.fragmentsize
-        self.__mIncrementSize = pOptions.incrementsize
-        self.__mFsType = pOptions.fstype
-        self.__start = pOptions.start
-        self.__stop = pOptions.stop
-        self.__tskoptions = pOptions.tskProperties
+    def __init__(self, start, stop):
+    
+        self.__pOptions = CGuiOptions()
+        self.__mImage = open(self.__pOptions.imagefile, "rb")
+        self.__start = start
+        self.__stop = stop
         
         self.__clusterarea = 0
         self.__rootdir = 0
         
-        for key in pOptions.tskProperties.iterkeys():
+        for key in self.__pOptions.tskProperties.iterkeys():
             if key.lower().find("cluster area") >= 0:
-                self.__clusterarea = pOptions.tskProperties[key][:pOptions.tskProperties[key].find(" ")]
+                self.__clusterarea = self.__pOptions.tskProperties[key][:self.__pOptions.tskProperties[key].find(" ")]
             if key.lower().find("root directory") >= 0:
-                self.__rootdir = pOptions.tskProperties[key][:pOptions.tskProperties[key].find(" ")]
-
-
-        
-        #logging.info("Offset = " + str(self.__mFragmentOffset) + ", NumFrags = " + \
-                #str(self.__mNumFrags))
+                self.__rootdir = self.__pOptions.tskProperties[key][:self.__pOptions.tskProperties[key].find(" ")]
 
     def __del__(self):
         self.__mImage.close()
@@ -39,15 +28,20 @@ class CGeneratorContext:
     def __createGenerator(self):
         
         lBlkLs = CTSKblkls()
-        lBlkLs.filename = self.__mPathImage
-        lBlkLs.imageoffset = self.__mImageOffset
-        lBlkLs.fstype = self.__mFsType
-        #lBlkLs.imagetype = ''
-        lBlkLs.sectorsize = self.__mFragmentSize
+        lBlkLs.filename = self.__pOptions.imagefile
+        lBlkLs.imageoffset = self.__pOptions.imageoffset
+        lBlkLs.fstype = self.__pOptions.fstype
+        lBlkLs.sectorsize = self.__pOptions.fragmentsize
         lBlkLs.list = True
         lBlkLs.start = self.__start
         lBlkLs.stop = self.__stop
-        command = lBlkLs.getAllocated()
+        
+        if self.__pOptions.blockstatus == "allocated":
+            command = lBlkLs.getAllocated()
+        elif self.__pOptions.blockstatus == "unallocated":
+            command = lBlkLs.getUnallocated()
+        else:
+            raise Exception, "Wrong value for blockstatus!"
         
         logging.info("Executing command: " + str(command))
         
@@ -56,8 +50,8 @@ class CGeneratorContext:
         for i in range(3):
                 line = proc.stdout.readline()
                 
-        #self.__mFragsChecked = 0
-
+        self.__mFragsChecked = 0
+        
         while True:
             line = proc.stdout.readline()
             if not line:
@@ -65,43 +59,36 @@ class CGeneratorContext:
             else:
                 
                 lOffset = self.__getOffset(line, '')
-                # TODO catch IOError if illegal offset has been given
                 logging.info("Seeking to offset " + str(lOffset))
                 self.__mImage.seek(lOffset, os.SEEK_SET)
-                lBuffer = self.__mImage.read(self.__mFragmentSize)
+                lBuffer = self.__mImage.read(self.__pOptions.fragmentsize)
+                
+                self.__mFragsChecked += 1
                 
                 if not lBuffer:
                     break
                 
                 yield (lOffset, lBuffer)
-                    
-                #self.__mFragsChecked += 1
-                #self.__mFragsTotal += 1
 
-    def __getOffsetFat12(self, line):      
-        return (int(line[:line.find('|')])-2) * self.__mFragmentSize + int(self.__clusterarea) * 512
-    
-    def __getOffsetFat16(self, line):
-        return (int(line[:line.find('|')])-2) * self.__mFragmentSize + int(self.__clusterarea) * 512
+    def __getOffsetFat(self, line):      
+        return (int(line[:line.find('|')])-2) * self.__pOptions.fragmentsize + int(self.__clusterarea) * 512
     
     
     def __getOffsetNtfs(self, line):
-        return (int(line[:line.find('|')])) * self.__mFragmentSize
+        return (int(line[:line.find('|')])) * self.__pOptions.fragmentsize
         
     def __getOffset(self, line, filesystem):
-        if self.__mFsType.lower().find("ntfs") >= 0:
+        if self.__pOptions.fstype.lower().find("ntfs") >= 0:
             return self.__getOffsetNtfs(line)
-        elif self.__mFsType.lower().find("fat12") >= 0:
-            return self.__getOffsetFat12(line)
-        elif self.__mFsType.lower().find("fat16") >= 0:
-            return self.__getOffsetFat16(line)
-
-    def getFragsRead(self): 
-        #return self.__mFragsChecked
+        elif self.__pOptions.fstype.lower().find("fat") >= 0:
+            return self.__getOffsetFat(line)
+        else:
+            raise Exception, "Filesystem not implemented!"
+            
+    def getFragsRead(self):
         return 1
 
     def getFragsTotal(self): 
-        #return self.__mFragsTotal
         return 1
 
     def getGenerator(self): 
@@ -120,9 +107,9 @@ class CTskImgProcessor:
             clusterrange = pOptions.tskProperties["* Data Area"]
             lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
         else:
-            pOptions.start = 0
-            pOptions.stop = 1
-            self.__mGenerators.append(CGeneratorContext(pOptions))
+            start = 0
+            stop = 1
+            self.__mGenerators.append(CGeneratorContext(start, stop))
             return
 
         lBlockRange = lsize // self.__mNumParallel
@@ -133,24 +120,19 @@ class CTskImgProcessor:
         
         rest = lsize % self.__mNumParallel
         if rest > 0:
-            ranges[len(ranges)-1] += rest
+            ranges[len(ranges)-1] += rest      
         
-        print ranges        
-        
-        rangeindex = 0
-        rangestart = 0
-        rangestop = 0
+        rangeindex, rangestart, rangestop = 0, 0, 0
         add = 1
         for lPid in range(self.__mNumParallel):
-            pOptions.start = rangestart
-            pOptions.stop = ranges[lPid] -1
+            start = rangestart
+            stop = ranges[lPid] -1
             rangestart = ranges[lPid]
-            
-            self.__mGenerators.append(CGeneratorContext(pOptions))
+            self.__mGenerators.append(CGeneratorContext(start, stop))
 
 
-    def getNumParallel(self):
-        return self.__mNumParallel
+    def getNumParallel(self, pNumParallel):
+        return pNumParallel
 
     def getFragsRead(self, pPid):
         return self.__mGenerators[pPid].getFragsRead()

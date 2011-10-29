@@ -1,4 +1,7 @@
 class CGuiOptions:
+    __shared_state = {}
+    
     def __init__(self):
-        pass
+        self.__dict__ = self.__shared_state
+
 
