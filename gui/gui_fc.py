@@ -175,7 +175,8 @@ class CMain(object):
             self.customwidget.refFragsInfo.setText("<html><font color=\"#FF0000\">Reference fragment directory does not exist.</font></html>")
 
     def on_actionAbout_triggered(self, pChecked=None):
-        QtGui.QMessageBox.about(self.ui, "Multimedia File Carver",
+        QtGui.QMessageBox.about(self.ui, 
+            "Multimedia File Carver",
             "<html>Key developers:  \
             <ul> \
                 <li>Rainer Poisel</li> \
@@ -183,7 +184,19 @@ class CMain(object):
                 <li>Manfred Ruzicka</li> \
                 <li>Markus Mannel</li> \
             </ul> \
-            &copy; 2011 St. Poelten University of Applied Sciences</html>")
+            &copy; 2011 St. Poelten University of Applied Sciences</html> \
+            <p> \
+            This software is released under the terms of the LGPLv3:<br /> \
+            <a href=\"http://www.gnu.org/licenses/lgpl.html\">http://www.gnu.org/licenses/lgpl.html</a> \
+            </p> \
+            Regarding software required for running our file carver we kindly refer to their respective licenses: \
+            <ul> \
+            <li><a href=\"http://ffmpeg.org/legal.html\">FFmpeg</a></li> \
+            <li><a href=\"http://www.gzip.org/zlib/zlib_license.html\">zlib</a></li> \
+            <li><a href=\"http://www.sleuthkit.org/sleuthkit/licenses.php\">The Sleuth Kit</a></li> \
+            </ul> \
+            "
+            )
 
     def on_inputFileButton_clicked(self, pChecked=None):
         lFilename = QtGui.QFileDialog.getOpenFileName(self.ui, \
