@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Multimedia File Carver"
-!define PRODUCT_VERSION "0.9-1"
+!define PRODUCT_VERSION "0.9-3"
 !define PRODUCT_PUBLISHER "St. Poelten University of Applied Sciences"
 !define PRODUCT_WEB_SITE "http://www.digitalforensics.at"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}"
