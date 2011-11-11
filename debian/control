@@ -10,7 +10,7 @@ Homepage: http://www.digitalforensics.at
 
 Package: mmc
 Architecture: amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-magic, ffmpeg, sleuthkit, zlib1g, python-imaging, python-pyside (>= 1.0.6), gnome-icon-theme, gnome-panel-data
+Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.6), python-magic, ffmpeg, sleuthkit, zlib1g, python-imaging, python-pyside (>= 1.0.6), gnome-icon-theme, gnome-panel-data
 Description: MultiMedia Carver
  Lorem ipsum dolor, 
  .
