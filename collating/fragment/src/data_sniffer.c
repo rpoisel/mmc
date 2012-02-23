@@ -1,18 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include <pthread.h>
 
 #include "data_sniffer.h"
-#include "fragment_classifier.h"
+
+void* classify_thread(void* pData);
 
 int main(int argc, char* argv[])
 {
     void* lHandleSO = NULL;
-    FragmentClassifier* lHandleFC = NULL;
     fc_new_ptr fc_new;
-    fc_classify_ptr fc_classify;
     fc_free_ptr fc_free;
-    int lResult;
+    int lResult = 0;
+    pthread_t lThread1;
+    int lThread1Ret;
+    struct ThreadData lData;
 
     if (argc != 3)
     {
@@ -29,20 +32,34 @@ int main(int argc, char* argv[])
         return -2;
     }
     fc_new = dlsym(lHandleSO, "fragment_classifier_new");
-    fc_classify = dlsym(lHandleSO, "fragment_classifier_classify");
+    lData.mFcClassify = dlsym(lHandleSO, "fragment_classifier_classify");
     fc_free = dlsym(lHandleSO, "fragment_classifier_free");
 
     /* initialize fragment classifier */
-    lHandleFC = (*fc_new)("/tmp", atoi(argv[2]));
+    lData.mHandleFC = (*fc_new)("/tmp", atoi(argv[2]));
 
-    /* classify fragments */
-    lResult = (*fc_classify)(lHandleFC, (const unsigned char*)"abc", 3);
+    /* start classification process */
+    lThread1Ret = pthread_create(&lThread1, NULL, classify_thread, (void*)&lData);
+
+    /* join threads */
+    pthread_join(lThread1, NULL);
 
     /* destruct fragment classifier */
-    (*fc_free)(lHandleFC);
+    (*fc_free)(lData.mHandleFC);
 
     /* close shared object */
     dlclose(lHandleSO);
 
     return lResult;
 }
+
+void* classify_thread(void* pData)
+{
+    int lResult = 0;
+    /* classify fragments */
+    /* lResult = (*fc_classify)(lHandleFC, (const unsigned char*)"abc", 3); */
+    lResult = (*((struct ThreadData*)pData)->mFcClassify)(((struct ThreadData*)pData)->mHandleFC, (const unsigned char*)"abc", 3);
+
+    return NULL;
+}
+
