@@ -16,4 +16,11 @@ __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFrag
         const unsigned char* pFragment,
         int pLen);
 
+typedef FragmentClassifier* (*fc_new_ptr)(const char* pFilename, 
+        unsigned int pFragmentSize);
+typedef void (*fc_free_ptr)(FragmentClassifier* pFragmentClassifier);
+typedef int (*fc_classify_ptr)(FragmentClassifier* pFragmentClassifier, 
+        const unsigned char* pFragment,
+        int pLen);
+
 #endif /* __FRAGMENT_CLASSIFIER_H__ */
