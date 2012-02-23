@@ -1,5 +1,7 @@
 # g++ -g -o HowToUse_Dll HowToUse_Dll.cpp -ldl -lpthread
 
+include vars.mk
+
 CC=gcc
 CXX=g++
 PYTHON=python
@@ -21,8 +23,10 @@ CLEANUP_FILES=\
 all:$(BIN_FRAGMENT_CONTEXT)
 	
 $(BIN_FRAGMENT_CONTEXT): $(BIN_FRAGMENT_CLASSIFIER)
-	$(MAKE) -f Makefile
 	LDFLAGS=$(LDFLAGS_CYTHON) $(PYTHON) $(PYTHON_FLAGS_FRAGMENT_CONTEXT)
+
+$(BIN_FRAGMENT_CLASSIFIER): 
+	$(MAKE) -f Makefile $(BIN_FRAGMENT_CLASSIFIER)
 
 .PHONY: clean
 
