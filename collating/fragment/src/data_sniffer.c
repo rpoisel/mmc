@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     }
 
     /* open shared object and extract functions */
-    lHandleSO = dlopen("./libfragment_classifier.so", RTLD_LAZY);
+    lHandleSO = dlopen("./libfragment_classifier_ncd.so", RTLD_LAZY);
     if (!lHandleSO)
     {
         fprintf(stderr, "Could not load shared object: %s\n", dlerror());

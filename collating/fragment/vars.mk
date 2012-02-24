@@ -1,8 +1,8 @@
 SRC_DIR=src
 BUILD_DIR=build
 OUT_DIR=.
-BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so
-OBJ_FRAGMENT_CLASSIFIER=$(BUILD_DIR)/fragment_classifier.o \
+BIN_FRAGMENT_CLASSIFIER_NCD=$(OUT_DIR)/libfragment_classifier_ncd.so
+OBJ_FRAGMENT_CLASSIFIER_NCD=$(BUILD_DIR)/fragment_classifier_ncd.o \
 			$(BUILD_DIR)/ncd.o
 CFLAGS_FRAGMENT_CLASSIFIER=-fPIC
 LDFLAGS_FRAGMENT_CLASSIFIER=-lz -shared -Wl,-soname,

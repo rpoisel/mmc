@@ -12,7 +12,7 @@ setup(
             Extension(
             name="fragment_context",
             sources=["fragment_context.pyx"],
-            libraries=["libfragment_classifier" if platform.system().lower() == "windows" else "fragment_classifier"],
+            libraries=["libfragment_classifier_ncd" if platform.system().lower() == "windows" else "fragment_classifier_ncd"],
             library_dirs=["."],
             include_dirs=["."])]
 )
