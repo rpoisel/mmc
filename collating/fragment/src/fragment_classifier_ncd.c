@@ -21,48 +21,37 @@ void initlibfragment_classifier(void) {};
 /* turn to 1 for verbose messages */
 #define VERBOSE 0
 /* set to 0 to turn off ncd testing */
-#define TEST_NCD 1
 
 #define STRLEN_PATH 1024
 
-#if TEST_NCD == 1
 #include "ncd.h"
 #define MAX_NUM_FILE_TYPES 16
 #define NUM_FRAGS_PER_FILE_TYPE 5
 /* #define FRAGS_REF_DIR "./data/frags_ref" */
 #define MAX_DIR_ENT 256
-#endif
 
 struct _FragmentClassifier
 {
     unsigned int mFragmentSize;
-#if TEST_NCD == 1
     unsigned char* mReferenceFrags[MAX_NUM_FILE_TYPES][NUM_FRAGS_PER_FILE_TYPE];
-#endif
 };
 
-#if TEST_NCD == 1
 static const char *sTypes[] = { ".html", ".txt", ".svg", ".h264", "" };
 struct SNearest
 {
     int mIdxTypeNearest;
     double mValNearest;
 };
-#endif
 
-#if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
     const unsigned char* pFragment,
     int pLen);
 int readRandFrag(unsigned char*, int, const char*, const char*);
-#endif
 
 FragmentClassifier* fragment_classifier_new(const char* pRefDir, 
         unsigned int pFragmentSize)
 {
-#if TEST_NCD == 1
     int lCntX = 0, lCntY = 0;
-#endif
 
     /* initialize handle structure */
     struct _FragmentClassifier* lHandle = 
@@ -70,7 +59,6 @@ FragmentClassifier* fragment_classifier_new(const char* pRefDir,
 
     lHandle->mFragmentSize = pFragmentSize;
 
-#if TEST_NCD == 1
 #ifdef _MSC_VER
     srand((unsigned)time(NULL));
 #else
@@ -86,15 +74,12 @@ FragmentClassifier* fragment_classifier_new(const char* pRefDir,
             readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, pRefDir, sTypes[lCntX]); 
         }
     }
-#endif
-
 
     return lHandle;
 }
 
 void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 {
-#if TEST_NCD == 1
     int lCntX = 0, lCntY = 0;
 
     /* free resources from the structure */
@@ -105,7 +90,6 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
             free(pFragmentClassifier->mReferenceFrags[lCntX][lCntY]);
         }
     }
-#endif
     free(pFragmentClassifier);
 }
 
@@ -115,32 +99,17 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 {
     int lReturn = 0;
 
-    /* do test here */
-    if (lReturn < 0 /* check for signatures */)
-    {
-        return lReturn;
-    }
-
-    /* do other test here */
-    if (lReturn < 0 /* check statistics */)
-    {
-        return lReturn;
-    }
-
-#if TEST_NCD == 1
     lReturn = check_ncd(pFragmentClassifier, pFragment, pLen);
     if (lReturn < 0)
     {
         /* non-relevant fragment */
         return lReturn;
     }
-#endif
 
     /* relevant fragment */
     return lReturn;
 }
 
-#if TEST_NCD == 1
 static int check_ncd(FragmentClassifier* pFragmentClassifier, 
     const unsigned char* pFragment,
     int pLen)
@@ -279,5 +248,4 @@ int readRandFrag(unsigned char* pBuf, int pFragmentSize,
 
     return (lCnt > 0 ? 1 : 0);
 }
-#endif
 
