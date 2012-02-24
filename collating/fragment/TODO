@@ -1,0 +1,1 @@
+Create fragment classifier with same interface as ncd classifier, but in the new function load other fragment classifiers from shared objects. When classifying, invoke them one after the other and use a weighting to determine the right file type. Free frees all loaded shared objects. 
