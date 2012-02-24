@@ -3,10 +3,12 @@
 
 #include "fragment_classifier.h"
 
-struct ThreadData
+typedef struct 
 {
-    FragmentClassifier* mHandleFC;
-    fc_classify_ptr mFcClassify;
-};
+    FragmentClassifier* handle_fc;
+    fc_classify_ptr fc_classify;
+    fc_new_ptr fc_new;
+    fc_free_ptr fc_free;
+} thread_data;
 
 #endif /* __DATA_SNIFFER_H__ */

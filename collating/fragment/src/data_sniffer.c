@@ -10,12 +10,10 @@ void* classify_thread(void* pData);
 int main(int argc, char* argv[])
 {
     void* lHandleSO = NULL;
-    fc_new_ptr fc_new;
-    fc_free_ptr fc_free;
     int lResult = 0;
     pthread_t lThread1;
     int lThread1Ret;
-    struct ThreadData lData;
+    thread_data lData;
 
     if (argc != 3)
     {
@@ -31,12 +29,12 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Could not load shared object: %s\n", dlerror());
         return -2;
     }
-    fc_new = dlsym(lHandleSO, "fragment_classifier_new");
-    lData.mFcClassify = dlsym(lHandleSO, "fragment_classifier_classify");
-    fc_free = dlsym(lHandleSO, "fragment_classifier_free");
+    lData.fc_new = dlsym(lHandleSO, "fragment_classifier_new");
+    lData.fc_classify = dlsym(lHandleSO, "fragment_classifier_classify");
+    lData.fc_free = dlsym(lHandleSO, "fragment_classifier_free");
 
     /* initialize fragment classifier */
-    lData.mHandleFC = (*fc_new)("/tmp", atoi(argv[2]));
+    lData.handle_fc = (*lData.fc_new)("/tmp", atoi(argv[2]));
 
     /* start classification process */
     lThread1Ret = pthread_create(&lThread1, NULL, classify_thread, (void*)&lData);
@@ -45,7 +43,7 @@ int main(int argc, char* argv[])
     pthread_join(lThread1, NULL);
 
     /* destruct fragment classifier */
-    (*fc_free)(lData.mHandleFC);
+    (*lData.fc_free)(lData.handle_fc);
 
     /* close shared object */
     dlclose(lHandleSO);
@@ -58,7 +56,7 @@ void* classify_thread(void* pData)
     int lResult = 0;
     /* classify fragments */
     /* lResult = (*fc_classify)(lHandleFC, (const unsigned char*)"abc", 3); */
-    lResult = (*((struct ThreadData*)pData)->mFcClassify)(((struct ThreadData*)pData)->mHandleFC, (const unsigned char*)"abc", 3);
+    lResult = (*((thread_data*)pData)->fc_classify)(((thread_data*)pData)->handle_fc, (const unsigned char*)"abc", 3);
 
     return NULL;
 }
