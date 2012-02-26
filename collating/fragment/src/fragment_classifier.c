@@ -58,12 +58,14 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 {
     int lCnt = 0;
     int lReturn = 0;
+    ClassifyHandler* lHandler = NULL;
 
     /* invoke loaded classifiers */
     for (lCnt = 0; lCnt < pFragmentClassifier->mNumClassifiers; lCnt++)
     {
-        lReturn += (pFragmentClassifier->mClassifiers[lCnt].mWeight * (*pFragmentClassifier->mClassifiers[lCnt].mFcClassify)(
-                pFragmentClassifier->mClassifiers[lCnt].mFcHandler, 
+        lHandler = pFragmentClassifier->mClassifiers + lCnt;
+        lReturn += (lHandler->mWeight * (*lHandler->mFcClassify)(
+                lHandler->mFcHandler, 
                 pFragment, 
                 pLen));
     }
