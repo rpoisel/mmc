@@ -4,7 +4,7 @@
 #include "fragment_classifier.h"
 
 /* this is just a facade */
-__declspec(dllexport) FragmentClassifier* fragment_classifier_py(const char* pFragsRefDir,
+__declspec(dllexport) FragmentClassifier* fragment_classifier_mmc(const char* pFragsRefDir,
         unsigned int pFragmentSize);
 
 #endif /* __FRAGMENT_CLASSIFIER_PY_H__ */

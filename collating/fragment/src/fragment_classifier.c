@@ -4,15 +4,32 @@
 #include <string.h>
 
 #include "fragment_classifier.h"
-#include "fragment_classifier_p.h"
-#include "fragment_classifier_py.h"
+#include "fragment_classifier_mmc.h"
 
 /* parameters */
 #define PATH_LEN 256
 #define NUM_OPTIONS 2
+#define MAX_CLASSIFIERS 10
 
 /* features */
 #define LOAD_SKEL 0
+
+typedef struct 
+{
+    void* mSoHandler;
+    struct _FragmentClassifier* mFcHandler;
+    int mWeight;
+    fc_new_ptr mFcNew;
+    fc_classify_ptr mFcClassify;
+    fc_free_ptr mFcFree;
+} ClassifyHandler;
+
+struct _FragmentClassifier
+{
+    unsigned int mFragmentSize;
+    unsigned int mNumClassifiers;
+    ClassifyHandler mClassifiers[MAX_CLASSIFIERS];
+};
 
 int load_classifier(ClassifyHandler* pHandle, 
         ClassifyOptions* pOptions, 
@@ -25,7 +42,6 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
         unsigned int pNumSo, 
         unsigned int pFragmentSize)
 {
-    char lPath[PATH_LEN] = { '\0' };
     int lCnt = 0;
 
     struct _FragmentClassifier* lHandle = 
@@ -40,10 +56,10 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
     for (lCnt = 0; lCnt < lHandle->mNumClassifiers; lCnt++)
     {
         if (load_classifier(lHandle->mClassifiers + lCnt,
-                (pOptions + lCnt), 
+                (pOptions + lCnt)->mSubOptions, 
                 pFragmentSize, 
-                (pOptions + lCnt)->mSoName, 
-                (pOptions + lCnt)->mWeight) < 0)
+                (pOptions + lCnt)->mOption1, 
+                atoi((pOptions + lCnt)->mOption2)) < 0)
         {
             return NULL;
         }
@@ -121,18 +137,24 @@ void unload_classifier(ClassifyHandler* pHandle)
     dlclose(pHandle->mSoHandler);
 }
 
-FragmentClassifier* fragment_classifier_py(const char* pFragsRefDir,
+FragmentClassifier* fragment_classifier_mmc(const char* pFragsRefDir,
         unsigned int pFragmentSize)
 {
     ClassifyOptions lOptions[NUM_OPTIONS];
+    ClassifyOptions lOptionsNcd;
 
     /* ncd */
-    strncpy(lOptions[0].mSoName, "collating/fragment/libfragment_classifier_ncd.so", MAX_STR_LEN);
-    lOptions[0].mWeight = 1;
-    strncpy(lOptions[0].mOption1, pFragsRefDir, MAX_STR_LEN);
+    strncpy(lOptions[0].mOption1, 
+            "collating/fragment/libfragment_classifier_ncd.so", 
+            MAX_STR_LEN);
+    strncpy(lOptions[0].mOption2, "1", MAX_STR_LEN);
+    lOptions[0].mSubOptions = &lOptionsNcd;
+    strncpy(lOptionsNcd.mOption1, pFragsRefDir, MAX_STR_LEN);
     /* skel */
-    strncpy(lOptions[1].mSoName, "collating/fragment//libfragment_classifier_skel.so", MAX_STR_LEN);
-    lOptions[1].mWeight = 0;
+    strncpy(lOptions[1].mOption1, 
+            "collating/fragment//libfragment_classifier_skel.so", 
+            MAX_STR_LEN);
+    strncpy(lOptions[1].mOption2, "0", MAX_STR_LEN);
 
     return fragment_classifier_new(lOptions, NUM_OPTIONS, pFragmentSize);
 }

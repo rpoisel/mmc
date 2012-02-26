@@ -4,7 +4,7 @@ cdef class CFragmentClassifier:
     cdef cfragment_context.FragmentClassifier * _c_fragment_context
 
     def __cinit__(self, pFragsRefDir, pFragmentSize):
-        self._c_fragment_context = cfragment_context.fragment_classifier_py(
+        self._c_fragment_context = cfragment_context.fragment_classifier_mmc(
                 pFragsRefDir, pFragmentSize)
         if self._c_fragment_context is NULL:
             raise MemoryError()

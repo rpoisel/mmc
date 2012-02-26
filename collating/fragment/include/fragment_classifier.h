@@ -7,13 +7,12 @@ typedef struct _FragmentClassifier FragmentClassifier;
 
 typedef struct _ClassifyOptions
 {
-    char mSoName[MAX_STR_LEN];
-    int mWeight;
     char mOption1[MAX_STR_LEN];
     char mOption2[MAX_STR_LEN];
     char mOption3[MAX_STR_LEN];
     char mOption4[MAX_STR_LEN];
     char mOption5[MAX_STR_LEN];
+    struct _ClassifyOptions* mSubOptions;
 } ClassifyOptions;
 
 #ifndef _MSC_VER
@@ -21,7 +20,7 @@ typedef struct _ClassifyOptions
 #endif
 
 __declspec(dllexport) FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
-        unsigned int pNumSo, 
+        unsigned int pNumOptions, 
         unsigned int pFragmentSize);
 
 __declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);

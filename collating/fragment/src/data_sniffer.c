@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
     pthread_t lThread1;
     thread_data lData;
     ClassifyOptions lOptions[NUM_OPTIONS];
+    ClassifyOptions lOptionsNcd;
 
     if (argc != 3)
     {
@@ -36,12 +37,13 @@ int main(int argc, char* argv[])
     }
 
     /* ncd */
-    strncpy(lOptions[0].mSoName, "./libfragment_classifier_ncd.so", MAX_STR_LEN);
-    lOptions[0].mWeight = 1;
-    strncpy(lOptions[0].mOption1, "../../data/frags_ref", MAX_STR_LEN);
+    strncpy(lOptions[0].mOption1, "./libfragment_classifier_ncd.so", MAX_STR_LEN);
+    strncpy(lOptions[0].mOption2, "1", MAX_STR_LEN);
+    lOptions[0].mSubOptions = &lOptionsNcd;
+    strncpy(lOptionsNcd.mOption1, "../../data/frags_ref", MAX_STR_LEN);
     /* skel */
-    strncpy(lOptions[1].mSoName, "./libfragment_classifier_skel.so", MAX_STR_LEN);
-    lOptions[1].mWeight = 0;
+    strncpy(lOptions[1].mOption1, "./libfragment_classifier_skel.so", MAX_STR_LEN);
+    strncpy(lOptions[1].mOption2, "0", MAX_STR_LEN);
 
     lData.path_image = argv[1];
     lData.frag_size = atoi(argv[2]);

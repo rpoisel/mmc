@@ -11,6 +11,6 @@ cdef extern from "include/fragment_classifier.h":
             unsigned char * pBuf,
             int pLen)
 
-cdef extern from "include/fragment_classifier_py.h":
-    FragmentClassifier * fragment_classifier_py(char * pFragsRefDir,
+cdef extern from "include/fragment_classifier_mmc.h":
+    FragmentClassifier * fragment_classifier_mmc(char * pFragsRefDir,
                     unsigned int pFragmentSize)
