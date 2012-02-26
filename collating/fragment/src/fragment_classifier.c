@@ -1,11 +1,37 @@
+#include <stdlib.h>
+
 #include "fragment_classifier.h"
 
-__declspec(dllexport) FragmentClassifier* fragment_classifier_new(const char* pFilename, 
-        unsigned int pFragmentSize);
+struct _FragmentClassifier
+{
+    unsigned int mFragmentSize;
+};
 
-__declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
+FragmentClassifier* fragment_classifier_new(const char* pFilename, 
+        unsigned int pFragmentSize)
+{
+    struct _FragmentClassifier* lHandle = (struct _FragmentClassifier*) malloc(sizeof(struct _FragmentClassifier));
 
-__declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
+    /* load shared libraries */
+
+    return lHandle;
+}
+
+void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
+{
+    /* free loaded shared libraries */
+
+    free(pFragmentClassifier);
+}
+
+int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment,
-        int pLen);
+        int pLen)
+{
+    /* invoke loaded classifiers */
+
+    /* weight results */
+
+    return -1;
+}
 
