@@ -81,16 +81,21 @@ int load_classifier(ClassifyHandler* pHandle,
 
     if (!pHandle->mSoHandler)
     {
-        fprintf(stderr, "Could not load shared object: %s\n", dlerror());
+        fprintf(stderr, "Could not load shared object: %s\n", 
+                dlerror());
         return -1;
     }
     pHandle->mWeight = pWeight;
 
-    pHandle->mFcNew = dlsym(pHandle->mSoHandler, "fragment_classifier_new");
-    pHandle->mFcClassify = dlsym(pHandle->mSoHandler, "fragment_classifier_classify");
-    pHandle->mFcFree = dlsym(pHandle->mSoHandler, "fragment_classifier_free");
+    pHandle->mFcNew = dlsym(pHandle->mSoHandler, 
+            "fragment_classifier_new");
+    pHandle->mFcClassify = dlsym(pHandle->mSoHandler, 
+            "fragment_classifier_classify");
+    pHandle->mFcFree = dlsym(pHandle->mSoHandler, 
+            "fragment_classifier_free");
 
-    pHandle->mFcHandler = (*pHandle->mFcNew)(pFilename, pFragmentSize);
+    pHandle->mFcHandler = (*pHandle->mFcNew)(pFilename, 
+            pFragmentSize);
     return 0;
 }
 
