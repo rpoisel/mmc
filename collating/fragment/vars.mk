@@ -1,14 +1,16 @@
 SRC_DIR=src
 BUILD_DIR=build
 OUT_DIR=.
+BUILD_DIR_NCD=$(BUILD_DIR)/ncd
+SRC_DIR_NCD=$(SRC_DIR)/ncd
 BIN_FRAGMENT_CLASSIFIER_NCD=$(OUT_DIR)/libfragment_classifier_ncd.so
-OBJ_FRAGMENT_CLASSIFIER_NCD=$(BUILD_DIR)/fragment_classifier_ncd.o \
-			$(BUILD_DIR)/ncd.o
-CFLAGS_FRAGMENT_CLASSIFIER_NCD=-fPIC
+OBJ_FRAGMENT_CLASSIFIER_NCD=$(BUILD_DIR_NCD)/fragment_classifier_ncd.o \
+			$(BUILD_DIR_NCD)/ncd.o
+CFLAGS_FRAGMENT_CLASSIFIER_NCD=$(CFLAGS) -fPIC -Iinclude/ncd
 LDFLAGS_FRAGMENT_CLASSIFIER_NCD=-lz -shared -Wl,-soname,
 LDFLAGS_TEST_NCD=-lz
-OBJ_TEST_NCD=$(BUILD_DIR)/ncd.o \
-	     $(BUILD_DIR)/test_ncd.o
+OBJ_TEST_NCD=$(BUILD_DIR_NCD)/ncd.o \
+	     $(BUILD_DIR_NCD)/test_ncd.o
 BIN_TEST_NCD=$(OUT_DIR)/test_ncd
 LDFLAGS_DATA_SNIFFER=
 OBJ_DATA_SNIFFER=$(BUILD_DIR)/data_sniffer.o

@@ -24,15 +24,20 @@ $(BIN_DATA_SNIFFER): init $(OBJ_DATA_SNIFFER)
 $(BIN_TEST_NCD): init $(OBJ_TEST_NCD)
 	$(CC) -o $(BIN_TEST_NCD) $(OBJ_TEST_NCD) $(LDFLAGS) $(LDFLAGS_TEST_NCD)
 
+$(BUILD_DIR_NCD)/%.o: $(SRC_DIR_NCD)/%.c
+	$(CC) -c $(CFLAGS_FRAGMENT_CLASSIFIER_NCD) -o $@ $<
+
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) -c $(CFLAGS) $(CFLAGS_FRAGMENT_CLASSIFIER_NCD) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 init:
 	@if [ ! -d $(BUILD_DIR) ] ; then $(MKDIR) -p $(BUILD_DIR) ; fi
+	@if [ ! -d $(BUILD_DIR_NCD) ] ; then $(MKDIR) -p $(BUILD_DIR_NCD) ; fi
 	@if [ ! -d $(OUT_DIR) ] ; then $(MKDIR) -p $(OUT_DIR) ; fi
 
 clean:
 	$(RM) $(RMFLAGS) $(BUILD_DIR)
+	$(RM) $(RMFLAGS) $(BUILD_DIR_NCD)
 	$(RM) $(RMFLAGS) $(BIN_FRAGMENT_CLASSIFIER_NCD)
 	$(RM) $(RMFLAGS) $(BIN_DATA_SNIFFER)
 	$(RM) $(RMFLAGS) $(BIN_TEST_NCD)
