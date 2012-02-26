@@ -5,6 +5,13 @@
 #include "fragment_classifier.h"
 #include "fragment_classifier_p.h"
 
+int load_classifier(ClassifyHandler* pHandle, 
+        const char* pFilename, 
+        unsigned pFragmentSize, 
+        const char* pPath, 
+        int pWeight);
+void unload_classifier(ClassifyHandler* pHandle);
+
 FragmentClassifier* fragment_classifier_new(const char* pFilename, 
         unsigned pFragmentSize)
 {
@@ -26,11 +33,42 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
     {
         return NULL;
     }
+    lHandle->mNumClassifiers++;
     /* load ncd classifier END */
 
-    lHandle->mNumClassifiers++;
-
     return lHandle;
+}
+
+void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
+{
+    int lCnt = 0;
+
+    /* free loaded shared libraries */
+    for (lCnt = 0; lCnt < pFragmentClassifier->mNumClassifiers; lCnt++)
+    {
+        unload_classifier(pFragmentClassifier->mClassifiers + lCnt);
+    }
+
+    free(pFragmentClassifier);
+}
+
+int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
+        const unsigned char* pFragment,
+        int pLen)
+{
+    int lCnt = 0;
+    int lReturn = 0;
+
+    /* invoke loaded classifiers */
+    for (lCnt = 0; lCnt < pFragmentClassifier->mNumClassifiers; lCnt++)
+    {
+        lReturn += (pFragmentClassifier->mClassifiers[lCnt].mWeight * (*pFragmentClassifier->mClassifiers[lCnt].mFcClassify)(
+                pFragmentClassifier->mClassifiers[lCnt].mFcHandler, 
+                pFragment, 
+                pLen));
+    }
+
+    return lReturn;
 }
 
 int load_classifier(ClassifyHandler* pHandle, 
@@ -56,36 +94,8 @@ int load_classifier(ClassifyHandler* pHandle,
     return 0;
 }
 
-void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
+void unload_classifier(ClassifyHandler* pHandle)
 {
-    int lCnt = 0;
-
-    /* free loaded shared libraries */
-    for (lCnt = 0; lCnt < pFragmentClassifier->mNumClassifiers; lCnt++)
-    {
-        (*pFragmentClassifier->mClassifiers[lCnt].mFcFree)(pFragmentClassifier->mClassifiers[lCnt].mFcHandler);
-        dlclose(pFragmentClassifier->mClassifiers[lCnt].mSoHandler);
-    }
-
-    free(pFragmentClassifier);
+    (*pHandle->mFcFree)(pHandle->mFcHandler);
+    dlclose(pHandle->mSoHandler);
 }
-
-int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
-        const unsigned char* pFragment,
-        int pLen)
-{
-    int lCnt = 0;
-    int lReturn = 0;
-
-    /* invoke loaded classifiers */
-    for (lCnt = 0; lCnt < pFragmentClassifier->mNumClassifiers; lCnt++)
-    {
-        lReturn += (pFragmentClassifier->mClassifiers[lCnt].mWeight * (*pFragmentClassifier->mClassifiers[lCnt].mFcClassify)(
-                pFragmentClassifier->mClassifiers[lCnt].mFcHandler, 
-                pFragment, 
-                pLen));
-    }
-
-    return lReturn;
-}
-
