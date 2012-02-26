@@ -23,6 +23,15 @@ OBJ_TEST_NCD=$(BUILD_DIR_NCD)/ncd.o \
 BIN_TEST_NCD=$(OUT_DIR)/test_ncd
 # ================= END NCD ==================
 
+# ================ START SKEL =================
+BUILD_DIR_SKEL=$(BUILD_DIR)/skel
+SRC_DIR_SKEL=$(SRC_DIR)/skel
+BIN_FRAGMENT_CLASSIFIER_SKEL=$(OUT_DIR)/libfragment_classifier_skel.so
+OBJ_FRAGMENT_CLASSIFIER_SKEL=$(BUILD_DIR_SKEL)/fragment_classifier_skel.o 
+CFLAGS_FRAGMENT_CLASSIFIER_SKEL=$(CFLAGS) -fPIC -Iinclude/skel
+LDFLAGS_FRAGMENT_CLASSIFIER_SKEL=-shared -Wl,-soname,
+# ================= END SKEL ==================
+
 # ================ START DATA SNIFFER =================
 LDFLAGS_DATA_SNIFFER=-L. -lfragment_classifier
 OBJ_DATA_SNIFFER=$(BUILD_DIR)/data_sniffer.o

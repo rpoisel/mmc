@@ -100,13 +100,8 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     int lReturn = 0;
 
     lReturn = check_ncd(pFragmentClassifier, pFragment, pLen);
-    if (lReturn < 0)
-    {
-        /* non-relevant fragment */
-        return lReturn;
-    }
 
-    /* relevant fragment */
+    /* non-relevant fragment <= 0 > relevant fragment */
     return lReturn;
 }
 

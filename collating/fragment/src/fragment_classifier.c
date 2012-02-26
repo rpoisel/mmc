@@ -5,6 +5,8 @@
 #include "fragment_classifier.h"
 #include "fragment_classifier_p.h"
 
+#define LOAD_SKEL 0
+
 int load_classifier(ClassifyHandler* pHandle, 
         const char* pFilename, 
         unsigned pFragmentSize, 
@@ -35,6 +37,20 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
     }
     lHandle->mNumClassifiers++;
     /* load ncd classifier END */
+
+#if LOAD_SKEL==1
+    /* load skel classifier START */
+    if (load_classifier(lHandle->mClassifiers + lHandle->mNumClassifiers,
+                pFilename, 
+                pFragmentSize, 
+                "./collating/fragment/libfragment_classifier_skel.so",
+                1) < 0)
+    {
+        return NULL;
+    }
+    lHandle->mNumClassifiers++;
+    /* load skel classifier END */
+#endif
 
     return lHandle;
 }
