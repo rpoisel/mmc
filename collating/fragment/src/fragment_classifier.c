@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include <string.h>
 
 #include "fragment_classifier.h"
 #include "fragment_classifier_p.h"
 
+/* parameters */
+#define PATH_LEN 256
+
+/* features */
 #define LOAD_SKEL 0
 
 int load_classifier(ClassifyHandler* pHandle, 
@@ -17,6 +22,8 @@ void unload_classifier(ClassifyHandler* pHandle);
 FragmentClassifier* fragment_classifier_new(const char* pFilename, 
         unsigned pFragmentSize)
 {
+    char lPath[PATH_LEN] = { '\0' };
+
     struct _FragmentClassifier* lHandle = 
         (struct _FragmentClassifier*) malloc(sizeof(struct _FragmentClassifier));
     if (!lHandle)
@@ -27,10 +34,12 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
     lHandle->mNumClassifiers = 0;
 
     /* load ncd classifier START */
+    strncpy(lPath, pFilename, PATH_LEN);
+    strncat(lPath, "libfragment_classifier_ncd.so", PATH_LEN - strlen(lPath) - 1);
     if (load_classifier(lHandle->mClassifiers + lHandle->mNumClassifiers,
-                pFilename, 
+                "data/frags_ref", 
                 pFragmentSize, 
-                "./collating/fragment/libfragment_classifier_ncd.so",
+                lPath, 
                 1) < 0)
     {
         return NULL;
@@ -40,10 +49,12 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
 
 #if LOAD_SKEL==1
     /* load skel classifier START */
+    strncpy(lPath, pFilename, PATH_LEN);
+    strncat(lPath, "libfragment_classifier_skel.so", PATH_LEN - strlen(lPath) - 1);
     if (load_classifier(lHandle->mClassifiers + lHandle->mNumClassifiers,
-                pFilename, 
+                "", 
                 pFragmentSize, 
-                "./collating/fragment/libfragment_classifier_skel.so",
+                lPath, 
                 1) < 0)
     {
         return NULL;
