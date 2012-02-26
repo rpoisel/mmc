@@ -48,7 +48,8 @@ static int check_ncd(FragmentClassifier* pFragmentClassifier,
     int pLen);
 int readRandFrag(unsigned char*, int, const char*, const char*);
 
-FragmentClassifier* fragment_classifier_new(const char* pRefDir, 
+FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
+        unsigned int pNumSo, 
         unsigned int pFragmentSize)
 {
     int lCntX = 0, lCntY = 0;
@@ -71,7 +72,7 @@ FragmentClassifier* fragment_classifier_new(const char* pRefDir,
             lHandle->mReferenceFrags[lCntX][lCntY] = 
                 (unsigned char*)malloc(sizeof(unsigned char) * pFragmentSize);
             /* randomly open file, random seek, read reference fragment */
-            readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, pRefDir, sTypes[lCntX]); 
+            readRandFrag(lHandle->mReferenceFrags[lCntX][lCntY], pFragmentSize, pOptions->mOption1, sTypes[lCntX]); 
         }
     }
 

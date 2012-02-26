@@ -5,24 +5,28 @@
 
 #include "fragment_classifier.h"
 #include "fragment_classifier_p.h"
+#include "fragment_classifier_py.h"
 
 /* parameters */
 #define PATH_LEN 256
+#define NUM_OPTIONS 2
 
 /* features */
 #define LOAD_SKEL 0
 
 int load_classifier(ClassifyHandler* pHandle, 
-        const char* pFilename, 
+        ClassifyOptions* pOptions, 
         unsigned pFragmentSize, 
         const char* pPath, 
         int pWeight);
 void unload_classifier(ClassifyHandler* pHandle);
 
-FragmentClassifier* fragment_classifier_new(const char* pFilename, 
-        unsigned pFragmentSize)
+FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
+        unsigned int pNumSo, 
+        unsigned int pFragmentSize)
 {
     char lPath[PATH_LEN] = { '\0' };
+    int lCnt = 0;
 
     struct _FragmentClassifier* lHandle = 
         (struct _FragmentClassifier*) malloc(sizeof(struct _FragmentClassifier));
@@ -31,37 +35,19 @@ FragmentClassifier* fragment_classifier_new(const char* pFilename,
         perror("Could not allocate memory for handle: ");
         return NULL;
     }
-    lHandle->mNumClassifiers = 0;
+    lHandle->mNumClassifiers = pNumSo;
 
-    /* load ncd classifier START */
-    strncpy(lPath, pFilename, PATH_LEN);
-    strncat(lPath, "libfragment_classifier_ncd.so", PATH_LEN - strlen(lPath) - 1);
-    if (load_classifier(lHandle->mClassifiers + lHandle->mNumClassifiers,
-                "data/frags_ref", 
-                pFragmentSize, 
-                lPath, 
-                1) < 0)
+    for (lCnt = 0; lCnt < lHandle->mNumClassifiers; lCnt++)
     {
-        return NULL;
-    }
-    lHandle->mNumClassifiers++;
-    /* load ncd classifier END */
-
-#if LOAD_SKEL==1
-    /* load skel classifier START */
-    strncpy(lPath, pFilename, PATH_LEN);
-    strncat(lPath, "libfragment_classifier_skel.so", PATH_LEN - strlen(lPath) - 1);
-    if (load_classifier(lHandle->mClassifiers + lHandle->mNumClassifiers,
-                "", 
+        if (load_classifier(lHandle->mClassifiers + lCnt,
+                (pOptions + lCnt), 
                 pFragmentSize, 
-                lPath, 
-                1) < 0)
-    {
-        return NULL;
+                (pOptions + lCnt)->mSoName, 
+                (pOptions + lCnt)->mWeight) < 0)
+        {
+            return NULL;
+        }
     }
-    lHandle->mNumClassifiers++;
-    /* load skel classifier END */
-#endif
 
     return lHandle;
 }
@@ -101,7 +87,7 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 }
 
 int load_classifier(ClassifyHandler* pHandle, 
-        const char* pFilename, 
+        ClassifyOptions* pOptions, 
         unsigned pFragmentSize, 
         const char* pPath, 
         int pWeight)
@@ -123,7 +109,8 @@ int load_classifier(ClassifyHandler* pHandle,
     pHandle->mFcFree = dlsym(pHandle->mSoHandler, 
             "fragment_classifier_free");
 
-    pHandle->mFcHandler = (*pHandle->mFcNew)(pFilename, 
+    pHandle->mFcHandler = (*pHandle->mFcNew)(pOptions, 
+            0, 
             pFragmentSize);
     return 0;
 }
@@ -133,3 +120,20 @@ void unload_classifier(ClassifyHandler* pHandle)
     (*pHandle->mFcFree)(pHandle->mFcHandler);
     dlclose(pHandle->mSoHandler);
 }
+
+FragmentClassifier* fragment_classifier_py(const char* pFragsRefDir,
+        unsigned int pFragmentSize)
+{
+    ClassifyOptions lOptions[NUM_OPTIONS];
+
+    /* ncd */
+    strncpy(lOptions[0].mSoName, "collating/fragment/libfragment_classifier_ncd.so", MAX_STR_LEN);
+    lOptions[0].mWeight = 1;
+    strncpy(lOptions[0].mOption1, pFragsRefDir, MAX_STR_LEN);
+    /* skel */
+    strncpy(lOptions[1].mSoName, "collating/fragment//libfragment_classifier_skel.so", MAX_STR_LEN);
+    lOptions[1].mWeight = 0;
+
+    return fragment_classifier_new(lOptions, NUM_OPTIONS, pFragmentSize);
+}
+

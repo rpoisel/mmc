@@ -8,7 +8,7 @@ typedef struct
 {
     void* mSoHandler;
     struct _FragmentClassifier* mFcHandler;
-    float mWeight;
+    int mWeight;
     fc_new_ptr mFcNew;
     fc_classify_ptr mFcClassify;
     fc_free_ptr mFcFree;

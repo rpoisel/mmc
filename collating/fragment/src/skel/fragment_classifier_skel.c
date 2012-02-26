@@ -11,7 +11,8 @@ struct _FragmentClassifier
     unsigned int mFragmentSize;
 };
 
-FragmentClassifier* fragment_classifier_new(const char* pRefDir, 
+FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
+        unsigned int pNumSo, 
         unsigned int pFragmentSize)
 {
     /* initialize handle structure */

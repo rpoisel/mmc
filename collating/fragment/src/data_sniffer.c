@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "fragment_classifier.h"
+
+#define NUM_OPTIONS 2
 
 typedef struct 
 {
@@ -11,6 +14,8 @@ typedef struct
     fc_new_ptr fc_new;
     fc_free_ptr fc_free;
     int result;
+    const char* path_image;
+    int frag_size;
     /* not used at the moment */
     int offset_img;
 } thread_data;
@@ -20,8 +25,8 @@ void* classify_thread(void* pData);
 int main(int argc, char* argv[])
 {
     pthread_t lThread1;
-    int lThread1Ret;
     thread_data lData;
+    ClassifyOptions lOptions[NUM_OPTIONS];
 
     if (argc != 3)
     {
@@ -30,14 +35,25 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    lData.handle_fc = fragment_classifier_new("./", atoi(argv[2]));
+    /* ncd */
+    strncpy(lOptions[0].mSoName, "./libfragment_classifier_ncd.so", MAX_STR_LEN);
+    lOptions[0].mWeight = 1;
+    strncpy(lOptions[0].mOption1, "../../data/frags_ref", MAX_STR_LEN);
+    /* skel */
+    strncpy(lOptions[1].mSoName, "./libfragment_classifier_skel.so", MAX_STR_LEN);
+    lOptions[1].mWeight = 0;
+
+    lData.path_image = argv[1];
+    lData.frag_size = atoi(argv[2]);
+    lData.handle_fc = fragment_classifier_new(lOptions, NUM_OPTIONS, lData.frag_size);
     if (!lData.handle_fc)
     {
         return EXIT_FAILURE;
     }
 
     /* start classification process */
-    lThread1Ret = pthread_create(&lThread1, NULL, classify_thread, (void*)&lData);
+    /* TODO check return value */
+    pthread_create(&lThread1, NULL, classify_thread, (void*)&lData);
 
     /* join threads */
     pthread_join(lThread1, NULL);
@@ -51,12 +67,26 @@ int main(int argc, char* argv[])
 void* classify_thread(void* pData)
 {
     thread_data* lData = (thread_data*)pData; 
+    FILE* lImage = NULL;
+    unsigned char* lBuf = NULL;
+    int lResult = lData->frag_size;
+
+    lBuf = (unsigned char*)malloc(lData->frag_size);
+    lImage = fopen(lData->path_image, "r");
 
     /* classify fragments */
-    lData->result = fragment_classifier_classify(lData->handle_fc, 
-            (const unsigned char*)"abc", 3);
+    while (lResult == lData->frag_size)
+    {
+        lResult = fread(lBuf, 1, lData->frag_size, lImage);
+        lData->result = fragment_classifier_classify(lData->handle_fc, 
+                lBuf, lResult);
+        /* do something with the result */
+        printf("Result: %d\n", lData->result);
+    }
 
-    /* do something with the result */
+
+    fclose(lImage);
+    free(lBuf);
 
     return NULL;
 }

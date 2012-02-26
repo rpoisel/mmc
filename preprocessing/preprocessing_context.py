@@ -81,8 +81,7 @@ class CPreprocessing:
         lResultThread.start()
         for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
             lProcess = multiprocessing.Process(target=self.classifyCore, args=(\
-              lCnt, lPreprocessor, lHeadersList, lBlocksList, lResultArray, "collating" + os.sep + "fragment" + os.sep , pOptions.fragmentsize))
-              # lCnt, lPreprocessor, lHeadersList, lBlocksList, lResultArray, pOptions.reffragsdir, pOptions.fragmentsize))
+               lCnt, lPreprocessor, lHeadersList, lBlocksList, lResultArray, pOptions.reffragsdir, pOptions.fragmentsize))
             lProcesses.append(lProcess)
             lProcess.start()
 
@@ -104,8 +103,7 @@ class CPreprocessing:
         lH264FC = fragment_context.CFragmentClassifier(
                 pRefFragsDir,
                 pFragmentSize)
-        logging.info("PID " + str(pPid) + " | Initializing fragment classifier: base lib-path " + pRefFragsDir + ", fragmentsize " + str(pFragmentSize))
-        # logging.info("PID " + str(pPid) + " | Initializing fragment classifier: reffragsdir " + pRefFragsDir + ", fragmentsize " + str(pFragmentSize))
+        logging.info("PID " + str(pPid) + " | Initializing fragment classifier: reffragsdir " + pRefFragsDir + ", fragmentsize " + str(pFragmentSize))
         lBlocks = frags.CFrags()
 
         # lBlock[0] ... offset
