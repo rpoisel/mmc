@@ -43,7 +43,8 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     }
 
     lReturn = calc_entropy(pFragment, pLen);
-    if (lReturn < -80)
+    /* empiric value ;-) */
+    if (lReturn > 0.625)
     {
         return 1;
     }
