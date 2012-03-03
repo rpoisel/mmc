@@ -3,6 +3,26 @@
 
 #define MAX_STR_LEN 256
 
+typedef enum _FileType
+{
+    FT_NONE = 0, 
+    FT_TXT, 
+    FT_HTML, 
+    FT_XML, 
+    FT_JPG, 
+    FT_DOC, 
+    FT_PDF, 
+    FT_H264, 
+} FileType;
+
+typedef struct _ResultClassify
+{
+    FileType mType;
+    int mStrength;
+} ResultClassify;
+
+ResultClassify example(void);
+
 typedef struct _FragmentClassifier FragmentClassifier;
 
 typedef struct _ClassifyOptions

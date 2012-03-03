@@ -2,6 +2,18 @@ cdef extern from *:
     ctypedef char * const_char_ptr "const char*"
 
 cdef extern from "include/fragment_classifier.h":
+    ctypedef enum FileType:
+        pass
+
+cdef extern from "include/fragment_classifier.h":
+    ctypedef struct ResultClassify:
+        FileType mType
+        int mStrength
+
+cdef extern from "include/fragment_classifier.h":
+        ResultClassify example()
+
+cdef extern from "include/fragment_classifier.h":
     ctypedef struct FragmentClassifier:
         pass
 
