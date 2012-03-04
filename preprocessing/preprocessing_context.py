@@ -106,24 +106,27 @@ class CPreprocessing:
     def classifyCore(self, pPid, pPreprocessor, pHeadersList, pBlocksList, pResultArray, pRefFragsDir, pFragmentSize):
         # data structure for temporary storage of results
         lMagic = magic_context.CMagic()
-        lH264FC = fragment_context.CFragmentClassifier(
+        lFC = fragment_context.CFragmentClassifier(
                 pRefFragsDir,
                 pFragmentSize)
         logging.info("PID " + str(pPid) + " | Initializing fragment classifier: reffragsdir " + pRefFragsDir + ", fragmentsize " + str(pFragmentSize))
         lBlocks = frags.CFrags()
 
-        # lBlock[0] ... offset
-        # lBlock[1] ... bytes/data
         for lBlock in pPreprocessor.getGenerator(pPid):
+            # lBlock[0] ... offset
+            # lBlock[1] ... bytes/data
             pResultArray[pPid] = 100 * pPreprocessor.getFragsRead(pPid) / pPreprocessor.getFragsTotal(pPid)
             # check for beginning of files using libmagic(3)
+            # TODO create more abstract method that allows to pass searched
+            #      filetype as a parameter
             if lMagic.determineMagicH264(lBlock[1]) == True:
                 lBlocks.addHeader(lBlock[0])
 
             # TODO ignore header fragments from other identifiable file types
 
             # generate a map of filetypes of fragments
-            elif lH264FC.classify(lBlock[1]) > 0:
+            # TODO add block dependent on its filetype (instead of an int-value)
+            elif lFC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
         logging.info("Process " + str(pPid) + " finished classifying")
