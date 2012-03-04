@@ -81,7 +81,13 @@ class CPreprocessing:
         lResultThread.start()
         for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
             lProcess = multiprocessing.Process(target=self.classifyCore, args=(\
-               lCnt, lPreprocessor, lHeadersList, lBlocksList, lResultArray, pOptions.reffragsdir, pOptions.fragmentsize))
+               lCnt, 
+               lPreprocessor, 
+               lHeadersList, 
+               lBlocksList, 
+               lResultArray, 
+               "", #pOptions.reffragsdir, 
+               pOptions.fragmentsize))
             lProcesses.append(lProcess)
             lProcess.start()
 

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Thu Aug 25 09:15:36 2011
-#      by: pyside-uic 0.2.12 running on PySide 1.0.5
+# Created: Sun Mar  4 10:51:15 2012
+#      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,10 +12,10 @@ from PySide import QtCore, QtGui
 class Ui_filecarvingWidget(object):
     def setupUi(self, filecarvingWidget):
         filecarvingWidget.setObjectName("filecarvingWidget")
-        filecarvingWidget.resize(667, 405)
+        filecarvingWidget.resize(664, 424)
         filecarvingWidget.setMinimumSize(QtCore.QSize(500, 0))
-        self.horizontalLayout = QtGui.QHBoxLayout(filecarvingWidget)
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.verticalLayout_4 = QtGui.QVBoxLayout(filecarvingWidget)
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.tabWidget = QtGui.QTabWidget(filecarvingWidget)
         self.tabWidget.setObjectName("tabWidget")
         self.tab_general = QtGui.QWidget()
@@ -47,11 +47,29 @@ class Ui_filecarvingWidget(object):
         self.outputDirInfo.setObjectName("outputDirInfo")
         self.srcdstLayout.addWidget(self.outputDirInfo, 4, 0, 1, 1)
         self.verticalLayout_2.addLayout(self.srcdstLayout)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.label_15 = QtGui.QLabel(self.tab_general)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_15.sizePolicy().hasHeightForWidth())
+        self.label_15.setSizePolicy(sizePolicy)
+        self.label_15.setObjectName("label_15")
+        self.horizontalLayout.addWidget(self.label_15)
+        self.recoverfiletypes = QtGui.QComboBox(self.tab_general)
+        self.recoverfiletypes.setEditable(False)
+        self.recoverfiletypes.setObjectName("recoverfiletypes")
+        self.horizontalLayout.addWidget(self.recoverfiletypes)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.imageView = QtGui.QGraphicsView(self.tab_general)
         self.imageView.setObjectName("imageView")
         self.verticalLayout_2.addWidget(self.imageView)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.progressLabel = QtGui.QLabel(self.tab_general)
+        self.progressLabel.setObjectName("progressLabel")
+        self.horizontalLayout_2.addWidget(self.progressLabel)
         self.progressBar = QtGui.QProgressBar(self.tab_general)
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
@@ -162,18 +180,6 @@ class Ui_filecarvingWidget(object):
         self.minimumFragmentSize.setObjectName("minimumFragmentSize")
         self.fragmentizerLayout.addWidget(self.minimumFragmentSize, 0, 3, 1, 1)
         self.verticalLayout_3.addWidget(self.groupBox_2)
-        self.collatingLayout = QtGui.QGridLayout()
-        self.collatingLayout.setObjectName("collatingLayout")
-        self.refFrags = QtGui.QLineEdit(self.tab_preprocessing)
-        self.refFrags.setObjectName("refFrags")
-        self.collatingLayout.addWidget(self.refFrags, 1, 0, 1, 1)
-        self.refFragsButton = QtGui.QPushButton(self.tab_preprocessing)
-        self.refFragsButton.setObjectName("refFragsButton")
-        self.collatingLayout.addWidget(self.refFragsButton, 1, 1, 1, 1)
-        self.refFragsInfo = QtGui.QLabel(self.tab_preprocessing)
-        self.refFragsInfo.setObjectName("refFragsInfo")
-        self.collatingLayout.addWidget(self.refFragsInfo, 2, 0, 1, 1)
-        self.verticalLayout_3.addLayout(self.collatingLayout)
         self.gridLayout_2 = QtGui.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.label_5 = QtGui.QLabel(self.tab_preprocessing)
@@ -248,7 +254,7 @@ class Ui_filecarvingWidget(object):
         self.graphicsView.setObjectName("graphicsView")
         self.verticalLayout.addWidget(self.graphicsView)
         self.tabWidget.addTab(self.tab_video, "")
-        self.horizontalLayout.addWidget(self.tabWidget)
+        self.verticalLayout_4.addWidget(self.tabWidget)
 
         self.retranslateUi(filecarvingWidget)
         self.tabWidget.setCurrentIndex(0)
@@ -260,6 +266,8 @@ class Ui_filecarvingWidget(object):
         self.outputDirButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Export Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
         self.outputDirInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_15.setText(QtGui.QApplication.translate("filecarvingWidget", "Files to recover", None, QtGui.QApplication.UnicodeUTF8))
+        self.progressLabel.setText(QtGui.QApplication.translate("filecarvingWidget", "progressLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.duration.setText(QtGui.QApplication.translate("filecarvingWidget", "00:00:00", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
         self.showResults.setText(QtGui.QApplication.translate("filecarvingWidget", "Show Results: ", None, QtGui.QApplication.UnicodeUTF8))
@@ -281,8 +289,6 @@ class Ui_filecarvingWidget(object):
         self.label_10.setText(QtGui.QApplication.translate("filecarvingWidget", "Minimum Fragment Size", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Minimum fragment size in blocks", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "4", None, QtGui.QApplication.UnicodeUTF8))
-        self.refFragsButton.setText(QtGui.QApplication.translate("filecarvingWidget", "Reference Frags", None, QtGui.QApplication.UnicodeUTF8))
-        self.refFragsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("filecarvingWidget", "Preprocessing: ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_12.setText(QtGui.QApplication.translate("filecarvingWidget", "Block status: ", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_preprocessing), QtGui.QApplication.translate("filecarvingWidget", "Preprocessing", None, QtGui.QApplication.UnicodeUTF8))

@@ -109,6 +109,11 @@ class CMain(object):
         self.customwidget.outputformat.addItem("JPEG")
         self.customwidget.outputformat.addItem("PNG")
 
+        self.customwidget.recoverfiletypes.addItem("Video")
+        self.customwidget.recoverfiletypes.addItem("Pictures")
+        self.customwidget.recoverfiletypes.addItem("Text")
+        self.customwidget.recoverfiletypes.addItem("Documents")
+
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
 
@@ -138,16 +143,20 @@ class CMain(object):
         self.customwidget.outputDirButton.clicked.connect(self.on_outputDirButton_clicked)
         self.customwidget.inputFile.textChanged.connect(self.on_inputFile_changed)
         self.customwidget.outputDir.textChanged.connect(self.on_outputDir_changed)
-        self.customwidget.refFrags.textChanged.connect(self.on_refFrags_changed)
-        self.customwidget.refFragsButton.clicked.connect(self.on_refFragsButton_clicked)
+        self.customwidget.recoverfiletypes.currentIndexChanged.connect(self.on_recoverFT_changed)
 
         # init values
         self.customwidget.inputFile.setText(os.getcwd() + os.sep + "data" + os.sep + "image_ref_h264_ntfs_formatted.img")
         self.customwidget.outputDir.setText(r"c:\temp" if platform.system().lower() == "windows" else "/tmp/temp")
-        self.customwidget.refFrags.setText(os.getcwd() + os.sep + "data" + os.sep + "frags_ref")
 
     def on_actionExit_triggered(self): 
         self.ui.close()
+
+    def on_recoverFT_changed(self, pIdx):
+        if pIdx == 0:
+            self.customwidget.tabWidget.setTabEnabled(2, True)
+        else:
+            self.customwidget.tabWidget.setTabEnabled(2, False)
 
     def on_inputFile_changed(self, pPath):
         if os.path.exists(pPath):
@@ -166,13 +175,6 @@ class CMain(object):
             self.customwidget.outputDirInfo.setText("Output directory exists.")
         else:
             self.customwidget.outputDirInfo.setText("<html><font color=\"#FF0000\">Output directory does not exist.</font></html>")
-
-    def on_refFrags_changed(self, pPath):
-        if os.path.isdir(pPath):
-            lNumFiles = len([lFile for lFile in os.listdir(pPath) if os.path.isfile(os.path.join(pPath, lFile))])
-            self.customwidget.refFragsInfo.setText("Reference fragment directory exists: " + str(lNumFiles) + " files.")
-        else:
-            self.customwidget.refFragsInfo.setText("<html><font color=\"#FF0000\">Reference fragment directory does not exist.</font></html>")
 
     def on_actionAbout_triggered(self, pChecked=None):
         QtGui.QMessageBox.about(self.ui, 
@@ -215,16 +217,6 @@ class CMain(object):
                 QtGui.QFileDialog.ShowDirsOnly)
         if lFilename != "":
             self.customwidget.outputDir.setText(lFilename)
-
-    def on_refFragsButton_clicked(self):
-        lDialog = QtGui.QFileDialog()
-        lDialog.setFileMode(QtGui.QFileDialog.Directory)
-        lFilename = lDialog.getExistingDirectory(self.ui, \
-                "Choose reference fragments directory", \
-                os.path.dirname(self.customwidget.refFrags.text()), \
-                QtGui.QFileDialog.ShowDirsOnly)
-        if lFilename != "":
-            self.customwidget.refFrags.setText(lFilename)
 
     def on_processButton_clicked(self, pChecked=None):
         if not os.path.exists(self.customwidget.inputFile.text()):
@@ -279,10 +271,6 @@ class CMain(object):
         if not os.path.exists(self.customwidget.inputFile.text()):
             QtGui.QMessageBox.about(self.ui, "Error",
                 "Please make sure that your input file exists.")
-            return
-        elif not os.path.isdir(self.customwidget.refFrags.text()):
-            QtGui.QMessageBox.about(self.ui, "Error",
-                "Please make sure that your reference fragment directory exists.")
             return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
@@ -346,7 +334,6 @@ class CMain(object):
         lOptions.minfragsize = int(self.customwidget.minimumFragmentSize.text())
         lOptions.hdrsize = int(self.customwidget.headerSize.text())
         lOptions.extractsize = int(self.customwidget.extractSize.text()) * 1024
-        lOptions.reffragsdir = self.customwidget.refFrags.text()
         lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
         lOptions.minpicsize = int(self.customwidget.minPicSize.text())
         lOptions.similarity = int(self.customwidget.similarity.text())
