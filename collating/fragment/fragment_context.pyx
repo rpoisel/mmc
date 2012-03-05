@@ -21,7 +21,11 @@ cdef class CFragmentClassifier:
         if self._c_fragment_context is NULL:
             raise MemoryError()
 
-# TODO http://groups.google.com/group/cython-users/browse_thread/thread/895500ddbbf1367c?pli=1
+# TODO 
+# http://groups.google.com/group/cython-users/browse_thread/thread/895500ddbbf1367c?pli=1
+# http://stackoverflow.com/questions/6165293/wrap-c-struct-with-array-member-for-access-in-python-swig-cython-ctypes
+# http://docs.python.org/library/struct.html
+
 #    def __cinit__(self, pFragsRefDir, pFragmentSize, pTypes):
 #        self._c_fragment_context = cfragment_context.fragment_classifier_new_ct(
 #                NULL, 
