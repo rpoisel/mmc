@@ -40,14 +40,14 @@ typedef struct _ClassifyOptions
 
 /* function declarations */
 __declspec(dllexport) FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
-        unsigned int pNumOptions, 
-        unsigned int pFragmentSize);
+        unsigned pNumOptions, 
+        unsigned pFragmentSize);
 
 __declspec(dllexport) FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions, 
-        unsigned int pNumOptions, 
-        unsigned int pFragmentSize,
+        unsigned pNumOptions, 
+        unsigned pFragmentSize,
         ClassifyT* pTypes,
-        unsigned int pNumTypes);
+        unsigned pNumTypes);
 
 __declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
 
@@ -62,8 +62,8 @@ __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFrag
 
 /* typedefs */
 typedef FragmentClassifier* (*fc_new_ptr)(ClassifyOptions* pOptions, 
-        unsigned int pNumSo, 
-        unsigned int pFragmentSize);
+        unsigned pNumSo, 
+        unsigned pFragmentSize);
 typedef void (*fc_free_ptr)(FragmentClassifier* pFragmentClassifier);
 typedef int (*fc_classify_ptr)(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment,

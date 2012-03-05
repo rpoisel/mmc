@@ -10,14 +10,14 @@
 
 struct _FragmentClassifier
 {
-    unsigned int mFragmentSize;
+    unsigned mFragmentSize;
     ClassifyT mFileTypes[MAX_FILETYPES];
-    unsigned int mNumFileTypes;
+    unsigned mNumFileTypes;
 };
 
 FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
-        unsigned int pNumSo, 
-        unsigned int pFragmentSize)
+        unsigned pNumSo, 
+        unsigned pFragmentSize)
 {
     /* initialize handle structure */
     struct _FragmentClassifier* lHandle = 
@@ -33,10 +33,10 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
 }
 
 FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions, 
-        unsigned int pNumSo, 
-        unsigned int pFragmentSize,
+        unsigned pNumSo, 
+        unsigned pFragmentSize,
         ClassifyT* pTypes,
-        unsigned int pNumTypes)
+        unsigned pNumTypes)
 {
     struct _FragmentClassifier* lHandle = fragment_classifier_new(
             pOptions,
