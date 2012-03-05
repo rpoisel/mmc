@@ -21,6 +21,7 @@ cdef class CFragmentClassifier:
         if self._c_fragment_context is NULL:
             raise MemoryError()
 
+# TODO http://groups.google.com/group/cython-users/browse_thread/thread/895500ddbbf1367c?pli=1
 #    def __cinit__(self, pFragsRefDir, pFragmentSize, pTypes):
 #        self._c_fragment_context = cfragment_context.fragment_classifier_new_ct(
 #                NULL, 
