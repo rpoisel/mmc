@@ -5,7 +5,7 @@
 
 #include "fragment_classifier.h"
 
-#define NUM_OPTIONS 2
+#define NUM_OPTIONS 0
 
 typedef struct 
 {
@@ -27,7 +27,6 @@ int main(int argc, char* argv[])
     pthread_t lThread1;
     thread_data lData;
     ClassifyOptions lOptions[NUM_OPTIONS];
-    ClassifyOptions lOptionsNcd;
 
     if (argc != 3)
     {
@@ -35,15 +34,6 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Invocation: %s <path-to-image> <block-size>\n", argv[0]);
         return EXIT_FAILURE;
     }
-
-    /* ncd */
-    strncpy(lOptions[0].mOption1, "./libfragment_classifier_ncd.so", MAX_STR_LEN);
-    strncpy(lOptions[0].mOption2, "1", MAX_STR_LEN);
-    lOptions[0].mSubOptions = &lOptionsNcd;
-    strncpy(lOptionsNcd.mOption1, "../../data/frags_ref", MAX_STR_LEN);
-    /* skel */
-    strncpy(lOptions[1].mOption1, "./libfragment_classifier_skel.so", MAX_STR_LEN);
-    strncpy(lOptions[1].mOption2, "0", MAX_STR_LEN);
 
     lData.path_image = argv[1];
     lData.frag_size = atoi(argv[2]);
