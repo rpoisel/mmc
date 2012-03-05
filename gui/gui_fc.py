@@ -110,9 +110,10 @@ class CMain(object):
         self.customwidget.outputformat.addItem("PNG")
 
         self.customwidget.recoverfiletypes.addItem("Video")
-        self.customwidget.recoverfiletypes.addItem("Images")
-        self.customwidget.recoverfiletypes.addItem("Text")
-        self.customwidget.recoverfiletypes.addItem("Documents")
+        self.customwidget.recoverfiletypes.addItem("Images (JPG)")
+        self.customwidget.recoverfiletypes.addItem("Images (PNG)")
+        #self.customwidget.recoverfiletypes.addItem("Text (not implemented yet)")
+        #self.customwidget.recoverfiletypes.addItem("Documents (not implemented yet)")
 
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
@@ -159,7 +160,7 @@ class CMain(object):
             self.customwidget.tabWidget.setTabEnabled(lCnt + 2, False)
         if pIdx == 0:
             self.customwidget.tabWidget.setTabEnabled(2, True)
-        elif pIdx == 1:
+        elif 0 < pIdx < 3:
             self.customwidget.tabWidget.setTabEnabled(3, True)
 
     def on_inputFile_changed(self, pPath):

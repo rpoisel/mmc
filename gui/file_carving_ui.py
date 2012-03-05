@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Mon Mar  5 14:52:19 2012
+# Created: Mon Mar  5 23:20:52 2012
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -62,6 +62,25 @@ class Ui_filecarvingWidget(object):
         self.recoverfiletypes.setEditable(False)
         self.recoverfiletypes.setObjectName("recoverfiletypes")
         self.horizontalLayout.addWidget(self.recoverfiletypes)
+        self.label_16 = QtGui.QLabel(self.tab_general)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_16.sizePolicy().hasHeightForWidth())
+        self.label_16.setSizePolicy(sizePolicy)
+        self.label_16.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_16.setObjectName("label_16")
+        self.horizontalLayout.addWidget(self.label_16)
+        self.strength = QtGui.QSpinBox(self.tab_general)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.strength.sizePolicy().hasHeightForWidth())
+        self.strength.setSizePolicy(sizePolicy)
+        self.strength.setMinimum(1)
+        self.strength.setMaximum(100)
+        self.strength.setObjectName("strength")
+        self.horizontalLayout.addWidget(self.strength)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.imageView = QtGui.QGraphicsView(self.tab_general)
         self.imageView.setObjectName("imageView")
@@ -271,6 +290,7 @@ class Ui_filecarvingWidget(object):
         self.fsInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "FS Info: ", None, QtGui.QApplication.UnicodeUTF8))
         self.outputDirInfo.setText(QtGui.QApplication.translate("filecarvingWidget", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.label_15.setText(QtGui.QApplication.translate("filecarvingWidget", "Files to recover", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_16.setText(QtGui.QApplication.translate("filecarvingWidget", "Strength", None, QtGui.QApplication.UnicodeUTF8))
         self.progressLabel.setText(QtGui.QApplication.translate("filecarvingWidget", "progressLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.duration.setText(QtGui.QApplication.translate("filecarvingWidget", "00:00:00", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
