@@ -22,8 +22,6 @@ typedef struct _ClassifyT
     int mStrength;
 } ClassifyT;
 
-ClassifyT example(void);
-
 typedef struct _FragmentClassifier FragmentClassifier;
 
 typedef struct _ClassifyOptions

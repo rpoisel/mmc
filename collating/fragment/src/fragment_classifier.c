@@ -7,12 +7,6 @@
 #define VERBOSE 0
 /* set to 0 to turn off ncd testing */
 
-ClassifyT example(void)
-{
-    ClassifyT lReturn = { FT_TXT, 3 };
-    return lReturn; 
-}
-
 struct _FragmentClassifier
 {
     unsigned int mFragmentSize;
