@@ -324,6 +324,14 @@ class CMain(object):
             lOptions.outputformat = "movie.dd"
         else:
             lOptions.outputformat = "%08d.jpg"
+
+        if self.customwidget.recoverfiletypes.currentIndex() == 0:
+            lOptions.recoverfiletype = "video"
+        elif self.customwidget.recoverfiletypes.currentIndex() == 1:
+            lOptions.recoverfiletype = "jpg"
+        elif self.customwidget.recoverfiletypes.currentIndex() == 2:
+            lOptions.recoverfiletype = "png"
+
         lOptions.showResults = self.customwidget.showResults.isChecked()
         lOptions.imagefile = self.customwidget.inputFile.text()
         lOptions.output = self.customwidget.outputDir.text()

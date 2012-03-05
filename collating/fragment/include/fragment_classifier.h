@@ -11,6 +11,7 @@ typedef enum _FileType
     FT_HTML, 
     FT_XML, 
     FT_JPG, 
+    FT_PNG,
     FT_DOC, 
     FT_PDF, 
     FT_H264, 

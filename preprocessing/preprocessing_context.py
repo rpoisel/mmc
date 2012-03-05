@@ -77,6 +77,16 @@ class CPreprocessing:
 
         lQueue = Queue.Queue()
         lResultArray = multiprocessing.Array('i', [0 for i in range(lPreprocessor.getNumParallel(pOptions.maxcpus))])
+        lTypes = []
+        if pOptions.recoverfiletype == "video":
+            lTypes.append({'mType':fragment_context.FileType.FT_H264, 'mStrength':62})
+        elif pOptions.recoverfiletype == "jpg":
+            lTypes.append({'mType':fragment_context.FileType.FT_JPG, 'mStrength':62})
+        elif pOptions.recoverfiletype == "png":
+            lTypes.append({'mType':fragment_context.FileType.FT_PNG, 'mStrength':62})
+        lFC = fragment_context.CFragmentClassifier(
+                pOptions,
+                lTypes)
         lResultThread = CResultThread(pCaller, lResultArray, lQueue)
         lResultThread.start()
         for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
@@ -86,6 +96,7 @@ class CPreprocessing:
                lHeadersList, 
                lBlocksList, 
                lResultArray, 
+               lFC,
                pOptions))
             lProcesses.append(lProcess)
             lProcess.start()
@@ -102,13 +113,9 @@ class CPreprocessing:
         logging.info("Finished classifying. Duration: " + str(lNow - lLast))
         return lVideoBlocks
         
-    def classifyCore(self, pPid, pPreprocessor, pHeadersList, pBlocksList, pResultArray, pOptions):
+    def classifyCore(self, pPid, pPreprocessor, pHeadersList, pBlocksList, pResultArray, pFC, pOptions):
         # data structure for temporary storage of results
         lMagic = magic_context.CMagic()
-        lTypes = [{'mType':fragment_context.FileType.FT_H264, 'mStrength':62}]
-        lFC = fragment_context.CFragmentClassifier(
-                pOptions,
-                lTypes)
         logging.info("PID " + str(pPid) + " | Initializing fragment classifier: fragmentsize " + str(pOptions.fragmentsize))
         lBlocks = frags.CFrags()
 
@@ -126,7 +133,7 @@ class CPreprocessing:
 
             # generate a map of filetypes of fragments
             # TODO add block dependent on its filetype (instead of an int-value)
-            elif lFC.classify(lBlock[1]) > 0:
+            elif pFC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
         logging.info("Process " + str(pPid) + " finished classifying")

@@ -8,9 +8,10 @@ cdef class FileType:
     FT_HTML = 2
     FT_XML = 3
     FT_JPG = 4
-    FT_DOC = 5
-    FT_PDF = 6
-    FT_H264 = 7
+    FT_PNG = 5
+    FT_DOC = 6 
+    FT_PDF = 7
+    FT_H264 = 8
 
 cdef class CFragmentClassifier:
 

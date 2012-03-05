@@ -14,6 +14,28 @@ class CDecoder:
         else:
             return None
 
+    def open(self, pPath):
+        pass
+
+    def write(self, pData):
+        pass
+
+    def close(self):
+        pass
+
+class CJpegDecoder(CDecoder):
+    def __init__(self):
+        pass
+
+    def open(self, pPath):
+        pass
+
+    def write(self, pData):
+        pass
+
+    def close(self):
+        pass
+
 class CFFMpegDecoder(CDecoder):
     def __init__(self):
         self.__mFFMpeg = None
