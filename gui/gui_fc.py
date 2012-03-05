@@ -110,7 +110,7 @@ class CMain(object):
         self.customwidget.outputformat.addItem("PNG")
 
         self.customwidget.recoverfiletypes.addItem("Video")
-        self.customwidget.recoverfiletypes.addItem("Pictures")
+        self.customwidget.recoverfiletypes.addItem("Images")
         self.customwidget.recoverfiletypes.addItem("Text")
         self.customwidget.recoverfiletypes.addItem("Documents")
 
@@ -130,6 +130,8 @@ class CMain(object):
 
         self.customwidget.progressBar.setMaximum(100)
         self.customwidget.progressBar.setMinimum(0)
+
+        self.on_recoverFT_changed(0)
 
         # actions
         self.ui.actionExit.triggered.connect(self.on_actionExit_triggered)
@@ -153,10 +155,12 @@ class CMain(object):
         self.ui.close()
 
     def on_recoverFT_changed(self, pIdx):
+        for lCnt in xrange(self.customwidget.tabWidget.count() - 2):
+            self.customwidget.tabWidget.setTabEnabled(lCnt + 2, False)
         if pIdx == 0:
             self.customwidget.tabWidget.setTabEnabled(2, True)
-        else:
-            self.customwidget.tabWidget.setTabEnabled(2, False)
+        elif pIdx == 1:
+            self.customwidget.tabWidget.setTabEnabled(3, True)
 
     def on_inputFile_changed(self, pPath):
         if os.path.exists(pPath):

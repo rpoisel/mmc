@@ -22,6 +22,9 @@
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -377,7 +380,7 @@
      </widget>
      <widget class="QWidget" name="tab_video">
       <attribute name="title">
-       <string>Video Parameters</string>
+       <string>Video Recovery</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -478,6 +481,11 @@
         <widget class="QGraphicsView" name="graphicsView"/>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Image Recovery</string>
+      </attribute>
      </widget>
     </widget>
    </item>

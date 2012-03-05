@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Sun Mar  4 10:51:15 2012
+# Created: Mon Mar  5 14:52:19 2012
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,6 +17,7 @@ class Ui_filecarvingWidget(object):
         self.verticalLayout_4 = QtGui.QVBoxLayout(filecarvingWidget)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.tabWidget = QtGui.QTabWidget(filecarvingWidget)
+        self.tabWidget.setEnabled(True)
         self.tabWidget.setObjectName("tabWidget")
         self.tab_general = QtGui.QWidget()
         self.tab_general.setObjectName("tab_general")
@@ -254,6 +255,9 @@ class Ui_filecarvingWidget(object):
         self.graphicsView.setObjectName("graphicsView")
         self.verticalLayout.addWidget(self.graphicsView)
         self.tabWidget.addTab(self.tab_video, "")
+        self.tab = QtGui.QWidget()
+        self.tab.setObjectName("tab")
+        self.tabWidget.addTab(self.tab, "")
         self.verticalLayout_4.addWidget(self.tabWidget)
 
         self.retranslateUi(filecarvingWidget)
@@ -303,5 +307,6 @@ class Ui_filecarvingWidget(object):
         self.label_4.setText(QtGui.QApplication.translate("filecarvingWidget", "Extract Size (kB)", None, QtGui.QApplication.UnicodeUTF8))
         self.extractSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Size of the subfragment to forward to the decoder", None, QtGui.QApplication.UnicodeUTF8))
         self.extractSize.setText(QtGui.QApplication.translate("filecarvingWidget", "90", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_video), QtGui.QApplication.translate("filecarvingWidget", "Video Parameters", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_video), QtGui.QApplication.translate("filecarvingWidget", "Video Recovery", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("filecarvingWidget", "Image Recovery", None, QtGui.QApplication.UnicodeUTF8))
 
