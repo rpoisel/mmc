@@ -28,6 +28,9 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
 
     lHandle->mFragmentSize = pFragmentSize;
 
+    /* initialize fields that are not used regularely with
+     * illegal values */
+
     return lHandle;
 }
 
@@ -41,6 +44,8 @@ FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions,
             pOptions,
             pNumSo,
             pFragmentSize);
+
+    /* initialize additional fields */
 
     return lHandle;
 }
@@ -73,8 +78,3 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     return 0;
 }
 
-FragmentClassifier* fragment_classifier_mmc(const char* pFragsRefDir,
-        unsigned int pFragmentSize)
-{
-    return fragment_classifier_new(NULL, 0, pFragmentSize);
-}

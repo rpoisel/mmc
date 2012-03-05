@@ -6,9 +6,11 @@ cdef extern from "include/fragment_classifier.h":
         pass
 
 cdef extern from "include/fragment_classifier.h":
-    ctypedef struct ClassifyT:
+    cdef struct _ClassifyT:
         FileType mType
         int mStrength
+
+ctypedef _ClassifyT ClassifyT
 
 cdef extern from "include/fragment_classifier.h":
     ctypedef struct ClassifyOptions:
@@ -18,9 +20,6 @@ cdef extern from "include/fragment_classifier.h":
         char * mOption4
         char * mOption5
         ClassifyOptions * mSubOptions
-
-cdef extern from "include/fragment_classifier.h":
-        ClassifyT example()
 
 cdef extern from "include/fragment_classifier.h":
     ctypedef struct FragmentClassifier:
@@ -42,6 +41,3 @@ cdef extern from "include/fragment_classifier.h":
         ClassifyT* pTypes,
         unsigned int pNumTypes)
 
-cdef extern from "include/fragment_classifier_mmc.h":
-    FragmentClassifier * fragment_classifier_mmc(char * pFragsRefDir,
-                    unsigned int pFragmentSize)

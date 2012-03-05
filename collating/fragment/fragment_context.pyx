@@ -1,3 +1,5 @@
+import struct
+
 cimport cfragment_context
 
 cdef class FileType:
@@ -14,27 +16,27 @@ cdef class CFragmentClassifier:
 
     cdef cfragment_context.FragmentClassifier * _c_fragment_context
 
-    def __cinit__(self, pFragsRefDir, pFragmentSize):
-        self._c_fragment_context = cfragment_context.fragment_classifier_mmc(
-                pFragsRefDir, 
-                pFragmentSize)
-        if self._c_fragment_context is NULL:
-            raise MemoryError()
-
-# TODO 
+# Cython docs, see
 # http://groups.google.com/group/cython-users/browse_thread/thread/895500ddbbf1367c?pli=1
 # http://stackoverflow.com/questions/6165293/wrap-c-struct-with-array-member-for-access-in-python-swig-cython-ctypes
 # http://docs.python.org/library/struct.html
+# http://docs.cython.org/src/userguide/extension_types.html
 
-#    def __cinit__(self, pFragsRefDir, pFragmentSize, pTypes):
-#        self._c_fragment_context = cfragment_context.fragment_classifier_new_ct(
-#                NULL, 
-#                0,
-#                0,
-#                NULL,
-#                0)
-#        if self._c_fragment_context is NULL:
-#            raise MemoryError()
+    def __cinit__(self, pOptions, pTypes):
+        cdef cfragment_context.ClassifyT lTypes[128]
+        lCnt = 0
+        for lType in pTypes:
+            lTypes[lCnt].mType = lType['mType']
+            lTypes[lCnt].mStrength = lType['mStrength']
+            lCnt += 1
+        self._c_fragment_context = cfragment_context.fragment_classifier_new_ct(
+                NULL, 
+                0,
+                pOptions.fragmentsize,
+                lTypes,
+                lCnt)
+        if self._c_fragment_context is NULL:
+            raise MemoryError()
 
     def __dealloc__(self):
         if self._c_fragment_context is not NULL:
@@ -49,7 +51,3 @@ cdef class CFragmentClassifier:
                 pBuf,
                 len(pBuf))
 
-    def example(self):
-        if self._c_fragment_context is NULL:
-            raise MemoryError()
-        return cfragment_context.example()

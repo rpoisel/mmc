@@ -86,8 +86,7 @@ class CPreprocessing:
                lHeadersList, 
                lBlocksList, 
                lResultArray, 
-               "", #pOptions.reffragsdir, 
-               pOptions.fragmentsize))
+               pOptions))
             lProcesses.append(lProcess)
             lProcess.start()
 
@@ -103,13 +102,14 @@ class CPreprocessing:
         logging.info("Finished classifying. Duration: " + str(lNow - lLast))
         return lVideoBlocks
         
-    def classifyCore(self, pPid, pPreprocessor, pHeadersList, pBlocksList, pResultArray, pRefFragsDir, pFragmentSize):
+    def classifyCore(self, pPid, pPreprocessor, pHeadersList, pBlocksList, pResultArray, pOptions):
         # data structure for temporary storage of results
         lMagic = magic_context.CMagic()
+        lTypes = [{'mType':fragment_context.FileType.FT_H264, 'mStrength':62}]
         lFC = fragment_context.CFragmentClassifier(
-                pRefFragsDir,
-                pFragmentSize)
-        logging.info("PID " + str(pPid) + " | Initializing fragment classifier: reffragsdir " + pRefFragsDir + ", fragmentsize " + str(pFragmentSize))
+                pOptions,
+                lTypes)
+        logging.info("PID " + str(pPid) + " | Initializing fragment classifier: fragmentsize " + str(pOptions.fragmentsize))
         lBlocks = frags.CFrags()
 
         for lBlock in pPreprocessor.getGenerator(pPid):
