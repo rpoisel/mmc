@@ -6,7 +6,7 @@
 /* data types */
 typedef enum _FileType
 {
-    FT_NONE = 0, 
+    FT_UNKNOWN = 0, 
     FT_TXT, 
     FT_HTML, 
     FT_XML, 
@@ -50,6 +50,11 @@ __declspec(dllexport) FragmentClassifier* fragment_classifier_new_ct(ClassifyOpt
         unsigned int pNumTypes);
 
 __declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
+
+__declspec(dllexport) int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
+        const unsigned char* pFragment,
+        int pLen,
+        ClassifyT* pResult);
 
 __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment,

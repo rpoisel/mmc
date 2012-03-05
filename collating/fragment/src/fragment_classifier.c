@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdlib.h>
 
 #include "fragment_classifier.h"
@@ -5,11 +6,13 @@
 
 /* turn to 1 for verbose messages */
 #define VERBOSE 0
-/* set to 0 to turn off ncd testing */
+#define MAX_FILETYPES 24
 
 struct _FragmentClassifier
 {
     unsigned int mFragmentSize;
+    ClassifyT mFileTypes[MAX_FILETYPES];
+    unsigned int mNumFileTypes;
 };
 
 FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
@@ -24,6 +27,7 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
 
     /* initialize fields that are not used regularely with
      * illegal values */
+    lHandle->mNumFileTypes = 0;
 
     return lHandle;
 }
@@ -40,6 +44,8 @@ FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions,
             pFragmentSize);
 
     /* initialize additional fields */
+    memcpy(lHandle->mFileTypes, pTypes, sizeof(ClassifyT) * pNumTypes);
+    lHandle->mNumFileTypes = pNumTypes;
 
     return lHandle;
 }
@@ -50,25 +56,64 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
     free(pFragmentClassifier);
 }
 
-int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
+int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment,
-        int pLen)
+        int pLen,
+        ClassifyT* pResult)
+
 {
-    float lReturn = 0;
+    float lEntropy = 0;
+    /* non-relevant fragment <= 0 > relevant fragment */
+
+    pResult->mType = FT_UNKNOWN;
+    pResult->mStrength = 0;
 
     if (pLen == 0)
     {
         return 0;
     }
 
-    lReturn = calc_entropy(pFragment, pLen);
-    /* empiric value ;-) */
-    if (lReturn > 0.625)
+    lEntropy = calc_entropy(pFragment, pLen);
+    if (lEntropy > 0.625) /* empiric value ;-) */
     {
-        return 1;
+        pResult->mType = FT_H264;
+        pResult->mStrength = 1;
     }
 
-    /* non-relevant fragment <= 0 > relevant fragment */
+    return pResult->mStrength;
+}
+
+int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
+        const unsigned char* pFragment,
+        int pLen)
+{
+    ClassifyT lResult;
+    int lCnt = 0;
+    fragment_classifier_classify_result(pFragmentClassifier,
+            pFragment, 
+            pLen, 
+            &lResult);
+
+    if (lResult.mStrength)
+    {
+        if (pFragmentClassifier->mNumFileTypes > 0)
+        {
+            for (lCnt = 0; lCnt < pFragmentClassifier->mNumFileTypes; lCnt++)
+            {
+                if (pFragmentClassifier->mFileTypes[lCnt].mType == lResult.mType)
+                {
+                    /* relevant fragment */
+                    return 1;
+                }
+            }
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    /* irrelevant fragment */
     return 0;
 }
 

@@ -3,7 +3,7 @@ import struct
 cimport cfragment_context
 
 cdef class FileType:
-    FT_NONE = 0
+    FT_UNKNOWN = 0
     FT_TXT = 1
     FT_HTML = 2
     FT_XML = 3
