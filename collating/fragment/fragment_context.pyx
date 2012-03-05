@@ -16,9 +16,20 @@ cdef class CFragmentClassifier:
 
     def __cinit__(self, pFragsRefDir, pFragmentSize):
         self._c_fragment_context = cfragment_context.fragment_classifier_mmc(
-                pFragsRefDir, pFragmentSize)
+                pFragsRefDir, 
+                pFragmentSize)
         if self._c_fragment_context is NULL:
             raise MemoryError()
+
+#    def __cinit__(self, pFragsRefDir, pFragmentSize, pTypes):
+#        self._c_fragment_context = cfragment_context.fragment_classifier_new_ct(
+#                NULL, 
+#                0,
+#                0,
+#                NULL,
+#                0)
+#        if self._c_fragment_context is NULL:
+#            raise MemoryError()
 
     def __dealloc__(self):
         if self._c_fragment_context is not NULL:

@@ -7,9 +7,9 @@
 #define VERBOSE 0
 /* set to 0 to turn off ncd testing */
 
-ResultClassify example(void)
+ClassifyT example(void)
 {
-    ResultClassify lReturn = { FT_TXT, 3 };
+    ClassifyT lReturn = { FT_TXT, 3 };
     return lReturn; 
 }
 
@@ -27,6 +27,20 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
         (struct _FragmentClassifier*)malloc(sizeof(struct _FragmentClassifier));
 
     lHandle->mFragmentSize = pFragmentSize;
+
+    return lHandle;
+}
+
+FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions, 
+        unsigned int pNumSo, 
+        unsigned int pFragmentSize,
+        ClassifyT* pTypes,
+        unsigned int pNumTypes)
+{
+    struct _FragmentClassifier* lHandle = fragment_classifier_new(
+            pOptions,
+            pNumSo,
+            pFragmentSize);
 
     return lHandle;
 }

@@ -223,10 +223,6 @@ class CMain(object):
             QtGui.QMessageBox.about(self.ui, "Error",
                 "Please make sure that your input file exists.")
             return
-        elif not os.path.isdir(self.customwidget.refFrags.text()):
-            QtGui.QMessageBox.about(self.ui, "Error",
-                "Please make sure that your reference fragment directory exists.")
-            return
         elif not os.path.isdir(self.customwidget.outputDir.text()):
             if self.__outputDirProblem() == False:
                 return

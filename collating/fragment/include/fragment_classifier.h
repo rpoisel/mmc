@@ -3,6 +3,7 @@
 
 #define MAX_STR_LEN 256
 
+/* data types */
 typedef enum _FileType
 {
     FT_NONE = 0, 
@@ -15,13 +16,13 @@ typedef enum _FileType
     FT_H264, 
 } FileType;
 
-typedef struct _ResultClassify
+typedef struct _ClassifyT
 {
     FileType mType;
     int mStrength;
-} ResultClassify;
+} ClassifyT;
 
-ResultClassify example(void);
+ClassifyT example(void);
 
 typedef struct _FragmentClassifier FragmentClassifier;
 
@@ -39,9 +40,16 @@ typedef struct _ClassifyOptions
 #define __declspec(dllexport) 
 #endif
 
+/* function declarations */
 __declspec(dllexport) FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
         unsigned int pNumOptions, 
         unsigned int pFragmentSize);
+
+__declspec(dllexport) FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions, 
+        unsigned int pNumOptions, 
+        unsigned int pFragmentSize,
+        ClassifyT* pTypes,
+        unsigned int pNumTypes);
 
 __declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
 
@@ -49,6 +57,7 @@ __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFrag
         const unsigned char* pFragment,
         int pLen);
 
+/* typedefs */
 typedef FragmentClassifier* (*fc_new_ptr)(ClassifyOptions* pOptions, 
         unsigned int pNumSo, 
         unsigned int pFragmentSize);
