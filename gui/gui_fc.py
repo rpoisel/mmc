@@ -332,6 +332,7 @@ class CMain(object):
         elif self.customwidget.recoverfiletypes.currentIndex() == 2:
             lOptions.recoverfiletype = "png"
 
+        lOptions.strength = self.customwidget.strength.value()
         lOptions.showResults = self.customwidget.showResults.isChecked()
         lOptions.imagefile = self.customwidget.inputFile.text()
         lOptions.output = self.customwidget.outputDir.text()

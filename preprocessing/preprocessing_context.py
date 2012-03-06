@@ -79,11 +79,11 @@ class CPreprocessing:
         lResultArray = multiprocessing.Array('i', [0 for i in range(lPreprocessor.getNumParallel(pOptions.maxcpus))])
         lTypes = []
         if pOptions.recoverfiletype == "video":
-            lTypes.append({'mType':fragment_context.FileType.FT_H264, 'mStrength':62})
+            lTypes.append({'mType':fragment_context.FileType.FT_H264, 'mStrength':pOptions.strength})
         elif pOptions.recoverfiletype == "jpg":
-            lTypes.append({'mType':fragment_context.FileType.FT_JPG, 'mStrength':62})
+            lTypes.append({'mType':fragment_context.FileType.FT_JPG, 'mStrength':pOptions.strength})
         elif pOptions.recoverfiletype == "png":
-            lTypes.append({'mType':fragment_context.FileType.FT_PNG, 'mStrength':62})
+            lTypes.append({'mType':fragment_context.FileType.FT_PNG, 'mStrength':pOptions.strength})
         lFC = fragment_context.CFragmentClassifier(
                 pOptions,
                 lTypes)
