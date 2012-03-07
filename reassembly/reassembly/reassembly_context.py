@@ -95,7 +95,10 @@ class CReassembly:
                 (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and lFrag.mPicEnd != "")]
 
         # determine reconstruction paths
-        CReassembly.reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions)
+        CReassembly.reassemblePUP(pSortedFrags, 
+                pIdxNoHeader, 
+                pOptions, 
+                CReassembly.compareVideoFrags)
 
         # extract determined videos
         lFH = None
@@ -230,11 +233,15 @@ class CReassembly:
     def getAssemblyMethods():
         return sorted(CReassembly.sReassemblyMethods.keys())
 
-    sReassemblyMethods = {'image processor':{'name':'image processor', 'func':__assemble_imageproc}, \
-            'permutations':{'name':'permutations', 'func':__assemble_permutations}}
-            
+
     @staticmethod
-    def reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions):
+    def compareVideoFrags(pFragment1, pFragment2, pSimilarity):
+        return CReassembly.__diffFrames(pFragment1.mPicEnd, \
+                pFragment2.mPicBegin, \
+                pSimilarity)
+        
+    @staticmethod
+    def reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions, pCmp):
         lNumFrg = len(pSortedFrags) - pIdxNoHeader
         lPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
         while lNumFrg > 0:
@@ -243,8 +250,8 @@ class CReassembly:
                 lIdxHead = lPaths[lIdxHdr]
                 for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
                     if pSortedFrags[lIdxFrag].mNextIdx == -1 and lIdxHead != lIdxFrag:
-                        lCmp = CReassembly.__diffFrames(pSortedFrags[lIdxHead].mPicEnd, \
-                                pSortedFrags[lIdxFrag].mPicBegin, \
+                        lCmp = pCmp(pSortedFrags[lIdxHead], \
+                                pSortedFrags[lIdxFrag], \
                                 pOptions.similarity)
                         if lCmp > lBestResult['cmp']:
                             lBestResult = {'idxHead':lIdxHead, 'idxFrag':lIdxFrag, 'idxHdr':lIdxHdr, 'cmp':lCmp}
@@ -254,6 +261,9 @@ class CReassembly:
             pSortedFrags[lBestResult['idxHead']].mNextIdx = lBestResult['idxFrag']
             lPaths[lBestResult['idxHdr']] = lBestResult['idxFrag']
             lNumFrg -= 1
+
+    sReassemblyMethods = {'image processor':{'name':'image processor', 'func':__assemble_imageproc}, \
+            'permutations':{'name':'permutations', 'func':__assemble_permutations}}
 
     def __init__(self):
         pass
