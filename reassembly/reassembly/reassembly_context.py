@@ -94,26 +94,8 @@ class CReassembly:
                 (lFrag.mIsHeader == True) or \
                 (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and lFrag.mPicEnd != "")]
 
-        # check for similarities
-        lNumFrg = len(pSortedFrags) - pIdxNoHeader
-        lPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
-        while lNumFrg > 0:
-            lBestResult = {'idxHead':-1, 'idxFrag':-1, 'idxHdr':-1, 'cmp':0}
-            for lIdxHdr in xrange(pIdxNoHeader):
-                lIdxHead = lPaths[lIdxHdr]
-                for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
-                    if pSortedFrags[lIdxFrag].mNextIdx == -1 and lIdxHead != lIdxFrag:
-                        lCmp = CReassembly.__diffFrames(pSortedFrags[lIdxHead].mPicEnd, \
-                                pSortedFrags[lIdxFrag].mPicBegin, \
-                                pOptions.similarity)
-                        if lCmp > lBestResult['cmp']:
-                            lBestResult = {'idxHead':lIdxHead, 'idxFrag':lIdxFrag, 'idxHdr':lIdxHdr, 'cmp':lCmp}
-            # check for ambiguous result
-            if lBestResult['cmp'] == 0:
-                break
-            pSortedFrags[lBestResult['idxHead']].mNextIdx = lBestResult['idxFrag']
-            lPaths[lBestResult['idxHdr']] = lBestResult['idxFrag']
-            lNumFrg -= 1
+        # determine reconstruction paths
+        CReassembly.reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions)
 
         # extract determined videos
         lFH = None
@@ -251,6 +233,27 @@ class CReassembly:
     sReassemblyMethods = {'image processor':{'name':'image processor', 'func':__assemble_imageproc}, \
             'permutations':{'name':'permutations', 'func':__assemble_permutations}}
             
+    @staticmethod
+    def reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions):
+        lNumFrg = len(pSortedFrags) - pIdxNoHeader
+        lPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
+        while lNumFrg > 0:
+            lBestResult = {'idxHead':-1, 'idxFrag':-1, 'idxHdr':-1, 'cmp':0}
+            for lIdxHdr in xrange(pIdxNoHeader):
+                lIdxHead = lPaths[lIdxHdr]
+                for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
+                    if pSortedFrags[lIdxFrag].mNextIdx == -1 and lIdxHead != lIdxFrag:
+                        lCmp = CReassembly.__diffFrames(pSortedFrags[lIdxHead].mPicEnd, \
+                                pSortedFrags[lIdxFrag].mPicBegin, \
+                                pOptions.similarity)
+                        if lCmp > lBestResult['cmp']:
+                            lBestResult = {'idxHead':lIdxHead, 'idxFrag':lIdxFrag, 'idxHdr':lIdxHdr, 'cmp':lCmp}
+            # check for ambiguous result
+            if lBestResult['cmp'] == 0:
+                break
+            pSortedFrags[lBestResult['idxHead']].mNextIdx = lBestResult['idxFrag']
+            lPaths[lBestResult['idxHdr']] = lBestResult['idxFrag']
+            lNumFrg -= 1
 
     def __init__(self):
         pass
