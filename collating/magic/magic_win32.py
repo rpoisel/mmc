@@ -14,7 +14,7 @@ def _init():
     L{ctypes.CDLL} instance 
     """
     #return ctypes.cdll.LoadLibrary(find_library('magic'))
-    return ctypes.cdll.LoadLibrary(r"lib\magic\dll32\magic")
+    return ctypes.cdll.LoadLibrary(r"magic")
 
 _libraries = {}
 _libraries['magic'] = _init()
