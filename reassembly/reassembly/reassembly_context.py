@@ -11,15 +11,12 @@ import Image
 
 import decoder
 
-class CReassembly:
+class CReassembly(object):
 
-    FRG_HDR = 0
-    FRG_BEGIN = 1
-    FRG_END = 2
-    FRG_SMALL = 3
+    def __init__(self, *args, **kwargs):
+        pass
 
-    @staticmethod
-    def assemble(pOptions, pFragments, pCaller):
+    def assemble(self, pOptions, pFragments, pCaller):
         # sort list so that header fragments are at the beginning
         lSortedFrags = sorted(pFragments, key=lambda lFrag: lFrag.mIsHeader, reverse = True)
         lIdxNoHeader = 0
@@ -29,11 +26,28 @@ class CReassembly:
             lFrag.mIsSmall = False
             lFrag.mPicBegin = ""
             lFrag.mPicEnd = ""
+        self._assemble_impl(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
 
-        CReassembly.sReassemblyMethods[pOptions.assemblymethod]['func'].__get__(None, CReassembly)(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
+    def _assemble_impl(self, pOptions, lSortedFrags, lIdxNoHeader, pCaller):
+        pass
 
-    @staticmethod
-    def __assemble_imageproc(pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+
+class CReassemblyImageProc(CReassembly):
+    
+    FRG_HDR = 0
+    FRG_BEGIN = 1
+    FRG_END = 2
+    FRG_SMALL = 3
+
+    def __init__(self, *args, **kwargs):
+        super(CReassemblyImageProc, self).__init__(*args, **kwargs)
+        if kwargs.has_key('path_algo'):
+            if kwargs['path_algo'] == "PUP":
+                self.mAlgo = CReassemblyImageProc.reassemblePUP
+        else:
+            self.mAlgo = CReassemblyImageProc.reassemblePUP
+
+    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         for lDir in [pOptions.output + "/hdr", pOptions.output + "/frg"]:
             if os.path.exists(lDir):
                 shutil.rmtree(lDir)
@@ -49,16 +63,16 @@ class CReassembly:
             lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if lFragHeader.mSize > pOptions.extractsize:
-                CReassembly.__decodeVideo(lFragHeader.mOffset + lFragHeader.mSize - \
+                self.__decodeVideo(lFragHeader.mOffset + lFragHeader.mSize - \
                         pOptions.extractsize, pOptions.output,
-                        "hdr", lCntHdr, lFragHeader.mSize, lHdrData, CReassembly.FRG_HDR,
+                        "hdr", lCntHdr, lFragHeader.mSize, lHdrData, CReassemblyImageProc.FRG_HDR,
                         lRecoverFH)
             else:
-                CReassembly.__decodeVideo(lFragHeader.mOffset + pOptions.hdrsize,
+                self.__decodeVideo(lFragHeader.mOffset + pOptions.hdrsize,
                         pOptions.output, "hdr", lCntHdr, lFragHeader.mSize, lHdrData,
-                        CReassembly.FRG_HDR, lRecoverFH)
+                        CReassemblyImageProc.FRG_HDR, lRecoverFH)
                 lFragHeader.mIsSmall = True
-            CReassembly.__determineCut(pOptions.output, "hdr", lFragHeader, lCntHdr, pOptions.minpicsize)
+            self.__determineCut(pOptions.output, "hdr", lFragHeader, lCntHdr, pOptions.minpicsize)
 
             # extract fragments frames
             # TODO check if fragment has already been decoded successfully
@@ -68,22 +82,22 @@ class CReassembly:
                 # extract begin
                 lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                 if lFrag.mSize > pOptions.extractsize:
-                    CReassembly.__decodeVideo(lFrag.mOffset, pOptions.output, "frg", 
-                            lCntFrg, pOptions.extractsize, lHdrData, CReassembly.FRG_BEGIN,
+                    self.__decodeVideo(lFrag.mOffset, pOptions.output, "frg", 
+                            lCntFrg, pOptions.extractsize, lHdrData, CReassemblyImageProc.FRG_BEGIN,
                             lRecoverFH)
                     # extract end
-                    CReassembly.__decodeVideo(lFrag.mOffset + lFrag.mSize - \
+                    self.__decodeVideo(lFrag.mOffset + lFrag.mSize - \
                             pOptions.extractsize,
                             pOptions.output, "frg", 
-                            lCntFrg, pOptions.extractsize, lHdrData, CReassembly.FRG_END,
+                            lCntFrg, pOptions.extractsize, lHdrData, CReassemblyImageProc.FRG_END,
                             lRecoverFH)
                 else:
                     # extract the whole fragment at once
-                    CReassembly.__decodeVideo(lFrag.mOffset, pOptions.output, "frg", 
-                            lCntFrg, lFrag.mSize, lHdrData, CReassembly.FRG_SMALL,
+                    self.__decodeVideo(lFrag.mOffset, pOptions.output, "frg", 
+                            lCntFrg, lFrag.mSize, lHdrData, CReassemblyImageProc.FRG_SMALL,
                             lRecoverFH)
                     lFrag.mIsSmall = True
-                CReassembly.__determineCut(pOptions.output, "frg", lFrag, lCntFrg, pOptions.minpicsize)
+                self.__determineCut(pOptions.output, "frg", lFrag, lCntFrg, pOptions.minpicsize)
                 lCntFrg += 1
             
             lCntHdr += 1
@@ -95,10 +109,10 @@ class CReassembly:
                 (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and lFrag.mPicEnd != "")]
 
         # determine reconstruction paths
-        CReassembly.reassemblePUP(pSortedFrags, 
+        self.mAlgo(pSortedFrags, 
                 pIdxNoHeader, 
                 pOptions, 
-                CReassembly.compareVideoFrags)
+                self.__compareVideoFrags)
 
         # extract determined videos
         lFH = None
@@ -126,8 +140,7 @@ class CReassembly:
         lRecoverFH.close()
         pCaller.progressCallback(100)
 
-    @staticmethod
-    def __diffFrames(pPath1, pPath2, pDiff):
+    def __diffFrames(self, pPath1, pPath2, pDiff):
         lImage1 = Image.open(pPath1, "r")
         lImage2 = Image.open(pPath2, "r")
         
@@ -149,8 +162,7 @@ class CReassembly:
 
         return lReturn
 
-    @staticmethod
-    def __determineCut(pOut, pDir, pFrag, pIdx, pMinPicSize):
+    def __determineCut(self, pOut, pDir, pFrag, pIdx, pMinPicSize):
         # determine relevant files
         lFiles = []
         for lFile in os.listdir(pOut + os.sep + pDir):
@@ -182,16 +194,15 @@ class CReassembly:
         for lFile in lSortedFiles:
             os.remove(lFile[0])
 
-    @staticmethod
-    def __decodeVideo(pOffset, pOut, pDir, pIdx, pLen, 
+    def __decodeVideo(self, pOffset, pOut, pDir, pIdx, pLen, 
             pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
         lFilename = pOut + os.sep + pDir + os.sep
-        if pWhence == CReassembly.FRG_HDR:
+        if pWhence == CReassemblyImageProc.FRG_HDR:
             lFilename += "h"
-        elif pWhence == CReassembly.FRG_BEGIN:
+        elif pWhence == CReassemblyImageProc.FRG_BEGIN:
             lFilename += "b"
-        elif pWhence == CReassembly.FRG_SMALL:
+        elif pWhence == CReassemblyImageProc.FRG_SMALL:
             lFilename += "s"
         else:
             lFilename += "e"
@@ -202,41 +213,8 @@ class CReassembly:
         lDecoder.write(pFH.read(pLen))
         lDecoder.close()
 
-    @staticmethod
-    def __assemble_permutations(pOptions, pSortedFrags, pIdxNoHeader, pCaller):
-        lCntHdr = 0
-        logging.info("Trying combinations... ")
-        for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
-            lDir = pOptions.output + os.sep + str(lCntHdr)
-            if not os.path.exists(lDir):
-                os.makedirs(lDir)
-            lRecoverFH = open(pOptions.imagefile, "rb")
-            for lCnt in xrange(len(pSortedFrags[pIdxNoHeader:])+1):
-                for lPermutation in itertools.permutations(pSortedFrags[pIdxNoHeader:], lCnt):
-                    logging.info("Trying permutation: " + str(lFragHeader) + ' ' + \
-                            ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
-                    lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
-                    lDecoder.open(lDir + os.sep + pOptions.outputformat)
-                    lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
-                    lDecoder.write(lRecoverFH.read(lFragHeader.mSize))
-                    for lFrag in lPermutation:
-                        lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
-                        lDecoder.write(lRecoverFH.read(lFrag.mSize))
-                    lDecoder.close()
-            lRecoverFH.close()
-            lCntHdr += 1
-            pCaller.progressCallback(100 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
-        logging.info("... Finished!")
-        pCaller.progressCallback(100)
-
-    @staticmethod
-    def getAssemblyMethods():
-        return sorted(CReassembly.sReassemblyMethods.keys())
-
-
-    @staticmethod
-    def compareVideoFrags(pFragment1, pFragment2, pSimilarity):
-        return CReassembly.__diffFrames(pFragment1.mPicEnd, \
+    def __compareVideoFrags(self, pFragment1, pFragment2, pSimilarity):
+        return self.__diffFrames(pFragment1.mPicEnd, \
                 pFragment2.mPicBegin, \
                 pSimilarity)
         
@@ -262,8 +240,48 @@ class CReassembly:
             lPaths[lBestResult['idxHdr']] = lBestResult['idxFrag']
             lNumFrg -= 1
 
-    sReassemblyMethods = {'image processor':{'name':'image processor', 'func':__assemble_imageproc}, \
-            'permutations':{'name':'permutations', 'func':__assemble_permutations}}
 
-    def __init__(self):
-        pass
+class CReassemblyPerm(CReassembly):
+
+    def __init__(self, *args, **kwargs):
+        super(CReassemblyPerm, self).__init__(*args, **kwargs)
+
+    def _assemble_impl(self, pOptions, lSortedFrags, lIdxNoHeader, pCaller):
+        lCntHdr = 0
+        logging.info("Trying combinations... ")
+        for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
+            lDir = pOptions.output + os.sep + str(lCntHdr)
+            if not os.path.exists(lDir):
+                os.makedirs(lDir)
+            lRecoverFH = open(pOptions.imagefile, "rb")
+            for lCnt in xrange(len(pSortedFrags[pIdxNoHeader:])+1):
+                for lPermutation in itertools.permutations(pSortedFrags[pIdxNoHeader:], lCnt):
+                    logging.info("Trying permutation: " + str(lFragHeader) + ' ' + \
+                            ''.join([str(lFrag)+' ' for lFrag in lPermutation]))
+                    lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
+                    lDecoder.open(lDir + os.sep + pOptions.outputformat)
+                    lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
+                    lDecoder.write(lRecoverFH.read(lFragHeader.mSize))
+                    for lFrag in lPermutation:
+                        lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
+                        lDecoder.write(lRecoverFH.read(lFrag.mSize))
+                    lDecoder.close()
+            lRecoverFH.close()
+            lCntHdr += 1
+            pCaller.progressCallback(100 * lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
+        logging.info("... Finished!")
+        pCaller.progressCallback(100)
+
+
+class CReassemblyFactory:
+
+    sReassemblyMethods = {'image processor':CReassemblyImageProc, \
+            'permutations':CReassemblyPerm}
+
+    @staticmethod
+    def getAssemblyMethods():
+        return sorted(CReassemblyFactory.sReassemblyMethods.keys())
+
+    @staticmethod
+    def getInstance(pWhich):
+        return CReassemblyFactory.sReassemblyMethods[pWhich]()

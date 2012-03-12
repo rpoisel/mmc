@@ -99,7 +99,7 @@ class CContext:
             pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
                     pOptions.offset,
                     "")
-            lReassembly = reassembly_context.CReassembly()
+            lReassembly = reassembly_context.CReassemblyFactory.getInstance(pOptions.assemblymethod)
             lReassembly.assemble(pOptions, self.mH264Fragments, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:

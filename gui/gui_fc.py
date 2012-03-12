@@ -118,7 +118,7 @@ class CMain(object):
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
 
-        for lAssembly in reassembly_context.CReassembly.getAssemblyMethods():
+        for lAssembly in reassembly_context.CReassemblyFactory.getAssemblyMethods():
             self.customwidget.assemblyMethod.addItem(lAssembly)
 
         self.customwidget.blockStatus.addItem("allocated")
