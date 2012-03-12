@@ -99,7 +99,13 @@ class CContext:
             pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
                     pOptions.offset,
                     "")
-            lReassembly = reassembly_context.CReassemblyFactory.getInstance(pOptions.assemblymethod)
+
+            if pOptions.recoverfiletype == "video":
+                lReassembly = reassembly_context.CReassemblyFactory.getInstanceVideo(pOptions.assemblymethod)
+            elif pOptions.recoverfiletype == "video":
+                lReassembly = reassembly_context.CReassemblyFactory.getInstanceJpeg(pOptions.assemblymethod)
+            elif pOptions.recoverfiletype == "video":
+                lReassembly = reassembly_context.CReassemblyFactory.getInstancePng(pOptions.assemblymethod)
             lReassembly.assemble(pOptions, self.mH264Fragments, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:

@@ -31,5 +31,4 @@ class CMagic:
                 lMagic.lower().find("text") != -1 or \
                 lMagic == "data":
             return False
-        print lMagic
         return True

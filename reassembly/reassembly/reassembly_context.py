@@ -15,7 +15,7 @@ import decoder
 class CReassembly(object):
 
     def __init__(self, *args, **kwargs):
-        pass
+        super(CReassembly, self).__init__(*args, **kwargs)
 
     def assemble(self, pOptions, pFragments, pCaller):
         # sort list so that header fragments are at the beginning
@@ -35,7 +35,48 @@ class CReassembly(object):
         pass
 
 
-class CReassemblyImageProc(CReassembly):
+class CReassemblyPUP(CReassembly):
+
+    def __init__(self, *args, **kwargs):
+        super(CReassemblyPUP, self).__init__(*args, **kwargs)
+
+    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+        # the place to invoke _reassemblePUP
+        self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
+                self._compareVideoFrags)
+
+    def _compareVideoFrags(self, pFragment1, pFragment2, pSimilarity):
+        # comparison function for two fragments
+        return -1
+
+    def _reassemblePUP(self, pSortedFrags, pIdxNoHeader, pOptions, pCmp):
+        lNumFrg = len(pSortedFrags) - pIdxNoHeader
+        lPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
+        while lNumFrg > 0:
+            lBestResult = {'idxHead': -1, 'idxFrag': -1, 'idxHdr': -1, \
+                    'cmp': 0}
+            for lIdxHdr in xrange(pIdxNoHeader):
+                lIdxHead = lPaths[lIdxHdr]
+                for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
+                    if pSortedFrags[lIdxFrag].mNextIdx == -1 and \
+                            lIdxHead != lIdxFrag:
+                        lCmp = pCmp(pSortedFrags[lIdxHead], \
+                                pSortedFrags[lIdxFrag], \
+                                pOptions.similarity)
+                        if lCmp > lBestResult['cmp']:
+                            lBestResult = {'idxHead': lIdxHead, \
+                                    'idxFrag': lIdxFrag, 'idxHdr': lIdxHdr, \
+                                    'cmp': lCmp}
+            # check for ambiguous result
+            if lBestResult['cmp'] == 0:
+                break
+            pSortedFrags[lBestResult['idxHead']].mNextIdx = \
+                    lBestResult['idxFrag']
+            lPaths[lBestResult['idxHdr']] = lBestResult['idxFrag']
+            lNumFrg -= 1
+
+
+class CReassemblyPUPVideo(CReassemblyPUP):
 
     FRG_HDR = 0
     FRG_BEGIN = 1
@@ -43,12 +84,7 @@ class CReassemblyImageProc(CReassembly):
     FRG_SMALL = 3
 
     def __init__(self, *args, **kwargs):
-        super(CReassemblyImageProc, self).__init__(*args, **kwargs)
-        if 'path_algo' in kwargs:
-            if kwargs['path_algo'] == "PUP":
-                self.mAlgo = CReassemblyImageProc.reassemblePUP
-        else:
-            self.mAlgo = CReassemblyImageProc.reassemblePUP
+        super(CReassemblyPUPVideo, self).__init__(*args, **kwargs)
 
     def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         for lDir in [pOptions.output + "/hdr", pOptions.output + "/frg"]:
@@ -69,12 +105,12 @@ class CReassemblyImageProc(CReassembly):
                 self.__decodeVideo(lFragHeader.mOffset + lFragHeader.mSize - \
                         pOptions.extractsize, pOptions.output,
                         "hdr", lCntHdr, lFragHeader.mSize, lHdrData,
-                        CReassemblyImageProc.FRG_HDR,
+                        CReassemblyPUPVideo.FRG_HDR,
                         lRecoverFH)
             else:
                 self.__decodeVideo(lFragHeader.mOffset + pOptions.hdrsize,
                         pOptions.output, "hdr", lCntHdr, lFragHeader.mSize,
-                        lHdrData, CReassemblyImageProc.FRG_HDR, lRecoverFH)
+                        lHdrData, CReassemblyPUPVideo.FRG_HDR, lRecoverFH)
                 lFragHeader.mIsSmall = True
             self.__determineCut(pOptions.output, "hdr", lFragHeader, lCntHdr,
                     pOptions.minpicsize)
@@ -89,18 +125,18 @@ class CReassemblyImageProc(CReassembly):
                 if lFrag.mSize > pOptions.extractsize:
                     self.__decodeVideo(lFrag.mOffset, pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
-                            CReassemblyImageProc.FRG_BEGIN, lRecoverFH)
+                            CReassemblyPUPVideo.FRG_BEGIN, lRecoverFH)
                     # extract end
                     self.__decodeVideo(lFrag.mOffset + lFrag.mSize - \
                             pOptions.extractsize,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
-                            CReassemblyImageProc.FRG_END, lRecoverFH)
+                            CReassemblyPUPVideo.FRG_END, lRecoverFH)
                 else:
                     # extract the whole fragment at once
                     self.__decodeVideo(lFrag.mOffset, pOptions.output, "frg",
                             lCntFrg, lFrag.mSize, lHdrData,
-                            CReassemblyImageProc.FRG_SMALL, lRecoverFH)
+                            CReassemblyPUPVideo.FRG_SMALL, lRecoverFH)
                     lFrag.mIsSmall = True
                 self.__determineCut(pOptions.output, "frg", lFrag, lCntFrg,
                         pOptions.minpicsize)
@@ -117,10 +153,10 @@ class CReassemblyImageProc(CReassembly):
                 lFrag.mPicEnd != "")]
 
         # determine reconstruction paths
-        self.mAlgo(pSortedFrags,
+        self._reassemblePUP(pSortedFrags,
                 pIdxNoHeader,
                 pOptions,
-                self.__compareVideoFrags)
+                self._compareVideoFrags)
 
         # extract determined videos
         lFH = None
@@ -148,9 +184,9 @@ class CReassemblyImageProc(CReassembly):
         lRecoverFH.close()
         pCaller.progressCallback(100)
 
-    def __diffFrames(self, pPath1, pPath2, pDiff):
-        lImage1 = Image.open(pPath1, "r")
-        lImage2 = Image.open(pPath2, "r")
+    def _compareVideoFrags(self, pFragment1, pFragment2, pSimilarity):
+        lImage1 = Image.open(pFragment1.mPicEnd, "r")
+        lImage2 = Image.open(pFragment2.mPicBegin, "r")
 
         # size check
         if lImage1.size != lImage2.size or \
@@ -165,11 +201,11 @@ class CReassemblyImageProc(CReassembly):
         for lChannel in xrange(3):
             for lIntensity in xrange(256):
                 lIdx = lChannel * 256 + lIntensity
-                if abs(lHist1[lIdx] - lHist2[lIdx]) < pDiff:
+                if abs(lHist1[lIdx] - lHist2[lIdx]) < pSimilarity:
                     lReturn += 1
 
-        logging.info("Value for " + pPath1 + " <=> " + pPath2 + ": " + \
-                str(lReturn))
+        logging.info("Value for " + pFragment1.mPicEnd + " <=> " + \
+                pFragment2.mPicBegin + ": " + str(lReturn))
 
         return lReturn
 
@@ -209,11 +245,11 @@ class CReassemblyImageProc(CReassembly):
             pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
         lFilename = pOut + os.sep + pDir + os.sep
-        if pWhence == CReassemblyImageProc.FRG_HDR:
+        if pWhence == CReassemblyPUPVideo.FRG_HDR:
             lFilename += "h"
-        elif pWhence == CReassemblyImageProc.FRG_BEGIN:
+        elif pWhence == CReassemblyPUPVideo.FRG_BEGIN:
             lFilename += "b"
-        elif pWhence == CReassemblyImageProc.FRG_SMALL:
+        elif pWhence == CReassemblyPUPVideo.FRG_SMALL:
             lFilename += "s"
         else:
             lFilename += "e"
@@ -223,38 +259,6 @@ class CReassemblyImageProc(CReassembly):
         lDecoder.write(pHdrData)
         lDecoder.write(pFH.read(pLen))
         lDecoder.close()
-
-    def __compareVideoFrags(self, pFragment1, pFragment2, pSimilarity):
-        return self.__diffFrames(pFragment1.mPicEnd, \
-                pFragment2.mPicBegin, \
-                pSimilarity)
-
-    @staticmethod
-    def reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions, pCmp):
-        lNumFrg = len(pSortedFrags) - pIdxNoHeader
-        lPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
-        while lNumFrg > 0:
-            lBestResult = {'idxHead': -1, 'idxFrag': -1, 'idxHdr': -1, \
-                    'cmp': 0}
-            for lIdxHdr in xrange(pIdxNoHeader):
-                lIdxHead = lPaths[lIdxHdr]
-                for lIdxFrag in xrange(pIdxNoHeader, len(pSortedFrags)):
-                    if pSortedFrags[lIdxFrag].mNextIdx == -1 and \
-                            lIdxHead != lIdxFrag:
-                        lCmp = pCmp(pSortedFrags[lIdxHead], \
-                                pSortedFrags[lIdxFrag], \
-                                pOptions.similarity)
-                        if lCmp > lBestResult['cmp']:
-                            lBestResult = {'idxHead': lIdxHead, \
-                                    'idxFrag': lIdxFrag, 'idxHdr': lIdxHdr, \
-                                    'cmp': lCmp}
-            # check for ambiguous result
-            if lBestResult['cmp'] == 0:
-                break
-            pSortedFrags[lBestResult['idxHead']].mNextIdx = \
-                    lBestResult['idxFrag']
-            lPaths[lBestResult['idxHdr']] = lBestResult['idxFrag']
-            lNumFrg -= 1
 
 
 class CReassemblyPerm(CReassembly):
@@ -298,13 +302,17 @@ class CReassemblyPerm(CReassembly):
 
 class CReassemblyFactory:
 
-    sReassemblyMethods = {'image processor': CReassemblyImageProc, \
-            'permutations': CReassemblyPerm}
+    sReassemblyMethodsVideo = {'Parallel Unique Path': CReassemblyPUPVideo, \
+            'Permutations': CReassemblyPerm}
+
+    sReassemblyMethodsJpeg = {}
+
+    sReassemblyMethodsPng = {}
 
     @staticmethod
-    def getAssemblyMethods():
-        return sorted(CReassemblyFactory.sReassemblyMethods.keys())
+    def getAssemblyMethodsVideo():
+        return sorted(CReassemblyFactory.sReassemblyMethodsVideo.keys())
 
     @staticmethod
-    def getInstance(pWhich):
-        return CReassemblyFactory.sReassemblyMethods[pWhich]()
+    def getInstanceVideo(pWhich):
+        return CReassemblyFactory.sReassemblyMethodsVideo[pWhich]()
