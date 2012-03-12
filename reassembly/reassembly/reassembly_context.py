@@ -30,7 +30,8 @@ class CReassembly(object):
             lFrag.mPicEnd = ""
         self._assemble_impl(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
 
-    def _assemble_impl(self, pOptions, lSortedFrags, lIdxNoHeader, pCaller):
+    # interface only
+    def _assemble_impl(self, pOptions, pSortedFrags, lIdxNoHeader, pCaller):
         pass
 
 
