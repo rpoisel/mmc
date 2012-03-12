@@ -84,12 +84,18 @@ class CPreprocessing:
                 ])
         lTypes = []
         if pOptions.recoverfiletype == "video":
+            lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
+                'mStrength': pOptions.strength})
             lTypes.append({'mType': fragment_context.FileType.FT_H264,
                 'mStrength': pOptions.strength})
-        elif pOptions.recoverfiletype == "jpg":
+        elif pOptions.recoverfiletype == "jpeg":
+            lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
+                'mStrength': pOptions.strength})
             lTypes.append({'mType': fragment_context.FileType.FT_JPG,
                 'mStrength': pOptions.strength})
         elif pOptions.recoverfiletype == "png":
+            lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
+                'mStrength': pOptions.strength})
             lTypes.append({'mType': fragment_context.FileType.FT_PNG,
                 'mStrength': pOptions.strength})
         lFC = fragment_context.CFragmentClassifier(
@@ -126,7 +132,7 @@ class CPreprocessing:
     def classifyCore(self, pPid, pPreprocessor, pHeadersList,
             pBlocksList, pResultArray, pFC, pOptions):
         # data structure for temporary storage of results
-        lMagic = magic_context.CMagic(magic_context.MagicDb.VIDEO)
+        lMagic = magic_context.CMagic(pOptions.recoverfiletype)
         logging.info("PID " + str(pPid) + \
                 " | Initializing fragment classifier: fragmentsize " + \
                 str(pOptions.fragmentsize))

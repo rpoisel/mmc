@@ -4,14 +4,16 @@ cimport cfragment_context
 
 cdef class FileType:
     FT_UNKNOWN = 0
-    FT_TXT = 1
-    FT_HTML = 2
-    FT_XML = 3
-    FT_JPG = 4
-    FT_PNG = 5
-    FT_DOC = 6 
-    FT_PDF = 7
-    FT_H264 = 8
+    FT_HIGH_ENTROPY = 1
+    FT_LOW_ENTROPY = 2
+    FT_TXT = 3
+    FT_HTML = 4
+    FT_XML = 5
+    FT_JPG = 6
+    FT_PNG = 7
+    FT_DOC = 8
+    FT_PDF = 9
+    FT_H264 = 10
 
 cdef class CFragmentClassifier:
 

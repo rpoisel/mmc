@@ -110,8 +110,8 @@ class CMain(object):
         self.customwidget.outputformat.addItem("PNG")
 
         self.customwidget.recoverfiletypes.addItem("Video")
-        self.customwidget.recoverfiletypes.addItem("Images (JPG)")
-        self.customwidget.recoverfiletypes.addItem("Images (PNG)")
+        self.customwidget.recoverfiletypes.addItem("JPEG")
+        self.customwidget.recoverfiletypes.addItem("PNG")
         #self.customwidget.recoverfiletypes.addItem("Text (not implemented yet)")
         #self.customwidget.recoverfiletypes.addItem("Documents (not implemented yet)")
 
@@ -328,7 +328,7 @@ class CMain(object):
         if self.customwidget.recoverfiletypes.currentIndex() == 0:
             lOptions.recoverfiletype = "video"
         elif self.customwidget.recoverfiletypes.currentIndex() == 1:
-            lOptions.recoverfiletype = "jpg"
+            lOptions.recoverfiletype = "jpeg"
         elif self.customwidget.recoverfiletypes.currentIndex() == 2:
             lOptions.recoverfiletype = "png"
 

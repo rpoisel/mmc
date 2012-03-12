@@ -7,6 +7,8 @@
 typedef enum _FileType
 {
     FT_UNKNOWN = 0, 
+    FT_HIGH_ENTROPY, 
+    FT_LOW_ENTROPY, 
     FT_TXT, 
     FT_HTML, 
     FT_XML, 

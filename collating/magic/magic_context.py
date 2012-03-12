@@ -8,18 +8,19 @@ else:
 
 
 class MagicDb:
-    NONE = 0x0
+
     BASE_PATH = os.path.join("data", "magic")
-    VIDEO = os.path.join(BASE_PATH, "animation.mgc")
-    IMAGE_JPEG = os.path.join(BASE_PATH, "jpeg.mgc")
-    IMAGE_PNG = os.path.join(BASE_PATH, "png.mgc")
+
+    sSignatures = {'video': os.path.join(BASE_PATH, "animation.mgc"), \
+            'jpeg': os.path.join(BASE_PATH, "jpeg.mgc"), \
+            'png': os.path.join(BASE_PATH, "png.mgc")}
 
 
 class CMagic:
     def __init__(self, pType):
         self.mMagic = magic.open(magic.NONE)
-        if pType != MagicDb.NONE:
-            self.mMagic.load(pType)
+        if pType in MagicDb.sSignatures:
+            self.mMagic.load(MagicDb.sSignatures[pType])
         else:
             self.mMagic.load()
 
@@ -30,4 +31,5 @@ class CMagic:
                 lMagic.lower().find("text") != -1 or \
                 lMagic == "data":
             return False
+        print lMagic
         return True

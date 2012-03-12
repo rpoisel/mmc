@@ -76,7 +76,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     lEntropy = calc_entropy(pFragment, pLen);
     if (lEntropy > 0.625) /* empiric value ;-) */
     {
-        pResult->mType = FT_H264;
+        pResult->mType = FT_HIGH_ENTROPY;
         pResult->mStrength = 1;
     }
 
