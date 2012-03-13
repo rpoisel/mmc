@@ -266,7 +266,7 @@ class CReassemblyPerm(CReassembly):
     def __init__(self, *args, **kwargs):
         super(CReassemblyPerm, self).__init__(*args, **kwargs)
 
-    def _assemble_impl(self, pOptions, lSortedFrags, lIdxNoHeader, pCaller):
+    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         lCntHdr = 0
         logging.info("Trying combinations... ")
         for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
