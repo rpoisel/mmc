@@ -58,7 +58,7 @@ class CImgVisualizer(QGraphicsScene):
         #calculate the fragment under cursor
         lWidth = lSceneWidth / float(self.__mSize) #w of 1 fragment
         lX = (pPos.x()-lSceneX) / lWidth
-        for lFrag in self.__mCtx.mH264Fragments:
+        for lFrag in self.__mCtx.mFragments:
             if lX >= lFrag.mOffset and lX <= lFrag.mOffset+lFrag.mSize:
                 #logging.info('Paint tooltip')
                 self.__mHoverFragment = lFrag
@@ -154,7 +154,7 @@ class CImgVisualizer(QGraphicsScene):
         lWidth = lSceneWidth / float(self.__mSize)#self.parent().size().width() / float(self.__mSize)
         lHeight = lSceneHeight #self.parent().size().height()
 
-        for lFrag in self.__mCtx.mH264Fragments:
+        for lFrag in self.__mCtx.mFragments:
             lColor = None
             if lFrag.mIsHeader:
                 lColor = QColor(255, 127, 127)

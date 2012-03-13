@@ -27,11 +27,11 @@ class CContext:
     sDefaultOutputFormat = 'jpg'
 
     def __init__(self):
-        self.mH264Fragments = []
+        self.mFragments = []
 
     @property
-    def h264fragments(self):
-        return self.mH264Fragments
+    def fragments(self):
+        return self.mFragments
 
     @staticmethod
     def getCPUs():
@@ -53,25 +53,25 @@ class CContext:
                 logging.info("Number of H.264 fragments %d" % 
                         len(lVideoBlocks.getBlocks()))
                 logging.info("8<============ Headers ==============")
-                for lH264Header in lHeaders:
-                    logging.info(str(lH264Header))
+                for lHeader in lHeaders:
+                    logging.info(str(lHeader))
                 logging.info("8<============ Blocks ==============")
-                for lH264Block in lBlocks:
-                    logging.info(str(lH264Block))
+                for lBlock in lBlocks:
+                    logging.info(str(lBlock))
 
             # initialize fragmentizer with parameters that describe
             # the most important properties for blocks => fragments
             # conversions
             logging.info("Starting fragmentizing.")
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            self.mH264Fragments = lFragmentizer.defrag(lVideoBlocks, 
+            self.mFragments = lFragmentizer.defrag(lVideoBlocks, 
                     pOptions.fragmentsize, pOptions.blockgap,
                     pOptions.minfragsize)
             logging.info("Finished fragmentizing.")
             logging.info("8<=============== FRAGMENTs ==============")
-            for lIdx in xrange(len(self.mH264Fragments)):
-                lH264Fragment = self.mH264Fragments[lIdx]
-                logging.info("FragmentIdx %04d" % lIdx + ": " + str(lH264Fragment))
+            for lIdx in xrange(len(self.mFragments)):
+                lFragment = self.mFragments[lIdx]
+                logging.info("FragmentIdx %04d" % lIdx + ": " + str(lFragment))
             logging.info("8<=============== FRAGMENTs ==============")
 
             pCaller.progressCallback(100)
@@ -106,7 +106,7 @@ class CContext:
                 lReassembly = reassembly_context.CReassemblyFactory.getInstanceJpeg(pOptions.assemblymethod)
             elif pOptions.recoverfiletype == "video":
                 lReassembly = reassembly_context.CReassemblyFactory.getInstancePng(pOptions.assemblymethod)
-            lReassembly.assemble(pOptions, self.mH264Fragments, pCaller)
+            lReassembly.assemble(pOptions, self.mFragments, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:
             logging.error("LookupError: " + str(pExc))

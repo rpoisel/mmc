@@ -43,9 +43,9 @@ class CReassemblyPUP(CReassembly):
     def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         # the place to invoke _reassemblePUP
         self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
-                self._compareVideoFrags)
+                self._compareFrags)
 
-    def _compareVideoFrags(self, pFragment1, pFragment2, pSimilarity):
+    def _compareFrags(self, pFragment1, pFragment2, pSimilarity):
         # comparison function for two fragments
         return -1
 
@@ -259,6 +259,21 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         lDecoder.write(pHdrData)
         lDecoder.write(pFH.read(pLen))
         lDecoder.close()
+
+
+class CReassemblyPUPJpeg(CReassemblyPUP):
+
+    def __init__(self, *args, **kwargs):
+        super(CReassemblyPUPJpeg, self).__init__(*args, **kwargs)
+
+    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+        # the place to invoke _reassemblePUP
+        self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
+                self._compareFrags)
+
+    def _compareFrags(self, pFragment1, pFragment2, pSimilarity):
+        # comparison function for two fragments
+        return -1
 
 
 class CReassemblyPerm(CReassembly):

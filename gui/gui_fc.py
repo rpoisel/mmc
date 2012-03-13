@@ -257,7 +257,7 @@ class CMain(object):
         return False
 
     def on_reassembleButton_clicked(self, pChecked=None):
-        if len(self.mContext.h264fragments) is 0:
+        if len(self.mContext.fragments) is 0:
             QtGui.QMessageBox.about(self.ui, "Error",
                 "What would you like to reassemble? No H.264 headers have been classified yet!")
         elif not os.path.isdir(self.customwidget.outputDir.text()):
@@ -377,7 +377,7 @@ class CMain(object):
         self.customwidget.duration.setText(str(lDelta))
         if pFinishedJob == Jobs.CLASSIFY:
             lNumRowsResult = 0
-            for lFrag in self.mContext.h264fragments:
+            for lFrag in self.mContext.fragments:
                 self.customwidget.resultTable.insertRow(lNumRowsResult) 
                 if lFrag.mIsHeader == True:
                     lItem = QtGui.QTableWidgetItem("H")
