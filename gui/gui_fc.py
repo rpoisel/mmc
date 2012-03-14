@@ -10,21 +10,22 @@ import logging
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
 import datetime
 # PyQt4, PySide stuff
-from qtimport import *
+from PySide import QtCore
+from PySide import QtGui
+from PySide import QtXml
+from PySide import QtUiTools
 
 sys.path.append('.')
 
 # Import the compiled UI module
-import gui_resources
-from file_carving_ui import Ui_filecarvingWidget
-from mainwindow import Ui_MainWindow
+import gui.gui_resources
 from mm_context import CContext
-from gui_options import CGuiOptions
+import gui.gui_options
 from preprocessing import preprocessing_context
 from preprocessing import fsstat_context
 from reassembly.reassembly import reassembly_context
 
-from gui_imgvisualizer import CImgVisualizer
+import gui.gui_imgvisualizer
 
 class Jobs:
     NONE=0x0
@@ -314,7 +315,7 @@ class CMain(object):
 
     def __getOptions(self):
         # TODO rename fragmentsize to blocksize
-        lOptions = CGuiOptions()
+        lOptions = gui.gui_options.CGuiOptions()
         lOptions.preprocess = self.customwidget.preprocessing.currentText()
         if self.customwidget.outputformat.currentText() == "PNG":
             lOptions.outputformat = "%08d.png"
@@ -360,7 +361,7 @@ class CMain(object):
     def on_begin_callback(self, pJob, pSize, pOffset, pFsType):
         if pJob == Jobs.CLASSIFY:
             logging.info("Beginning classifying. Imagesize is " + str(pSize) + " bytes.")
-            self.__mImgVisualizer = CImgVisualizer(self.mContext, pSize, pOffset, pFsType, self.customwidget.imageView)
+            self.__mImgVisualizer = gui.gui_imgvisualizer.CimgVisualizer(self.mContext, pSize, pOffset, pFsType, self.customwidget.imageView)
             self.customwidget.imageView.setScene(self.__mImgVisualizer)
         elif pJob == Jobs.REASSEMBLE:
             logging.info("Beginning reassembling.")

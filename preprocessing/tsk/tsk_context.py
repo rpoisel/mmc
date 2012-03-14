@@ -3,12 +3,12 @@ import logging
 import subprocess
 import math
 from tsk import CTSKblkls
-from gui_options import CGuiOptions
+import gui.gui_options
 
 class CGeneratorContext:
     def __init__(self, start, stop):
     
-        self.__pOptions = CGuiOptions()
+        self.__pOptions = gui.gui_options.CGuiOptions()
         self.__mImage = open(self.__pOptions.imagefile, "rb")
         self.__start = start
         self.__stop = stop
