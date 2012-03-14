@@ -1,0 +1,7 @@
+include MANIFEST.in
+recursive-include gui *.py
+recursive-include collating *.py
+recursive-include collating *.so
+recursive-include preprocessing *.py
+recursive-include reassembly *.py
+recursive-include lib *.py

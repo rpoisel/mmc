@@ -9,11 +9,11 @@ lTarget = Executable(
     ) 
 include_files = [("collating/fragment/libfragment_classifier.so", "libfragment_classifier.so")]
 setup(
-    version = "1.0",
-    description = "mmc",
-    author = "me",
-    author_email = "email@email.com",
-    #name = "app",
+    version = "0.9.5",
+    description = "Multimedia File Carver",
+    author = "Rainer Poisel",
+    author_email = "rainer.poisel@fhstp.ac.at",
+    name = "mmc",
     options = {"build_exe": {
                              "append_script_to_exe": True,
                              "create_shared_zip": False,
