@@ -361,7 +361,7 @@ class CMain(object):
     def on_begin_callback(self, pJob, pSize, pOffset, pFsType):
         if pJob == Jobs.CLASSIFY:
             logging.info("Beginning classifying. Imagesize is " + str(pSize) + " bytes.")
-            self.__mImgVisualizer = gui.gui_imgvisualizer.CimgVisualizer(self.mContext, pSize, pOffset, pFsType, self.customwidget.imageView)
+            self.__mImgVisualizer = gui.gui_imgvisualizer.CImgVisualizer(self.mContext, pSize, pOffset, pFsType, self.customwidget.imageView)
             self.customwidget.imageView.setScene(self.__mImgVisualizer)
         elif pJob == Jobs.REASSEMBLE:
             logging.info("Beginning reassembling.")
