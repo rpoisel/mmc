@@ -2,7 +2,7 @@ import platform
 import os
 
 if platform.system().lower() == "windows":
-    import magic_win32 as magic
+    import magic_win as magic
 else:
     import magic
 
