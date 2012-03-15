@@ -8,16 +8,16 @@ FRAGMENT_CONTEXT=fragment_context
 
 all: $(FRAGMENT_CONTEXT)
     move build\lib.win-amd64-2.7\fragment_context.pyd . 
-    copy lib\zlib\dllx64\zlibwapi.dll .
 
 $(FRAGMENT_CONTEXT): $(LIBFRAGMENT_CLASSIFIER).dll
-    python setup.py build_ext 
+    python setup.py build_ext -i
 
 $(LIBFRAGMENT_CLASSIFIER).dll: 
     cl /c src\fragment_classifier.c /Iinclude /I. 
-    cl /c src\ncd.c /Iinclude /I. /Ilib\zlib
-    link fragment_classifier.obj ncd.obj lib\zlib\dllx64\zlibwapi.lib /DLL /out:$(LIBFRAGMENT_CLASSIFIER).dll 
+    cl /c src\entropy/entropy.c /Iinclude /Iinclude\entropy /I. 
+    link fragment_classifier.obj entropy /DLL /out:$(LIBFRAGMENT_CLASSIFIER).dll 
     
 clean:
     del $(LIBFRAGMENT_CLASSIFIER).* *.obj *.pyd
+	del $(FRAGMENT_CONTEXT).c
     rmdir /S /Q build
