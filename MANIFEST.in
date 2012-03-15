@@ -5,3 +5,5 @@ recursive-include collating *.so
 recursive-include preprocessing *.py
 recursive-include reassembly *.py
 recursive-include lib *.py
+recursive-include data/magic *.mgc
+recursive-include data *.img
