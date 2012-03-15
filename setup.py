@@ -12,17 +12,19 @@ def pathAdd(pList, pPath, pExtension):
                 and lFile.endswith(pExtension):
             pList.append(lFilePath)
 
-lTarget = Executable(
-    script="gui/gui_fc.py",
-    includes=["PySide.QtCore", "PySide.QtGui", "PySide.QtXml", "magic"]
-    )
-
 include_files = []
+lTargetIncludes = ["PySide.QtCore", "PySide.QtGui", "PySide.QtXml"]
 if platform.system().lower() == "linux":
     include_files.append(("collating/fragment/libfragment_classifier.so", \
             "libfragment_classifier.so"))
+    lTargetIncludes.append("magic")
 pathAdd(include_files, os.path.join('data', 'magic'), ".mgc")
 pathAdd(include_files, 'data', ".img")
+
+lTarget = Executable(
+    script="gui/gui_fc.py",
+    includes=lTargetIncludes
+    )
 
 setup(
     version="0.9.5",
