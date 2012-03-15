@@ -98,9 +98,6 @@ class CPreprocessing:
                 'mStrength': pOptions.strength})
             lTypes.append({'mType': fragment_context.FileType.FT_PNG,
                 'mStrength': pOptions.strength})
-        lFC = fragment_context.CFragmentClassifier(
-                pOptions,
-                lTypes)
         lResultThread = CResultThread(pCaller, lResultArray, lQueue)
         lResultThread.start()
         for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
@@ -111,7 +108,7 @@ class CPreprocessing:
                lHeadersList,
                lBlocksList,
                lResultArray,
-               lFC,
+               lTypes,
                pOptions \
                        ))
             lProcesses.append(lProcess)
@@ -130,9 +127,12 @@ class CPreprocessing:
         return lVideoBlocks
 
     def classifyCore(self, pPid, pPreprocessor, pHeadersList,
-            pBlocksList, pResultArray, pFC, pOptions):
+            pBlocksList, pResultArray, pTypes, pOptions):
         # data structure for temporary storage of results
         lMagic = magic_context.CMagic(pOptions.recoverfiletype)
+        lFC = fragment_context.CFragmentClassifier(
+                pOptions,
+                pTypes)
         logging.info("PID " + str(pPid) + \
                 " | Initializing fragment classifier: fragmentsize " + \
                 str(pOptions.fragmentsize))
@@ -154,7 +154,7 @@ class CPreprocessing:
             # generate a map of filetypes of fragments
             # TODO add block dependent on its filetype
             #      (instead of an int-value)
-            elif pFC.classify(lBlock[1]) > 0:
+            elif lFC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
         logging.info("Process " + str(pPid) + " finished classifying")
