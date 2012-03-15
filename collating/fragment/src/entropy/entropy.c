@@ -1,6 +1,11 @@
 #include <math.h>
-#include <stdint.h>
 #include <stdio.h>
+
+#ifdef _MSC_VER
+#include "stdint_ms.h"
+#else 
+#include <stdint.h>
+#endif /* _MSC_VER */
 
 #include "entropy.h"
 
