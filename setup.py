@@ -14,10 +14,19 @@ def pathAdd(pList, pPath, pExtension):
 
 include_files = []
 lTargetIncludes = ["PySide.QtCore", "PySide.QtGui", "PySide.QtXml"]
-if platform.system().lower() == "linux":
+lPlatform = platform.system().lower()
+if lPlatform == "linux":
     include_files.append(("collating/fragment/libfragment_classifier.so", \
             "libfragment_classifier.so"))
     lTargetIncludes.append("magic")
+elif lPlatform == "windows":
+    include_files.append((r"collating\magic\magic.dll", \
+            r"collating\magic\magic.dll"))
+    include_files.append((r"collating\magic\libgnurx-0.dll", \
+            r"collating\magic\libgnurx-0.dll"))
+    pathAdd(include_files, "bin", ".exe")
+    pathAdd(include_files, "bin", ".dll")
+	
 pathAdd(include_files, os.path.join('data', 'magic'), ".mgc")
 pathAdd(include_files, 'data', ".img")
 
