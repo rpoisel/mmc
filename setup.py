@@ -26,7 +26,7 @@ elif lPlatform == "windows":
             r"collating\magic\libgnurx-0.dll"))
     pathAdd(include_files, "bin", ".exe")
     pathAdd(include_files, "bin", ".dll")
-	
+
 pathAdd(include_files, os.path.join('data', 'magic'), ".mgc")
 pathAdd(include_files, 'data', ".img")
 
