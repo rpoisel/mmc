@@ -130,6 +130,9 @@ class CPreprocessing:
             pBlocksList, pResultArray, pTypes, pOptions):
         # data structure for temporary storage of results
         lMagic = magic_context.CMagic(pOptions.recoverfiletype)
+        # do not change this: the fragment classifier cannot be pickled on
+        # windows; so it has to be instantiated separately in each
+        # process/thread
         lFC = fragment_context.CFragmentClassifier(
                 pOptions,
                 pTypes)
