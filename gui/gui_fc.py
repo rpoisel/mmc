@@ -16,6 +16,11 @@ from PySide import QtXml
 from PySide import QtUiTools
 
 sys.path.append('.')
+lPlatform = platform.system().lower()
+if lPlatform == "linux":
+	os.environ['LD_LIBRARY_PATH'] += r":collating/fragment"
+elif lPlatform == "windows":
+	os.environ['PATH'] += r";collating\magic"
 
 # Import the compiled UI module
 import gui.gui_resources
