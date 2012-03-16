@@ -100,13 +100,15 @@ class CContext:
                     pOptions.offset,
                     "")
 
+            lReassembly = None
             if pOptions.recoverfiletype == "video":
                 lReassembly = reassembly_context.CReassemblyFactory.getInstanceVideo(pOptions.assemblymethod)
             elif pOptions.recoverfiletype == "video":
                 lReassembly = reassembly_context.CReassemblyFactory.getInstanceJpeg(pOptions.assemblymethod)
             elif pOptions.recoverfiletype == "video":
                 lReassembly = reassembly_context.CReassemblyFactory.getInstancePng(pOptions.assemblymethod)
-            lReassembly.assemble(pOptions, self.mFragments, pCaller)
+            if lReassembly != None:
+                lReassembly.assemble(pOptions, self.mFragments, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:
             logging.error("LookupError: " + str(pExc))

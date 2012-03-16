@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Fri Mar 16 08:26:13 2012
+# Created: Fri Mar 16 11:08:24 2012
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_filecarvingWidget(object):
     def setupUi(self, filecarvingWidget):
         filecarvingWidget.setObjectName("filecarvingWidget")
-        filecarvingWidget.resize(537, 450)
+        filecarvingWidget.resize(500, 391)
         filecarvingWidget.setMinimumSize(QtCore.QSize(500, 0))
         self.verticalLayout_4 = QtGui.QVBoxLayout(filecarvingWidget)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
@@ -282,9 +282,28 @@ class Ui_filecarvingWidget(object):
         self.graphicsView.setObjectName("graphicsView")
         self.verticalLayout.addWidget(self.graphicsView)
         self.tabWidget.addTab(self.tab_video, "")
-        self.tab = QtGui.QWidget()
-        self.tab.setObjectName("tab")
-        self.tabWidget.addTab(self.tab, "")
+        self.tab_image = QtGui.QWidget()
+        self.tab_image.setObjectName("tab_image")
+        self.verticalLayout_5 = QtGui.QVBoxLayout(self.tab_image)
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.label_17 = QtGui.QLabel(self.tab_image)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_17.sizePolicy().hasHeightForWidth())
+        self.label_17.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(26)
+        font.setWeight(75)
+        font.setUnderline(False)
+        font.setStrikeOut(False)
+        font.setBold(True)
+        self.label_17.setFont(font)
+        self.label_17.setAutoFillBackground(False)
+        self.label_17.setObjectName("label_17")
+        self.verticalLayout_5.addWidget(self.label_17)
+        self.tabWidget.addTab(self.tab_image, "")
         self.verticalLayout_4.addWidget(self.tabWidget)
 
         self.retranslateUi(filecarvingWidget)
@@ -337,5 +356,6 @@ class Ui_filecarvingWidget(object):
         self.extractSize.setText(QtGui.QApplication.translate("filecarvingWidget", "90", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("filecarvingWidget", "Output Format:", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_video), QtGui.QApplication.translate("filecarvingWidget", "Video Recovery", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("filecarvingWidget", "Image Recovery", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_17.setText(QtGui.QApplication.translate("filecarvingWidget", "Not Implemented yet. ", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_image), QtGui.QApplication.translate("filecarvingWidget", "Image Recovery", None, QtGui.QApplication.UnicodeUTF8))
 

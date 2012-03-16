@@ -112,8 +112,8 @@ class CMain(object):
         self.customwidget.outputformat.addItem("PNG")
 
         self.customwidget.recoverfiletypes.addItem("Video")
-        self.customwidget.recoverfiletypes.addItem("JPEG")
-        self.customwidget.recoverfiletypes.addItem("PNG")
+        self.customwidget.recoverfiletypes.addItem("JPEG (not implemented)")
+        self.customwidget.recoverfiletypes.addItem("PNG (not implemented)")
         #self.customwidget.recoverfiletypes.addItem("Text (not implemented yet)")
         #self.customwidget.recoverfiletypes.addItem("Documents (not implemented yet)")
 
@@ -424,6 +424,10 @@ class CMain(object):
         if pFinishedJob == Jobs.REASSEMBLE and \
             lOptions.showResults == True:
                 QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://" + lOptions.output))
+        if pFinishedJob == Jobs.CLASSIFY:
+            logging.info("Classification finished. ")
+        elif pFinishedJob == Jobs.REASSEMBLE:
+            logging.info("Reassembling finished. ")
 
     def run(self):
         #self.__mWindow.show()
