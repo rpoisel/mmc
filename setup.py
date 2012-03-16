@@ -20,10 +20,18 @@ if lPlatform == "linux":
             "libfragment_classifier.so"))
     lTargetIncludes.append("magic")
 elif lPlatform == "windows":
-    include_files.append((r"collating\magic\magic.dll", \
-            r"collating\magic\magic.dll"))
-    include_files.append((r"collating\magic\libgnurx-0.dll", \
-            r"collating\magic\libgnurx-0.dll"))
+    lBits = 32
+    if sys.maxsize > 2**32:
+        lBits = 64
+    lPath = r"collating\magic\lib\magic\dll" + str(lBits)
+    include_files.append((lPath + r"\magic.dll", \
+            lPath + r"\magic.dll"))
+    if lBits == 64:
+        include_files.append((lPath + r"\libgnurx-0.dll", \
+                lPath + r"\libgnurx-0.dll"))
+    else:
+        include_files.append((lPath + r"\regex2.dll", \
+                lPath + r"\regex2.dll"))
     pathAdd(include_files, "bin", ".exe")
     pathAdd(include_files, "bin", ".dll")
 

@@ -17,8 +17,6 @@ from PySide import QtXml
 from PySide import QtUiTools
 
 sys.path.append('.')
-if platform.system().lower() == "windows":
-    os.environ['PATH'] += r";collating\magic"
 
 # Import the compiled UI module
 import gui.gui_resources
