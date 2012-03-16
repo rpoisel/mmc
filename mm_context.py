@@ -16,6 +16,7 @@ from reassembly.reassembly import reassembly_context
 from reassembly.fragmentizer import fragmentizer_context
 from lib import datatypes
 
+
 class CContext:
     sDefaultImagefile = 'image.img'
     sDefaultFragmentsize = 512
@@ -44,19 +45,19 @@ class CContext:
                     "")
             # initialize preprocessor
             lProcessor = preprocessing_context.CPreprocessing(pOptions)
-            lVideoBlocks = lProcessor.classify(pOptions, pCaller)
+            lBlocks = lProcessor.classify(pOptions, pCaller)
             logging.info("Back to the main context.")
 
             if pOptions.verbose is True:
-                lBlocks = lVideoBlocks.getBlocks()
-                lHeaders = lVideoBlocks.getHeaders()
-                logging.info("Number of H.264 fragments %d" % 
-                        len(lVideoBlocks.getBlocks()))
+                lBlocksAll = lBlocks.getBlocks()
+                lHeaders = lBlocks.getHeaders()
+                logging.info("Number of H.264 fragments %d" %
+                        len(lBlocks.getBlocks()))
                 logging.info("8<============ Headers ==============")
                 for lHeader in lHeaders:
                     logging.info(str(lHeader))
                 logging.info("8<============ Blocks ==============")
-                for lBlock in lBlocks:
+                for lBlock in lBlocksAll:
                     logging.info(str(lBlock))
 
             # initialize fragmentizer with parameters that describe
@@ -64,9 +65,9 @@ class CContext:
             # conversions
             logging.info("Starting fragmentizing.")
             lFragmentizer = fragmentizer_context.CFragmentizer()
-            self.mFragments = lFragmentizer.defrag(lVideoBlocks, 
+            self.mFragments = lFragmentizer.defrag(lBlocks,
                     pOptions.fragmentsize, pOptions.blockgap,
-                    pOptions.minfragsize)
+                    pOptions.minfragsize, pOptions.recoverfiletype)
             logging.info("Finished fragmentizing.")
             logging.info("8<=============== FRAGMENTs ==============")
             for lIdx in xrange(len(self.mFragments)):
@@ -102,11 +103,17 @@ class CContext:
 
             lReassembly = None
             if pOptions.recoverfiletype == "video":
-                lReassembly = reassembly_context.CReassemblyFactory.getInstanceVideo(pOptions.assemblymethod)
+                lReassembly = \
+                    reassembly_context.CReassemblyFactory.getInstanceVideo(\
+                    pOptions.assemblymethod)
             elif pOptions.recoverfiletype == "video":
-                lReassembly = reassembly_context.CReassemblyFactory.getInstanceJpeg(pOptions.assemblymethod)
+                lReassembly = \
+                    reassembly_context.CReassemblyFactory.getInstanceJpeg(\
+                    pOptions.assemblymethod)
             elif pOptions.recoverfiletype == "video":
-                lReassembly = reassembly_context.CReassemblyFactory.getInstancePng(pOptions.assemblymethod)
+                lReassembly = \
+                    reassembly_context.CReassemblyFactory.getInstancePng(\
+                    pOptions.assemblymethod)
             if lReassembly != None:
                 lReassembly.assemble(pOptions, self.mFragments, pCaller)
             pCaller.finishedCallback()

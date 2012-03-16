@@ -1,39 +1,40 @@
-from lib.frags import CFragment
+from lib.frags import CFragmentFactory
+
 
 class CFragmentizer:
     def __init__(self):
         pass
 
-    def defrag(self, pVideoBlocks, pBlockSize, pBlockGap, 
-            pMinFragSize):
+    def defrag(self, pBlocks, pBlockSize, pBlockGap,
+            pMinFragSize, pType):
         lFragments = []
-        lVideoBlocks = sorted(pVideoBlocks.getBlocks().keys())
-        lVideoHeaders = pVideoBlocks.getHeaders()
+        lBlocks = sorted(pBlocks.getBlocks().keys())
+        lHeaders = pBlocks.getHeaders()
 
         # only do this if we found some video fragments
-        if len(lVideoBlocks) == 0:
+        if len(lBlocks) == 0:
             return lFragments
 
         # first do the block building
-        lFragmentCur = CFragment(pBlockSize)
-        for lIdx in xrange(len(lVideoBlocks)):
-            if lVideoBlocks[lIdx] in lVideoHeaders: # header fragment
-                lFragmentCur = CFragment(pBlockSize)
+        lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
+        for lIdx in xrange(len(lBlocks)):
+            if lBlocks[lIdx] in lHeaders:  # header fragment
+                lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
                 # start new header-fragment
                 lFragmentCur.mIsHeader = True
-                lFragmentCur.mOffset = lVideoBlocks[lIdx]
+                lFragmentCur.mOffset = lBlocks[lIdx]
                 lFragments.append(lFragmentCur)
-            elif lFragmentCur.mOffset == -1: # new no-header fragment
-                lFragmentCur.mOffset = lVideoBlocks[lIdx]
+            elif lFragmentCur.mOffset == -1:  # new no-header fragment
+                lFragmentCur.mOffset = lBlocks[lIdx]
                 lFragments.append(lFragmentCur)
-            elif (lVideoBlocks[lIdx] - \
-                    (lFragmentCur.mOffset + lFragmentCur.mSize)) > pBlockGap: 
+            elif (lBlocks[lIdx] - \
+                    (lFragmentCur.mOffset + lFragmentCur.mSize)) > pBlockGap:
                 # fragment after header or new no-header with big gap
-                lFragmentCur = CFragment(pBlockSize)
-                lFragmentCur.mOffset = lVideoBlocks[lIdx]
+                lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
+                lFragmentCur.mOffset = lBlocks[lIdx]
                 lFragments.append(lFragmentCur)
-            else: #fragment after header or new no-header with small gap
-                lFragmentCur.mSize = lVideoBlocks[lIdx] - \
+            else:  # fragment after header or new no-header with small gap
+                lFragmentCur.mSize = lBlocks[lIdx] - \
                         lFragmentCur.mOffset + pBlockSize
 
         return self.__reduce(lFragments, pBlockSize, pMinFragSize)
@@ -41,4 +42,5 @@ class CFragmentizer:
     def __reduce(self, pFragments, pBlockSize, pMultiplicator):
         return [lFrag for lFrag in pFragments \
                 if lFrag.mIsHeader is True or \
-                (lFrag.mIsHeader is False and lFrag.mSize > (pBlockSize * pMultiplicator))]
+                (lFrag.mIsHeader is False and \
+                lFrag.mSize > (pBlockSize * pMultiplicator))]

@@ -78,8 +78,14 @@ class CImgVisualizer(QGraphicsScene):
         # if one pic is shown only, center the one at the mouse x
         # if two pics are shown, center both at the mouse x
         if not self.__mHoverFragment is None:
-            lImgBegin = self.__mHoverFragment.mPicBegin
-            lImgEnd = self.__mHoverFragment.mPicEnd
+            if hasattr(self.__mHoverFragment, "mPicBegin"):
+                lImgBegin = self.__mHoverFragment.mPicBegin
+            else:
+                lImgBegin = None
+            if hasattr(self.__mHoverFragment, "mPicEnd"):
+                lImgEnd = self.__mHoverFragment.mPicEnd
+            else:
+                lImgEnd =None
             lBeginX = self.__mHoverPosition.x()
             lEndX = self.__mHoverPosition.x()
             lY = self.__mHoverPosition.y()
