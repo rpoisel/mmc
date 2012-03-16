@@ -59,7 +59,6 @@ class CPreprocessing:
         self.__mResultArray = None
 
     def classify(self, pOptions, pCaller):
-        lNumCPUs = pOptions.maxcpus
 
         # TODO load dynamically
         if pOptions.preprocess == "sleuthkit":
@@ -72,16 +71,7 @@ class CPreprocessing:
 
         lLast = datetime.datetime.now()
         logging.info(str(lLast) + " Start classifying.")
-        lManager = multiprocessing.Manager()
-        lHeadersList = lManager.list()
-        lBlocksList = lManager.list()
-        lProcesses = []
 
-        lQueue = Queue.Queue()
-        lResultArray = multiprocessing.Array('i', \
-                [0 for i in \
-                range(lPreprocessor.getNumParallel(pOptions.maxcpus)) \
-                ])
         lTypes = []
         if pOptions.recoverfiletype == "video":
             lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
@@ -98,24 +88,45 @@ class CPreprocessing:
                 'mStrength': pOptions.strength})
             lTypes.append({'mType': fragment_context.FileType.FT_PNG,
                 'mStrength': pOptions.strength})
+        if pOptions.multiprocessing == True:
+            lManager = multiprocessing.Manager()
+            lHeadersList = lManager.list()
+            lBlocksList = lManager.list()
+            lProcesses = []
+            lResultArray = multiprocessing.Array('i', \
+                    [0 for i in \
+                    range(lPreprocessor.getNumParallel(pOptions.maxcpus)) \
+                    ])
+        else:
+            lHeadersList = []
+            lBlocksList = []
+            lResultArray = [0]
+
+        lQueue = Queue.Queue()
         lResultThread = CResultThread(pCaller, lResultArray, lQueue)
         lResultThread.start()
-        for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
-            lProcess = multiprocessing.Process(target=self.classifyCore, \
-                    args=(\
-               lCnt,
-               lPreprocessor,
-               lHeadersList,
-               lBlocksList,
-               lResultArray,
-               lTypes,
-               pOptions \
-                       ))
-            lProcesses.append(lProcess)
-            lProcess.start()
 
-        for lProcess in lProcesses:
-            lProcess.join(1000000L)
+        if pOptions.multiprocessing == True:
+            for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
+                lProcess = multiprocessing.Process(target=self.classifyCore, \
+                        args=(\
+                   lCnt,
+                   lPreprocessor,
+                   lHeadersList,
+                   lBlocksList,
+                   lResultArray,
+                   lTypes,
+                   pOptions \
+                           ))
+                lProcesses.append(lProcess)
+                lProcess.start()
+
+            for lProcess in lProcesses:
+                lProcess.join(1000000L)
+        else:
+            self.classifyCore(0, lPreprocessor, lHeadersList, \
+                    lBlocksList, lResultArray, lTypes, pOptions)
+
         lQueue.put(True)
         lResultThread.join()
 

@@ -119,6 +119,7 @@ class CMain(object):
 
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
+        self.on_multiprocessing_changed(False)
 
         for lAssembly in reassembly_context.CReassemblyFactory.getAssemblyMethodsVideo():
             self.customwidget.assemblyMethod.addItem(lAssembly)
@@ -149,10 +150,18 @@ class CMain(object):
         self.customwidget.inputFile.textChanged.connect(self.on_inputFile_changed)
         self.customwidget.outputDir.textChanged.connect(self.on_outputDir_changed)
         self.customwidget.recoverfiletypes.currentIndexChanged.connect(self.on_recoverFT_changed)
+        self.customwidget.multiprocessing.stateChanged.connect(self.on_multiprocessing_changed)
 
         # init values
         self.customwidget.inputFile.setText(os.getcwd() + os.sep + "data" + os.sep + "image_ref_h264_ntfs_formatted.img")
         self.customwidget.outputDir.setText(r"c:\temp" if platform.system().lower() == "windows" else "/tmp/temp")
+
+    def on_multiprocessing_changed(self, pState): 
+        self.customwidget.maxCPUs.setEnabled(pState)
+        if pState == False:
+            self.customwidget.maxCPUs.setCurrentIndex(self.customwidget.maxCPUs.count() - 1)
+        else:
+            self.customwidget.maxCPUs.setCurrentIndex(0)
 
     def on_actionExit_triggered(self): 
         self.ui.close()
@@ -351,6 +360,7 @@ class CMain(object):
         lOptions.similarity = int(self.customwidget.similarity.text())
         lOptions.blockstatus = self.customwidget.blockStatus.currentText()
         lOptions.maxcpus = int(self.customwidget.maxCPUs.currentText())
+        lOptions.multiprocessing = self.customwidget.multiprocessing.isChecked()
         if self.__mGeometry != None:
             lOptions.fstype = self.__mGeometry.fstype
             lOptions.tskProperties = self.__mGeometry.tskProperties
