@@ -202,7 +202,7 @@ class CMain(object):
                 <li>Manfred Ruzicka</li> \
                 <li>Markus Mannel</li> \
             </ul> \
-            &copy; 2011 St. Poelten University of Applied Sciences</html> \
+            &copy; 2011, 2012 St. Poelten University of Applied Sciences</html> \
             <p> \
             This software is released under the terms of the LGPLv3:<br /> \
             <a href=\"http://www.gnu.org/licenses/lgpl.html\">http://www.gnu.org/licenses/lgpl.html</a> \
