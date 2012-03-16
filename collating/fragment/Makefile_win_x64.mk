@@ -7,7 +7,6 @@ LIBFRAGMENT_CLASSIFIER=libfragment_classifier
 FRAGMENT_CONTEXT=fragment_context
 
 all: $(FRAGMENT_CONTEXT)
-    move build\lib.win-amd64-2.7\fragment_context.pyd . 
 
 $(FRAGMENT_CONTEXT): $(LIBFRAGMENT_CLASSIFIER).dll
     python setup.py build_ext -i
