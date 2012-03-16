@@ -18,7 +18,7 @@ class MagicDb:
 
 class CMagic:
     def __init__(self, pType):
-        self.mMagic = magic.open(magic.NONE)
+        self.mMagic = magic.open(magic.MAGIC_NONE)
         if pType in MagicDb.sSignatures:
             self.mMagic.load(MagicDb.sSignatures[pType])
         else:
