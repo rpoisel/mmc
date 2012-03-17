@@ -12,6 +12,7 @@ from preprocessing.tsk import tsk_context
 from preprocessing.plain import plain_context
 from preprocessing import fsstat_context
 try:
+    #from collating.fragment import fragment_context
     from collating.fragment import fragment_context
 except ImportError, pExc:
     logging.error("Problem with importing a library: " + str(pExc))
@@ -144,9 +145,17 @@ class CPreprocessing:
         # do not change this: the fragment classifier cannot be pickled on
         # windows; so it has to be instantiated separately in each
         # process/thread
-        lFC = fragment_context.CFragmentClassifier(
-                pOptions,
+        try:
+            lFC = fragment_context.CFragmentClassifier()
+        except OSError, pExc:
+            logging.error("")
+            logging.error("Problem with importing a library: " + str(pExc))
+            logging.error("Try making it with 'make' first.")
+            logging.error("")
+            return
+        lFC.open(pOptions,
                 pTypes)
+
         logging.info("PID " + str(pPid) + \
                 " | Initializing fragment classifier: fragmentsize " + \
                 str(pOptions.fragmentsize))
@@ -171,6 +180,7 @@ class CPreprocessing:
             elif lFC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
+        lFC.free()
         logging.info("Process " + str(pPid) + " finished classifying")
         self.__mLock.acquire()
         # gather results (append to shared memory list)

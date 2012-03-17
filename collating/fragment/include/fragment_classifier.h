@@ -62,14 +62,4 @@ __declspec(dllexport) int fragment_classifier_classify_result(FragmentClassifier
 __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment,
         int pLen);
-
-/* typedefs */
-typedef FragmentClassifier* (*fc_new_ptr)(ClassifyOptions* pOptions, 
-        unsigned pNumSo, 
-        unsigned pFragmentSize);
-typedef void (*fc_free_ptr)(FragmentClassifier* pFragmentClassifier);
-typedef int (*fc_classify_ptr)(FragmentClassifier* pFragmentClassifier, 
-        const unsigned char* pFragment,
-        int pLen);
-
 #endif /* __FRAGMENT_CLASSIFIER_H__ */
