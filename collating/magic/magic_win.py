@@ -16,12 +16,7 @@ def _init():
     L{ctypes.CDLL} instance 
     """
     #return ctypes.cdll.LoadLibrary(find_library('magic'))
-    lBits = 32
-    if sys.maxsize > 2**32:
-        lBits = 64
-    lPath = r"collating\magic\lib\magic\dll" + str(lBits)
-    os.environ['PATH'] += ";" + lPath
-    return ctypes.cdll.LoadLibrary(lPath + r"\magic")
+    return ctypes.cdll.LoadLibrary(r"magic")
 
 _libraries = {}
 _libraries['magic'] = _init()

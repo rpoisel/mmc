@@ -17,6 +17,13 @@ from PySide import QtXml
 from PySide import QtUiTools
 
 sys.path.append('.')
+if platform.system().lower() == "windows":
+    lBits = 32
+    if sys.maxsize > 2**32:
+        lBits = 64
+    lPath = r"collating\magic\lib\magic\dll" + str(lBits)
+    lPath += r";collating\fragment"
+    os.environ['PATH'] += ";" + lPath
 
 # Import the compiled UI module
 import gui.gui_resources
