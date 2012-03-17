@@ -1,5 +1,3 @@
-import struct
-
 cimport cfragment_context
 
 cdef class FileType:
