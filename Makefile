@@ -9,6 +9,7 @@ all: fragment_context
 DIR_FRAG_MM_META=collating/media
 DIR_FRAGMENT_CONTEXT=collating/fragment
 DIR_BUILD=build
+DIR_DIST=dist
 	
 frag_mm_meta:
 	$(MAKE) -C $(DIR_FRAG_MM_META)
@@ -31,4 +32,4 @@ debclean:
 clean:
 	$(MAKE) -C $(DIR_FRAG_MM_META) clean
 	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT) -f Makefile_lnx.mk clean
-	-rm -rf $(DIR_BUILD)
+	-rm -rf $(DIR_BUILD) $(DIR_DIST)

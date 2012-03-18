@@ -19,16 +19,15 @@ class CReassembly(object):
 
     def assemble(self, pOptions, pFragments, pCaller):
         # sort list so that header fragments are at the beginning
-        lSortedFrags = sorted(pFragments, \
-                key=lambda lFrag: lFrag.mIsHeader, reverse=True)
+        pFragments.sort(key=lambda lFrag: lFrag.mIsHeader, reverse=True)
         lIdxNoHeader = 0
-        for lFrag in lSortedFrags:
+        for lFrag in pFragments:
             if lFrag.mIsHeader == True:
                 lIdxNoHeader += 1
             lFrag.mIsSmall = False
             lFrag.mPicBegin = ""
             lFrag.mPicEnd = ""
-        self._assemble_impl(pOptions, lSortedFrags, lIdxNoHeader, pCaller)
+        self._assemble_impl(pOptions, pFragments, lIdxNoHeader, pCaller)
 
     # interface only
     def _assemble_impl(self, pOptions, pSortedFrags, lIdxNoHeader, pCaller):
@@ -223,22 +222,23 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         if len(lFiles) < 1:
             return
 
-        lSortedFiles = sorted(lFiles, key=lambda lFile: lFile[0])
+        lFiles.sort(key=lambda lFile: lFile[0])
 
-        lRefSize = max(lSortedFiles, key=lambda lFile: lFile[1])[1]
-        for lFile in reversed(lSortedFiles):
+        lRefSize = max(lFiles, key=lambda lFile: lFile[1])[1]
+        lFiles.reverse()
+        for lFile in lFiles:
             if lFile[1] > (lRefSize * pMinPicSize / 100):
                 pFrag.mPicEnd = lFile[0]
-                lSortedFiles.remove(lFile)
+                lFiles.remove(lFile)
                 break
         if pFrag.mIsHeader == False:
-            for lFile in lSortedFiles:
+            for lFile in lFiles:
                 if lFile[1] > (lRefSize * pMinPicSize / 100):
                     pFrag.mPicBegin = lFile[0]
-                    lSortedFiles.remove(lFile)
+                    lFiles.remove(lFile)
                     break
 
-        for lFile in lSortedFiles:
+        for lFile in lFiles:
             os.remove(lFile[0])
 
     def __decodeVideo(self, pOffset, pOut, pDir, pIdx, pLen,
