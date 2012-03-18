@@ -37,6 +37,8 @@ typedef struct _ClassifyOptions
     struct _ClassifyOptions* mSubOptions;
 } ClassifyOptions;
 
+typedef int (*fragment_cb)(unsigned long long pOffset, FileType pType, int pStrength);
+
 #ifndef _MSC_VER
 #define __declspec(dllexport) 
 #endif
@@ -62,4 +64,8 @@ __declspec(dllexport) int fragment_classifier_classify_result(FragmentClassifier
 __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment,
         int pLen);
+
+int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
+        fragment_cb pCallback, 
+        const char* pPath);
 #endif /* __FRAGMENT_CLASSIFIER_H__ */

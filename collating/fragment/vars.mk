@@ -8,7 +8,7 @@ OBJ_FRAGMENT_CLASSIFIER= $(BUILD_DIR)/fragment_classifier.o \
 			 $(BUILD_DIR)/minIni.o \
 			 $(BUILD_DIR)/entropy/entropy.o
 CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC -Iinclude/entropy
-LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm
+LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm -lpthread
 # ================= END ==================
 
 # ================ START DATA SNIFFER =================

@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include "fragment_classifier.h"
 #include "entropy/entropy.h"
@@ -15,6 +16,18 @@ struct _FragmentClassifier
     ClassifyT mFileTypes[MAX_FILETYPES];
     unsigned mNumFileTypes;
 };
+
+typedef struct 
+{
+    FragmentClassifier* handle_fc;
+    fragment_cb callback;
+    int result;
+    char path_image[MAX_STR_LEN];
+    /* not used at the moment */
+    int offset_img;
+} thread_data;
+
+void* classify_thread(void* pData);
 
 FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
         unsigned pNumSo, 
@@ -116,5 +129,52 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 
     /* irrelevant fragment */
     return 0;
+}
+
+int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
+        fragment_cb pCallback, 
+        const char* pPath)
+{
+    pthread_t lThread1;
+    thread_data lData;
+    strncpy(lData.path_image, pPath, MAX_STR_LEN);
+    lData.handle_fc = pFragmentClassifier;
+    lData.callback = pCallback;
+
+    /* TODO check return value */
+    pthread_create(&lThread1, NULL, classify_thread, (void*)&lData);
+
+    /* join threads */
+    pthread_join(lThread1, NULL);
+
+    return EXIT_SUCCESS;
+}
+
+void* classify_thread(void* pData)
+{
+    unsigned long long lOffset = 0;
+    thread_data* lData = (thread_data*)pData; 
+    FILE* lImage = NULL;
+    unsigned char* lBuf = NULL;
+    int lResult = lData->handle_fc->mFragmentSize;
+
+    lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
+    lImage = fopen(lData->path_image, "r");
+
+    /* classify fragments */
+    while (lResult == lData->handle_fc->mFragmentSize)
+    {
+        lResult = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
+        lData->result = fragment_classifier_classify(lData->handle_fc, 
+                lBuf, lResult);
+        /* do something with the result */
+        lData->callback(lOffset, lData->result, 0);
+        lOffset += lResult;
+    }
+
+    fclose(lImage);
+    free(lBuf);
+
+    return NULL;
 }
 
