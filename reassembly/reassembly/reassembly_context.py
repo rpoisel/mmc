@@ -24,9 +24,6 @@ class CReassembly(object):
         for lFrag in pFragments:
             if lFrag.mIsHeader == True:
                 lIdxNoHeader += 1
-            lFrag.mIsSmall = False
-            lFrag.mPicBegin = ""
-            lFrag.mPicEnd = ""
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader, pCaller)
 
     # interface only

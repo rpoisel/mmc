@@ -33,6 +33,9 @@ class CFragmentizer:
             elif (lBlocks[lIdx] - \
                     (lFragmentCur.mOffset + lFragmentCur.mSize)) > pBlockGap:
                 # fragment after header or new no-header with big gap
+                if lFragmentCur is False and \
+                        lFrag.mSize < (pBlockSize * pMinFragSize):
+                            lFragments.pop()
                 lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
                 lFragmentCur.mOffset = lBlocks[lIdx]
                 lFragments.append(lFragmentCur)
