@@ -20,7 +20,7 @@ class CFragmentizer:
         for lIdx in xrange(len(lBlocks)):
             if lBlocks[lIdx] in lHeaders:  # header fragment
                 if lFragmentCur.mIsHeader is False and \
-                        lFrag.mSize < (pBlockSize * pMinFragSize):
+                        lFragmentCur.mSize < (pBlockSize * pMinFragSize):
                             lFragments.pop()
                 lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
                 # start new header-fragment
@@ -34,7 +34,7 @@ class CFragmentizer:
                     (lFragmentCur.mOffset + lFragmentCur.mSize)) > pBlockGap:
                 # fragment after header or new no-header with big gap
                 if lFragmentCur.mIsHeader is False and \
-                        lFrag.mSize < (pBlockSize * pMinFragSize):
+                        lFragmentCur.mSize < (pBlockSize * pMinFragSize):
                             lFragments.pop()
                 lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
                 lFragmentCur.mOffset = lBlocks[lIdx]
