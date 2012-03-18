@@ -19,6 +19,9 @@ class CFragmentizer:
         lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
         for lIdx in xrange(len(lBlocks)):
             if lBlocks[lIdx] in lHeaders:  # header fragment
+                if lFragmentCur is False and \
+                        lFrag.mSize < (pBlockSize * pMinFragSize):
+                            lFragments.pop()
                 lFragmentCur = CFragmentFactory.getFragment(pType, pBlockSize)
                 # start new header-fragment
                 lFragmentCur.mIsHeader = True
@@ -37,10 +40,4 @@ class CFragmentizer:
                 lFragmentCur.mSize = lBlocks[lIdx] - \
                         lFragmentCur.mOffset + pBlockSize
 
-        return self.__reduce(lFragments, pBlockSize, pMinFragSize)
-
-    def __reduce(self, pFragments, pBlockSize, pMultiplicator):
-        return [lFrag for lFrag in pFragments \
-                if lFrag.mIsHeader is True or \
-                (lFrag.mIsHeader is False and \
-                lFrag.mSize > (pBlockSize * pMultiplicator))]
+        return lFragments
