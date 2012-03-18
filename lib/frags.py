@@ -38,6 +38,8 @@ class CFragmentFactory:
             return CFragmentPng(pBlockSize)
 
 
+# TODO work with properties: 
+# http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
 class CFragment(object):
     def __init__(self, pBlockSize):
         self.mOffset = -1

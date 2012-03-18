@@ -65,7 +65,7 @@ __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFrag
         const unsigned char* pFragment,
         int pLen);
 
-int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
+__declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
         const char* pPath);
 #endif /* __FRAGMENT_CLASSIFIER_H__ */

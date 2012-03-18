@@ -6,7 +6,21 @@
 
 #define NUM_OPTIONS 0
 
-int callback_print(unsigned long long pOffset, FileType pType, int pStrength);
+
+typedef struct
+{
+    unsigned long long* mBlockArray;
+    unsigned long long mMaxBlocks;
+    unsigned long long mNumBlocks;
+} block_array;
+
+block_array* block_array_new(unsigned long long pMaxBlocks);
+int block_array_add(block_array* pArray, unsigned long long pOffset, int pIsHeader);
+int block_array_sort(block_array* pArray);
+unsigned long long block_array_get(block_array* pArray, unsigned long long pIndex);
+int block_array_free(block_array* pArray);
+
+int callback_collect(unsigned long long pOffset, FileType pType, int pStrength);
 
 int main(int argc, char* argv[])
 {
@@ -35,29 +49,13 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
-int callback_print(unsigned long long pOffset, FileType pType, int pStrength)
+block_array* block_array_new(unsigned long long pMaxBlocks)
 {
-    printf("Offset: %lld, Type: ", pOffset);
-    switch (pType)
-    {
-        case FT_HIGH_ENTROPY:
-            printf("High Entropy");
-            break;
-        case FT_LOW_ENTROPY:
-            printf("Low Entropy");
-            break;
-        case FT_JPG:
-            printf("JPEG");
-            break;
-        case FT_PNG:
-            printf("PNG");
-            break;
-        case FT_H264:
-            printf("H264");
-            break;
-        default:
-            printf("Unknown");
-    }
-    printf(", Strength: %d\n", pStrength);
+    return NULL;
+}
+
+int callback_collect(unsigned long long pOffset, FileType pType, int pStrength)
+{
+    /* store classified block */
     return 0;
 }

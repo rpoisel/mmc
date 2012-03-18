@@ -133,7 +133,11 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 
 int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
-        const char* pPath)
+        const char* pPath
+        /* int pNumThreads, 
+         * int pSize, 
+         */
+        )
 {
     pthread_t lThread1;
     thread_data lData;
@@ -152,24 +156,41 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
 
 void* classify_thread(void* pData)
 {
-    unsigned long long lOffset = 0;
     thread_data* lData = (thread_data*)pData; 
+    int lLen = lData->handle_fc->mFragmentSize;
+    unsigned long long lOffset = 0;
     FILE* lImage = NULL;
     unsigned char* lBuf = NULL;
-    int lResult = lData->handle_fc->mFragmentSize;
+    ClassifyT lResult = { 0, 0 };
+    int lCnt = 0;
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
     lImage = fopen(lData->path_image, "r");
 
     /* classify fragments */
-    while (lResult == lData->handle_fc->mFragmentSize)
+    while (lLen == lData->handle_fc->mFragmentSize)
     {
-        lResult = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
-        lData->result = fragment_classifier_classify(lData->handle_fc, 
-                lBuf, lResult);
+        lLen = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
+        fragment_classifier_classify_result(lData->handle_fc, lBuf, lLen,
+                &lResult);
         /* do something with the result */
-        lData->callback(lOffset, lData->result, 0);
-        lOffset += lResult;
+        if (lData->handle_fc->mNumFileTypes == 0)
+        {
+            lData->callback(lOffset, lResult.mType, lResult.mStrength);
+        }
+        else
+        {
+            for (lCnt = 0; lCnt < lData->handle_fc->mNumFileTypes; lCnt++)
+            {
+                if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
+                {
+                    /* relevant fragment */
+                    lData->callback(lOffset, lResult.mType, lResult.mStrength);
+                    break;
+                }
+            }
+        }
+        lOffset += lLen;
     }
 
     fclose(lImage);
@@ -177,4 +198,3 @@ void* classify_thread(void* pData)
 
     return NULL;
 }
-
