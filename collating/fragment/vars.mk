@@ -5,10 +5,17 @@ OUT_DIR=.
 # ================ START =================
 BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so
 OBJ_FRAGMENT_CLASSIFIER= $(BUILD_DIR)/fragment_classifier.o \
-			 $(BUILD_DIR)/minIni.o \
 			 $(BUILD_DIR)/entropy/entropy.o
 CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC -Iinclude/entropy
 LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm -lpthread
+# ================= END ==================
+
+# ================ START =================
+BIN_BLOCK_READER=$(OUT_DIR)/libblock_reader.so
+OBJ_BLOCK_READER= $(BUILD_DIR)/block_reader.o \
+			 $(BUILD_DIR)/block_collection.o
+CFLAGS_BLOCK_READER=$(CFLAGS) -fPIC
+LDFLAGS_BLOCK_READER=-shared -Wl,-soname, -L. -lfragment_classifier
 # ================= END ==================
 
 # ================ START DATA SNIFFER =================
