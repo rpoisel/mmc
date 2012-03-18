@@ -6,7 +6,8 @@
 
 #define NUM_OPTIONS 0
 
-int callback_print(unsigned long long pOffset, FileType pType, int pStrength);
+int callback_print(void* pData, unsigned long long pOffset, 
+        FileType pType, int pStrength, int pIsHeader);
 
 int main(int argc, char* argv[])
 {
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
     }
 
     /* start multithreaded classification process */
-    fragment_classifier_classify_mt(lHandle, callback_print, argv[1]);
+    fragment_classifier_classify_mt(lHandle, callback_print, NULL, argv[1]);
 
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
@@ -35,7 +36,8 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
-int callback_print(unsigned long long pOffset, FileType pType, int pStrength)
+int callback_print(void* pData, unsigned long long pOffset, 
+        FileType pType, int pStrength, int pIsHeader)
 {
     printf("Offset: %lld, Type: ", pOffset);
     switch (pType)

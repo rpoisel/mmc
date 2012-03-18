@@ -2,33 +2,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fragment_classifier.h"
-#include "block_collection.h"
+#include "block_reader.h"
 
-#define NUM_OPTIONS 0
+int callback_collect(void* pData, unsigned long long pOffset, 
+        FileType pType, int pStrength, int pIsHeader);
 
-int callback_collect(unsigned long long pOffset, FileType pType, int pStrength);
-
-int main(int argc, char* argv[])
+int classify(block_collection_t* pBlocks, 
+        int pBlockSize, 
+        int pNumBlocks, 
+        const char* pImage, 
+        ClassifyT* pTypes, 
+        int pNumTypes)
 {
     FragmentClassifier* lHandle = NULL;
-    ClassifyOptions lOptions[NUM_OPTIONS];
 
-    if (argc != 3)
-    {
-        fprintf(stderr, "Wrong number of command-line arguments.\n");
-        fprintf(stderr, "Invocation: %s <path-to-image> <block-size>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    lHandle = fragment_classifier_new(lOptions, NUM_OPTIONS, atoi(argv[2]));
+    lHandle = fragment_classifier_new_ct(NULL, 0, pBlockSize, pTypes, pNumTypes);
     if (!lHandle)
     {
         return EXIT_FAILURE;
     }
 
     /* start multithreaded classification process */
-    fragment_classifier_classify_mt(lHandle, callback_collect, argv[1]);
+    fragment_classifier_classify_mt(lHandle, callback_collect, pBlocks, pImage);
 
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
@@ -36,8 +31,10 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
-int callback_collect(unsigned long long pOffset, FileType pType, int pStrength)
+int callback_collect(void* pData, unsigned long long pOffset, 
+        FileType pType, int pStrength, int pIsHeader)
 {
+    block_collection_t* pBlocks = (block_collection_t* )pData;
     /* store classified block */
-    return 0;
+    return block_collection_add(pBlocks, pOffset, pIsHeader);
 }

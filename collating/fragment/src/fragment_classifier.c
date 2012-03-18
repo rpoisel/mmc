@@ -21,6 +21,7 @@ typedef struct
 {
     FragmentClassifier* handle_fc;
     fragment_cb callback;
+    void* callback_data;
     int result;
     char path_image[MAX_STR_LEN];
     /* not used at the moment */
@@ -131,8 +132,10 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     return 0;
 }
 
+#ifndef _MSC_VER
 int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
+        void* pCallbackData, 
         const char* pPath
         /* int pNumThreads, 
          * int pSize, 
@@ -144,6 +147,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     strncpy(lData.path_image, pPath, MAX_STR_LEN);
     lData.handle_fc = pFragmentClassifier;
     lData.callback = pCallback;
+    lData.callback_data = pCallbackData; 
 
     /* TODO check return value */
     pthread_create(&lThread1, NULL, classify_thread, (void*)&lData);
@@ -171,12 +175,14 @@ void* classify_thread(void* pData)
     while (lLen == lData->handle_fc->mFragmentSize)
     {
         lLen = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
+        /* TODO determine header signature with libmagic(3) */
         fragment_classifier_classify_result(lData->handle_fc, lBuf, lLen,
                 &lResult);
-        /* do something with the result */
+        /* do something with the classification result */
         if (lData->handle_fc->mNumFileTypes == 0)
         {
-            lData->callback(lOffset, lResult.mType, lResult.mStrength);
+            lData->callback(lData->callback_data, lOffset, 
+                    lResult.mType, lResult.mStrength, 0 /* TODO isHeader */);
         }
         else
         {
@@ -185,7 +191,8 @@ void* classify_thread(void* pData)
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
                     /* relevant fragment */
-                    lData->callback(lOffset, lResult.mType, lResult.mStrength);
+                    lData->callback(lData->callback_data, lOffset, 
+                            lResult.mType, lResult.mStrength, 0 /* TODO isHeader */);
                     break;
                 }
             }
@@ -198,3 +205,4 @@ void* classify_thread(void* pData)
 
     return NULL;
 }
+#endif
