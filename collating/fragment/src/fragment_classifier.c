@@ -159,7 +159,7 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     {
         if (pFragmentClassifier->mNumFileTypes > 0)
         {
-            for (lCnt = 0; lCnt < pFragmentClassifier->mNumFileTypes; lCnt++)
+            for (lCnt = 0; lCnt < pFragmentClassifier->mNumFileTypes; ++lCnt)
             {
                 if (pFragmentClassifier->mFileTypes[lCnt].mType == lResult.mType)
                 {
@@ -202,7 +202,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     stat(pImage, &lStat);
     lImageSize = lStat.st_size;
 
-    for (lCnt = 0; lCnt < pNumThreads; lCnt++)
+    for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
         strncpy((lData + lCnt)->path_image, pImage, MAX_STR_LEN);
         (lData + lCnt)->handle_fc = pFragmentClassifier;
@@ -215,7 +215,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     }
 
     /* join threads */
-    for (lCnt = 0; lCnt < pNumThreads; lCnt++)
+    for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
         pthread_join(*(lThreads + lCnt), NULL);
     }
@@ -275,7 +275,7 @@ void* classify_thread(void* pData)
         }
         else
         {
-            for (lCnt = 0; lCnt < lData->handle_fc->mNumFileTypes; lCnt++)
+            for (lCnt = 0; lCnt < lData->handle_fc->mNumFileTypes; ++lCnt)
             {
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
