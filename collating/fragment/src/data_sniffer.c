@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "fragment_classifier.h"
 
@@ -13,12 +14,19 @@ int main(int argc, char* argv[])
 {
     FragmentClassifier* lHandle = NULL;
     ClassifyOptions lOptions[NUM_OPTIONS];
+    pthread_mutex_t lMutex = PTHREAD_MUTEX_INITIALIZER;
+    int lNumThreads = NUM_THREADS_DEFAULT;
 
-    if (argc != 3)
+    if (argc != 3 && argc != 4)
     {
         fprintf(stderr, "Wrong number of command-line arguments.\n");
-        fprintf(stderr, "Invocation: %s <path-to-image> <block-size>\n", argv[0]);
+        fprintf(stderr, "Invocation: %s <path-to-image> <block-size> [num-threads]\n", argv[0]);
         return EXIT_FAILURE;
+    }
+
+    if (argc == 4)
+    {
+        lNumThreads = atoi(argv[3]);
     }
 
     lHandle = fragment_classifier_new(lOptions, NUM_OPTIONS, atoi(argv[2]));
@@ -27,8 +35,12 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    pthread_mutex_init(&lMutex, NULL);
+
     /* start multithreaded classification process */
-    fragment_classifier_classify_mt(lHandle, callback_print, NULL, argv[1]);
+    fragment_classifier_classify_mt(lHandle, callback_print, (void *)&lMutex, argv[1], lNumThreads);
+
+    pthread_mutex_destroy(&lMutex);
 
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
@@ -39,7 +51,11 @@ int main(int argc, char* argv[])
 int callback_print(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader)
 {
-    printf("Offset: %lld, Type: ", pOffset);
+    pthread_mutex_t* lMutex = (pthread_mutex_t* )pData;
+    pthread_mutex_lock(lMutex);
+    pIsHeader ? printf("Header, ") : printf("        ");
+    printf("Offset: % 10lld, Strength: %d, Type: ", 
+            pOffset, pStrength);
     switch (pType)
     {
         case FT_HIGH_ENTROPY:
@@ -66,6 +82,7 @@ int callback_print(void* pData, unsigned long long pOffset,
         default:
             printf("Unknown");
     }
-    printf(", Strength: %d\n", pStrength);
+    printf("\n");
+    pthread_mutex_unlock(lMutex);
     return 0;
 }

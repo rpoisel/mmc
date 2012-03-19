@@ -23,7 +23,8 @@ int classify(block_collection_t* pBlocks,
     }
 
     /* start multithreaded classification process */
-    fragment_classifier_classify_mt(lHandle, callback_collect, pBlocks, pImage);
+    fragment_classifier_classify_mt(lHandle, callback_collect, 
+            pBlocks, pImage, NUM_THREADS_DEFAULT);
 
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);

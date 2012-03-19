@@ -14,7 +14,6 @@
 /* turn to 1 for verbose messages */
 #define VERBOSE 0
 #define MAX_FILETYPES 24
-#define NUM_THREADS 4
 
 struct _FragmentClassifier
 {
@@ -94,6 +93,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
 
     pResult->mType = FT_UNKNOWN;
     pResult->mStrength = 0;
+    pResult->mIsHeader = 0;
 
     if (pLen == 0)
     {
@@ -105,9 +105,12 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     if (pMagic != NULL)
     {
         lMagicResult = magic_buffer(pMagic, pFragment, pLen);
-        if (strstr(lMagicResult, "text") == NULL &&
-                strcmp(lMagicResult, "data") != 0)
+        if (strcmp(lMagicResult, "data") != 0)
         {
+            if (strstr(lMagicResult, "text") == NULL)
+            {
+                /* do not do anything yet */
+            }
             if (strstr(lMagicResult, "video") != NULL)
             {
                 pResult->mType = FT_VIDEO;
@@ -179,44 +182,46 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
         void* pCallbackData, 
-        const char* pImage
-        /* int pNumThreads, 
-         * int pSize, 
+        const char* pImage, 
+        unsigned int pNumThreads
+        /* int pSize, 
          */
         )
 {
-    pthread_t lThreads[NUM_THREADS];
+    pthread_t* lThreads = NULL;
     int lCnt = 0;
-    thread_data* lData;
+    thread_data* lData = NULL;
     struct stat lStat;
     off_t lImageSize;
 
     /* TODO check return value */
-    lData = (thread_data* )malloc(sizeof(thread_data) * NUM_THREADS);
+    lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
+    lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
     
     /* TOD check return value */
     stat(pImage, &lStat);
     lImageSize = lStat.st_size;
 
-    for (lCnt = 0; lCnt < NUM_THREADS; lCnt++)
+    for (lCnt = 0; lCnt < pNumThreads; lCnt++)
     {
         strncpy((lData + lCnt)->path_image, pImage, MAX_STR_LEN);
         (lData + lCnt)->handle_fc = pFragmentClassifier;
         (lData + lCnt)->callback = pCallback;
         (lData + lCnt)->callback_data = pCallbackData; 
-        (lData + lCnt)->num_frags = lImageSize / (NUM_THREADS * pFragmentClassifier->mFragmentSize);
-        (lData + lCnt)->offset_img = lCnt * lImageSize / NUM_THREADS;
+        (lData + lCnt)->num_frags = lImageSize / (pNumThreads * pFragmentClassifier->mFragmentSize);
+        (lData + lCnt)->offset_img = lCnt * lImageSize / pNumThreads;
         pthread_create((lThreads + lCnt), NULL, 
                 classify_thread, (void*)(lData + lCnt));
     }
 
     /* join threads */
-    for (lCnt = 0; lCnt < NUM_THREADS; lCnt++)
+    for (lCnt = 0; lCnt < pNumThreads; lCnt++)
     {
         pthread_join(*(lThreads + lCnt), NULL);
     }
 
     free(lData);
+    free(lThreads);
 
     return EXIT_SUCCESS;
 }

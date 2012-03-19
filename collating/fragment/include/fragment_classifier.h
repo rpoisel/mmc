@@ -2,6 +2,7 @@
 #define __FRAGMENT_CLASSIFIER_H__ 1
 
 #define MAX_STR_LEN 256
+#define NUM_THREADS_DEFAULT 1
 
 #ifndef _MSC_VER
 #include <magic.h>
@@ -82,6 +83,7 @@ __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFrag
 __declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
         void* pCallbackData, 
-        const char* pImage);
+        const char* pImage, 
+        unsigned int pNumThreads);
 #endif
 #endif /* __FRAGMENT_CLASSIFIER_H__ */
