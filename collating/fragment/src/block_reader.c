@@ -37,5 +37,5 @@ int callback_collect(void* pData, unsigned long long pOffset,
 {
     block_collection_t* pBlocks = (block_collection_t* )pData;
     /* store classified block */
-    return block_collection_add(pBlocks, pOffset, pIsHeader);
+    return block_collection_set(pBlocks, pOffset, pIsHeader);
 }

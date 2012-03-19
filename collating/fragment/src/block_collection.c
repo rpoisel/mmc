@@ -4,7 +4,7 @@
 
 struct _block_collection_t
 {
-    unsigned long long* mBlockArray;
+    unsigned long* mBlockArray;
     unsigned long long mMaxBlocks;
     unsigned long long mNumBlocks;
     unsigned long long mNumHeaders;
@@ -14,7 +14,7 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks)
 {
     block_collection_t* lHandle = (block_collection_t*)malloc(sizeof(block_collection_t));
 
-    lHandle->mBlockArray = (unsigned long long*)malloc(sizeof(unsigned long long) * pMaxBlocks);
+    lHandle->mBlockArray = (unsigned long*)malloc((pMaxBlocks / (sizeof(unsigned long) / BITS_PER_BLOCK)) + 1);
     lHandle->mMaxBlocks = pMaxBlocks;
     lHandle->mNumBlocks = 0;
     lHandle->mNumHeaders = 0;
@@ -22,7 +22,7 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks)
     return lHandle;
 }
 
-int block_collection_add(block_collection_t* pCollection, 
+int block_collection_set(block_collection_t* pCollection, 
         unsigned long long pOffset, int pIsHeader)
 {
     if (pIsHeader)
@@ -39,6 +39,7 @@ int block_collection_add(block_collection_t* pCollection,
     return 0;
 }
 
+#if 0
 static int compare_blocks(const void* pBlock1, const void* pBlock2)
 {
     return OFFSET((**(unsigned long long** )pBlock1)) - \
@@ -51,6 +52,7 @@ void block_collection_sort(block_collection_t* pCollection)
     qsort((void* )pCollection, pCollection->mNumBlocks, 
             sizeof(block_collection_t), compare_blocks);
 }
+#endif
 
 unsigned long long block_collection_get(block_collection_t* pCollection, 
         unsigned long long pIndex)
