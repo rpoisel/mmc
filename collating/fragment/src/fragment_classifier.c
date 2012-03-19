@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <sys/stat.h>
+
+#ifndef _MSC_VER
+#include <magic.h>
+#endif
 
 #include "fragment_classifier.h"
 #include "entropy/entropy.h"
@@ -9,6 +14,7 @@
 /* turn to 1 for verbose messages */
 #define VERBOSE 0
 #define MAX_FILETYPES 24
+#define NUM_THREADS 4
 
 struct _FragmentClassifier
 {
@@ -24,8 +30,8 @@ typedef struct
     void* callback_data;
     int result;
     char path_image[MAX_STR_LEN];
-    /* not used at the moment */
     int offset_img;
+    int num_frags;
 } thread_data;
 
 void* classify_thread(void* pData);
@@ -72,11 +78,17 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 }
 
 int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
+#ifndef _MSC_VER
+        magic_t pMagic, 
+#endif
         const unsigned char* pFragment,
         int pLen,
         ClassifyT* pResult)
 
 {
+#ifndef _MSC_VER
+    const char* lMagicResult = NULL;
+#endif
     float lEntropy = 0;
     /* non-relevant fragment <= 0 > relevant fragment */
 
@@ -88,11 +100,39 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         return 0;
     }
 
-    lEntropy = calc_entropy(pFragment, pLen);
-    if (lEntropy > 0.625) /* empiric value ;-) */
+#ifndef _MSC_VER
+    /* signature checking */
+    if (pMagic != NULL)
     {
-        pResult->mType = FT_HIGH_ENTROPY;
-        pResult->mStrength = 1;
+        lMagicResult = magic_buffer(pMagic, pFragment, pLen);
+        if (strstr(lMagicResult, "text") == NULL &&
+                strcmp(lMagicResult, "data") != 0)
+        {
+            if (strstr(lMagicResult, "video") != NULL)
+            {
+                pResult->mType = FT_VIDEO;
+                pResult->mStrength = 1;
+                pResult->mIsHeader = 1;
+            }
+            else if (strstr(lMagicResult, "image") != NULL)
+            {
+                pResult->mType = FT_IMAGE;
+                pResult->mStrength = 1;
+                pResult->mIsHeader = 1;
+            }
+        }
+    }
+    if (pResult->mType == FT_UNKNOWN)
+#endif
+
+    /* statistical examination */
+    {
+        lEntropy = calc_entropy(pFragment, pLen);
+        if (lEntropy > 0.625) /* empiric value ;-) */
+        {
+            pResult->mType = FT_HIGH_ENTROPY;
+            pResult->mStrength = 1;
+        }
     }
 
     return pResult->mStrength;
@@ -105,6 +145,9 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
     ClassifyT lResult;
     int lCnt = 0;
     fragment_classifier_classify_result(pFragmentClassifier,
+#ifndef _MSC_VER
+            NULL, 
+#endif
             pFragment, 
             pLen, 
             &lResult);
@@ -136,24 +179,44 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
         void* pCallbackData, 
-        const char* pPath
+        const char* pImage
         /* int pNumThreads, 
          * int pSize, 
          */
         )
 {
-    pthread_t lThread1;
-    thread_data lData;
-    strncpy(lData.path_image, pPath, MAX_STR_LEN);
-    lData.handle_fc = pFragmentClassifier;
-    lData.callback = pCallback;
-    lData.callback_data = pCallbackData; 
+    pthread_t lThreads[NUM_THREADS];
+    int lCnt = 0;
+    thread_data* lData;
+    struct stat lStat;
+    off_t lImageSize;
 
     /* TODO check return value */
-    pthread_create(&lThread1, NULL, classify_thread, (void*)&lData);
+    lData = (thread_data* )malloc(sizeof(thread_data) * NUM_THREADS);
+    
+    /* TOD check return value */
+    stat(pImage, &lStat);
+    lImageSize = lStat.st_size;
+
+    for (lCnt = 0; lCnt < NUM_THREADS; lCnt++)
+    {
+        strncpy((lData + lCnt)->path_image, pImage, MAX_STR_LEN);
+        (lData + lCnt)->handle_fc = pFragmentClassifier;
+        (lData + lCnt)->callback = pCallback;
+        (lData + lCnt)->callback_data = pCallbackData; 
+        (lData + lCnt)->num_frags = lImageSize / (NUM_THREADS * pFragmentClassifier->mFragmentSize);
+        (lData + lCnt)->offset_img = lCnt * lImageSize / NUM_THREADS;
+        pthread_create((lThreads + lCnt), NULL, 
+                classify_thread, (void*)(lData + lCnt));
+    }
 
     /* join threads */
-    pthread_join(lThread1, NULL);
+    for (lCnt = 0; lCnt < NUM_THREADS; lCnt++)
+    {
+        pthread_join(*(lThreads + lCnt), NULL);
+    }
+
+    free(lData);
 
     return EXIT_SUCCESS;
 }
@@ -162,27 +225,48 @@ void* classify_thread(void* pData)
 {
     thread_data* lData = (thread_data*)pData; 
     int lLen = lData->handle_fc->mFragmentSize;
-    unsigned long long lOffset = 0;
+    unsigned long long lOffset = lData->offset_img;
     FILE* lImage = NULL;
     unsigned char* lBuf = NULL;
-    ClassifyT lResult = { 0, 0 };
+    ClassifyT lResult = { 0, 0, 0 };
+    int lCntFrag = 0;
     int lCnt = 0;
+
+
+#ifndef _MSC_VER
+    magic_t lMagic = magic_open(MAGIC_NONE);
+    if (!lMagic)
+    {
+        printf("Could not load library\n");
+    }
+    /* TODO load proper file */
+    if (magic_load(lMagic, "../../data/magic/animation.mgc:" \
+                "../../data/magic/jpeg.mgc:../../data/magic/png.mgc"))
+    {
+        printf("%s\n", magic_error(lMagic));
+    }
+#endif
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
     lImage = fopen(lData->path_image, "r");
+    fseek(lImage, lOffset, SEEK_SET);
+
 
     /* classify fragments */
-    while (lLen == lData->handle_fc->mFragmentSize)
+    lCntFrag = 0;
+    /* TODO check if lCntFrag test is correct */
+    while (lLen == lData->handle_fc->mFragmentSize && 
+            lCntFrag < lData->num_frags)
     {
+        lCntFrag++;
         lLen = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
-        /* TODO determine header signature with libmagic(3) */
-        fragment_classifier_classify_result(lData->handle_fc, lBuf, lLen,
+        fragment_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult);
         /* do something with the classification result */
         if (lData->handle_fc->mNumFileTypes == 0)
         {
             lData->callback(lData->callback_data, lOffset, 
-                    lResult.mType, lResult.mStrength, 0 /* TODO isHeader */);
+                    lResult.mType, lResult.mStrength, lResult.mIsHeader);
         }
         else
         {
@@ -192,7 +276,7 @@ void* classify_thread(void* pData)
                 {
                     /* relevant fragment */
                     lData->callback(lData->callback_data, lOffset, 
-                            lResult.mType, lResult.mStrength, 0 /* TODO isHeader */);
+                            lResult.mType, lResult.mStrength, lResult.mIsHeader);
                     break;
                 }
             }
@@ -202,6 +286,9 @@ void* classify_thread(void* pData)
 
     fclose(lImage);
     free(lBuf);
+#ifndef _MSC_VER
+    magic_close(lMagic);
+#endif
 
     return NULL;
 }

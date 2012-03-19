@@ -21,12 +21,15 @@ typedef enum _FileType
     FT_DOC, 
     FT_PDF, 
     FT_H264, 
+    FT_VIDEO,
+    FT_IMAGE,
 } FileType;
 
 typedef struct _ClassifyT
 {
     FileType mType;
     int mStrength;
+    int mIsHeader;
 } ClassifyT;
 
 typedef struct _FragmentClassifier FragmentClassifier;
@@ -64,6 +67,9 @@ __declspec(dllexport) FragmentClassifier* fragment_classifier_new_ct(ClassifyOpt
 __declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
 
 __declspec(dllexport) int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
+#ifndef _MSC_VER
+        magic_t pMagic, 
+#endif
         const unsigned char* pFragment,
         int pLen,
         ClassifyT* pResult);
@@ -76,6 +82,6 @@ __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFrag
 __declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
         void* pCallbackData, 
-        const char* pPath);
+        const char* pImage);
 #endif
 #endif /* __FRAGMENT_CLASSIFIER_H__ */

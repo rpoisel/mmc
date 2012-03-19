@@ -54,6 +54,12 @@ int callback_print(void* pData, unsigned long long pOffset,
         case FT_PNG:
             printf("PNG");
             break;
+        case FT_VIDEO:
+            printf("VIDEO");
+            break;
+        case FT_IMAGE:
+            printf("IMAGE");
+            break;
         case FT_H264:
             printf("H264");
             break;

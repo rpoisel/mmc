@@ -14,6 +14,8 @@ class FileType:
     FT_DOC = 8
     FT_PDF = 9
     FT_H264 = 10
+    FT_VIDEO = 11
+    FT_IMAGE = 12
 
 
 class ClassifyT(Structure):
