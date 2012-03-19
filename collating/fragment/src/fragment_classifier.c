@@ -29,8 +29,8 @@ typedef struct
     void* callback_data;
     int result;
     char path_image[MAX_STR_LEN];
-    int offset_img;
-    int num_frags;
+    unsigned long long offset_img;
+    unsigned long long num_frags;
 } thread_data;
 
 void* classify_thread(void* pData);
@@ -236,7 +236,6 @@ void* classify_thread(void* pData)
     ClassifyT lResult = { 0, 0, 0 };
     int lCntFrag = 0;
     int lCnt = 0;
-
 
 #ifndef _MSC_VER
     magic_t lMagic = magic_open(MAGIC_NONE);
