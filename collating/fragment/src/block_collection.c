@@ -1,23 +1,38 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "block_collection.h"
+
+#define STORAGE_SIZE(x) (x * BITS_PER_BLOCK / (sizeof(unsigned long) * 8))
 
 struct _block_collection_t
 {
     unsigned long* mBlockArray;
+    unsigned mBlockSize;
     unsigned long long mMaxBlocks;
     unsigned long long mNumBlocks;
     unsigned long long mNumHeaders;
 };
 
-block_collection_t* block_collection_new(unsigned long long pMaxBlocks)
+block_collection_t* block_collection_new(unsigned long long pMaxBlocks, unsigned pBlockSize)
 {
+    int lCnt = 0;
+
     block_collection_t* lHandle = (block_collection_t*)malloc(sizeof(block_collection_t));
 
-    lHandle->mBlockArray = (unsigned long*)malloc((pMaxBlocks / (sizeof(unsigned long) / BITS_PER_BLOCK)) + 1);
+    printf("Storage size: %llu\n", STORAGE_SIZE(pMaxBlocks));
+    lHandle->mBlockArray = (unsigned long*)malloc(STORAGE_SIZE(pMaxBlocks) > sizeof(unsigned long) ? STORAGE_SIZE(pMaxBlocks) : sizeof(unsigned long));
+    lHandle->mBlockSize = pBlockSize;
     lHandle->mMaxBlocks = pMaxBlocks;
     lHandle->mNumBlocks = 0;
     lHandle->mNumHeaders = 0;
+
+    for (lCnt = 0; 
+            lCnt <= STORAGE_SIZE(pMaxBlocks) / sizeof(unsigned long); 
+            ++lCnt)
+    {
+        lHandle->mBlockArray[lCnt] = 0;
+    }
 
     return lHandle;
 }
@@ -25,6 +40,17 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks)
 int block_collection_set(block_collection_t* pCollection, 
         unsigned long long pOffset, int pIsHeader)
 {
+    unsigned long long lOffsetStorage = pOffset / (pCollection->mBlockSize * BLOCKS_PER_STORAGE);
+    unsigned long* lStorage = pCollection->mBlockArray + lOffsetStorage;
+    unsigned lShifts = (BLOCKS_PER_STORAGE - 1 - (pOffset / pCollection->mBlockSize) % BLOCKS_PER_STORAGE) * BITS_PER_BLOCK;
+
+    unsigned long lBitmask = ((0x01 | (pIsHeader ? 0x02 : 0x00)) << lShifts);
+    (*lStorage) |= lBitmask;
+
+    printf("Offset: %9llu, Bitmask: 0x%08lX, Storage: 0x%08lX, Offset Storage: %llu, Right Shifts: %u\n", 
+            pOffset, lBitmask, *lStorage, lOffsetStorage, lShifts);
+
+    /*
     if (pIsHeader)
     {
         pCollection->mBlockArray[pCollection->mNumBlocks] = HEADER(pOffset);
@@ -35,6 +61,7 @@ int block_collection_set(block_collection_t* pCollection,
         pCollection->mBlockArray[pCollection->mNumBlocks] = pOffset;
     }
     pCollection->mNumBlocks++;
+    */
 
     return 0;
 }
@@ -69,14 +96,5 @@ void block_collection_free(block_collection_t* pCollection)
 {
     free(pCollection->mBlockArray);
     free(pCollection);
-}
-
-int isHeader(unsigned long long pOffset)
-{
-    if (pOffset & BITMASK_HEADER)
-    {
-        return 1;
-    }
-    return 0;
 }
 

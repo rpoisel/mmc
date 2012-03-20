@@ -4,17 +4,24 @@
 #include <pthread.h>
 
 #include "fragment_classifier.h"
+#include "block_collection.h"
 
 #define NUM_OPTIONS 0
 
 int callback_print(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader);
 
+typedef struct
+{
+    pthread_mutex_t mMutex;
+    block_collection_t* mStorage;
+} thread_data;
+
 int main(int argc, char* argv[])
 {
     FragmentClassifier* lHandle = NULL;
     ClassifyOptions lOptions[NUM_OPTIONS];
-    pthread_mutex_t lMutex = PTHREAD_MUTEX_INITIALIZER;
+    thread_data lData = { PTHREAD_MUTEX_INITIALIZER, NULL };
     int lNumThreads = NUM_THREADS_DEFAULT;
 
     if (argc != 3 && argc != 4)
@@ -34,14 +41,16 @@ int main(int argc, char* argv[])
     {
         return EXIT_FAILURE;
     }
+    lData.mStorage = block_collection_new(10000000L, atoi(argv[2]));
 
-    pthread_mutex_init(&lMutex, NULL);
+    pthread_mutex_init(&lData.mMutex, NULL);
 
     /* start multithreaded classification process */
-    fragment_classifier_classify_mt(lHandle, callback_print, (void *)&lMutex, argv[1], lNumThreads);
+    fragment_classifier_classify_mt(lHandle, callback_print, (void *)&lData, argv[1], lNumThreads);
 
-    pthread_mutex_destroy(&lMutex);
+    pthread_mutex_destroy(&lData.mMutex);
 
+    block_collection_free(lData.mStorage);
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
 
@@ -51,8 +60,10 @@ int main(int argc, char* argv[])
 int callback_print(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader)
 {
-    pthread_mutex_t* lMutex = (pthread_mutex_t* )pData;
-    pthread_mutex_lock(lMutex);
+    thread_data* lData = (thread_data* )pData;
+    pthread_mutex_lock(&lData->mMutex);
+    block_collection_set(lData->mStorage, pOffset, pIsHeader);
+    /*
     pIsHeader ? printf("Header, ") : printf("        ");
     printf("Offset: % 10lld, Strength: %d, Type: ", 
             pOffset, pStrength);
@@ -83,6 +94,7 @@ int callback_print(void* pData, unsigned long long pOffset,
             printf("Unknown");
     }
     printf("\n");
-    pthread_mutex_unlock(lMutex);
+    */
+    pthread_mutex_unlock(&lData->mMutex);
     return 0;
 }
