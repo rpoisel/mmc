@@ -22,27 +22,28 @@ class ClassifyT(Structure):
     _fields_ = [ \
             ("mType", c_uint), \
             ("mStrength", c_int), \
+            ("mIsHeader", c_int), \
             ]
 
 ClassifyTArray = ClassifyT * 24
 
 
-class CFragmentOptions(Structure):
+class CBlockOptions(Structure):
     pass
 
 
-class CFragmentOptions(Structure):
+class CBlockOptions(Structure):
     _fields_ = [ \
             ("mOption1", c_char_p), \
             ("mOption2", c_char_p), \
             ("mOption3", c_char_p), \
             ("mOption4", c_char_p), \
             ("mOption5", c_char_p), \
-            ("mSubOptions", POINTER(CFragmentOptions)), \
+            ("mSubOptions", POINTER(CBlockOptions)), \
             ]
 
 
-CFragmentOptionsPointer = POINTER(CFragmentOptions)
+CBlockOptionsPointer = POINTER(CBlockOptions)
 
 
 class CClassifyHandler(Structure):
@@ -52,7 +53,7 @@ class CClassifyHandler(Structure):
 CClassifyHandlerPointer = POINTER(CClassifyHandler)
 
 
-class CFragmentClassifier:
+class CBlockClassifier:
 
     def __init__(self):
         # open library handle
@@ -66,7 +67,7 @@ class CFragmentClassifier:
         self.__mOpen = self.__mLH.fragment_classifier_new_ct
         self.__mOpen.restype = CClassifyHandlerPointer
         self.__mOpen.argtypes = \
-            [CFragmentOptionsPointer, c_uint, c_uint, ClassifyTArray, c_uint]
+            [CBlockOptionsPointer, c_uint, c_uint, ClassifyTArray, c_uint]
 
         self.__mFree = self.__mLH.fragment_classifier_free
         self.__mFree.restype = None
@@ -92,3 +93,33 @@ class CFragmentClassifier:
 
     def classify(self, pBuffer):
         return self.__mClassify(self.__mCH, pBuffer, len(pBuffer))
+
+
+class CFragmentClassifier:
+
+    def __init__(self):
+
+        # load library
+        lLibname = r"libblock_reader"
+        if platform.system().lower() == "windows":
+            lLibname += ".dll"
+        elif platform.system().lower() == "linux":
+            lLibname += ".so"
+        self.__mLH = cdll.LoadLibrary(lLibname)
+
+        self.__mClassify = self.__mLH.classify
+        self.__mClassify.restype = c_int
+        self.__mClassify.argtypes = \
+            [c_int, c_int, c_char_p, ClassifyTArray, \
+            c_int, c_int]
+
+    def classify(self, pBlockSize, pNumBlocks, pImage,
+            pTypes, pNumThreads):
+        lCnt = 0
+        lTypes = ClassifyTArray()
+        for lType in pTypes:
+            lTypes[lCnt].mType = lType['mType']
+            lTypes[lCnt].mStrength = lType['mStrength']
+            lCnt += 1
+        return self.__mClassify(pBlockSize, pNumBlocks,
+                pImage, lTypes, lCnt, pNumThreads)

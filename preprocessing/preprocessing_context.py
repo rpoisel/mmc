@@ -3,10 +3,12 @@ import sys
 import math
 import logging
 import multiprocessing
+import platform
 import datetime
 import threading
 import time
 import Queue
+from ctypes import *
 
 from preprocessing.tsk import tsk_context
 from preprocessing.plain import plain_context
@@ -89,6 +91,7 @@ class CPreprocessing:
                 'mStrength': pOptions.strength})
             lTypes.append({'mType': fragment_context.FileType.FT_PNG,
                 'mStrength': pOptions.strength})
+
         if pOptions.multiprocessing == True:
             lManager = multiprocessing.Manager()
             lHeadersList = lManager.list()
@@ -125,8 +128,10 @@ class CPreprocessing:
             for lProcess in lProcesses:
                 lProcess.join(1000000L)
         else:
-            self.classifyCore(0, lPreprocessor, lHeadersList, \
-                    lBlocksList, lResultArray, lTypes, pOptions)
+            lClassifier = fragment_context.CFragmentClassifier()
+            lClassifier.classify(512, 128,
+                    'data/image_ref_h264_ntfs_formatted.img', lTypes,
+                    pOptions.maxcpus)
 
         lQueue.put(True)
         lResultThread.join()
@@ -146,7 +151,7 @@ class CPreprocessing:
         # windows; so it has to be instantiated separately in each
         # process/thread
         try:
-            lFC = fragment_context.CFragmentClassifier()
+            lFC = fragment_context.CBlockClassifier()
         except OSError, pExc:
             logging.error("")
             logging.error("Problem with importing a library: " + str(pExc))

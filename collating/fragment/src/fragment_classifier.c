@@ -244,8 +244,8 @@ void* classify_thread(void* pData)
         printf("Could not load library\n");
     }
     /* TODO load proper file */
-    if (magic_load(lMagic, "../../data/magic/animation.mgc:" \
-                "../../data/magic/jpeg.mgc:../../data/magic/png.mgc"))
+    if (magic_load(lMagic, "data/magic/animation.mgc:" \
+                "data/magic/jpeg.mgc:data/magic/png.mgc"))
     {
         printf("%s\n", magic_error(lMagic));
     }

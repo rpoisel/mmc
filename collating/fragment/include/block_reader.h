@@ -4,11 +4,11 @@
 #include "fragment_classifier.h"
 #include "block_collection.h"
 
-int classify(block_collection_t* pBlocks, 
-        int pBlockSize, 
+int classify(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
         ClassifyT* pTypes, 
-        int pNumTypes); 
+        int pNumTypes, 
+        int pNumThreads); 
 
 #endif /* __BLOCK_READER_H__ */

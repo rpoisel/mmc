@@ -7,14 +7,15 @@
 int callback_collect(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader);
 
-int classify(block_collection_t* pBlocks, 
-        int pBlockSize, 
+int classify(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
         ClassifyT* pTypes, 
-        int pNumTypes)
+        int pNumTypes, 
+        int pNumThreads)
 {
     FragmentClassifier* lHandle = NULL;
+    block_collection_t* lBlocks = NULL;
 
     lHandle = fragment_classifier_new_ct(NULL, 0, pBlockSize, pTypes, pNumTypes);
     if (!lHandle)
@@ -22,9 +23,13 @@ int classify(block_collection_t* pBlocks,
         return EXIT_FAILURE;
     }
 
+    lBlocks = block_collection_new(pNumBlocks, pBlockSize); 
+
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_collect, 
-            pBlocks, pImage, NUM_THREADS_DEFAULT);
+            lBlocks, pImage, pNumThreads);
+
+    block_collection_free(lBlocks);
 
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
