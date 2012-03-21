@@ -129,8 +129,11 @@ class CPreprocessing:
                 lProcess.join(1000000L)
         else:
             lClassifier = fragment_context.CFragmentClassifier()
-            lClassifier.classify(512, 128,
-                    'data/image_ref_h264_ntfs_formatted.img', lTypes,
+            #lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
+            lSize = os.path.getsize(pOptions.imagefile);
+            lFragsTotal = lSize / pOptions.fragmentsize
+            lClassifier.classify(pOptions.fragmentsize, lFragsTotal,
+                    pOptions.imagefile, lTypes,
                     pOptions.maxcpus)
 
         lQueue.put(True)

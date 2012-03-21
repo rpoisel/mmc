@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-#include <sys/stat.h>
 
 #ifndef _MSC_VER
 #include <magic.h>
@@ -31,6 +30,9 @@ typedef struct
     char path_image[MAX_STR_LEN];
     unsigned long long offset_img;
     unsigned long long num_frags;
+#ifndef _MSC_VER
+    const char* mPathMagic;
+#endif
 } thread_data;
 
 void* classify_thread(void* pData);
@@ -183,33 +185,28 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         fragment_cb pCallback, 
         void* pCallbackData, 
         const char* pImage, 
+        unsigned long long pSize,
+        const char* pPathMagic, 
         unsigned int pNumThreads
-        /* int pSize, 
-         */
         )
 {
     pthread_t* lThreads = NULL;
     int lCnt = 0;
     thread_data* lData = NULL;
-    struct stat lStat;
-    off_t lImageSize;
 
     /* TODO check return value */
     lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
     
-    /* TOD check return value */
-    stat(pImage, &lStat);
-    lImageSize = lStat.st_size;
-
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
         strncpy((lData + lCnt)->path_image, pImage, MAX_STR_LEN);
         (lData + lCnt)->handle_fc = pFragmentClassifier;
         (lData + lCnt)->callback = pCallback;
         (lData + lCnt)->callback_data = pCallbackData; 
-        (lData + lCnt)->num_frags = lImageSize / (pNumThreads * pFragmentClassifier->mFragmentSize);
-        (lData + lCnt)->offset_img = lCnt * lImageSize / pNumThreads;
+        (lData + lCnt)->mPathMagic = pPathMagic;
+        (lData + lCnt)->num_frags = pSize / (pNumThreads); /* * pFragmentClassifier->mFragmentSize); */
+        (lData + lCnt)->offset_img = lCnt * pSize / pNumThreads;
         pthread_create((lThreads + lCnt), NULL, 
                 classify_thread, (void*)(lData + lCnt));
     }
@@ -244,8 +241,7 @@ void* classify_thread(void* pData)
         printf("Could not load library\n");
     }
     /* TODO load proper file */
-    if (magic_load(lMagic, "data/magic/animation.mgc:" \
-                "data/magic/jpeg.mgc:data/magic/png.mgc"))
+    if (magic_load(lMagic, lData->mPathMagic))
     {
         printf("%s\n", magic_error(lMagic));
     }
@@ -258,7 +254,6 @@ void* classify_thread(void* pData)
 
     /* classify fragments */
     lCntFrag = 0;
-    /* TODO check if lCntFrag test is correct */
     while (lLen == lData->handle_fc->mFragmentSize && 
             lCntFrag < lData->num_frags)
     {

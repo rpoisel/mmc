@@ -27,7 +27,11 @@ int classify(int pBlockSize,
 
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_collect, 
-            lBlocks, pImage, pNumThreads);
+            lBlocks, pImage, pNumBlocks, 
+            "data/magic/animation.mgc:" \
+                "data/magic/jpeg.mgc:" \
+                "data/magic/png.mgc", 
+            pNumThreads);
 
     block_collection_free(lBlocks);
 
