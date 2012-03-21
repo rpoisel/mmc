@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
     int lNumThreads = NUM_THREADS_DEFAULT;
     struct stat lStat;
     off_t lImageSize;
+    off_t lImageBlockSize = 0;
 
     if (argc != 3 && argc != 4)
     {
@@ -43,18 +44,24 @@ int main(int argc, char* argv[])
     stat(argv[1], &lStat);
     lImageSize = lStat.st_size;
 
+    lImageBlockSize = lImageSize / atoi(argv[2]);
+    if (lImageSize % atoi(argv[2]) != 0)
+    {
+        ++lImageBlockSize;
+    }
+
     lHandle = fragment_classifier_new(lOptions, NUM_OPTIONS, atoi(argv[2]));
     if (!lHandle)
     {
         return EXIT_FAILURE;
     }
 
-    lData.mStorage = block_collection_new(lImageSize / atoi(argv[2]), atoi(argv[2]));
+    lData.mStorage = block_collection_new(lImageBlockSize, atoi(argv[2]));
 
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_print, 
             (void *)&lData, argv[1], 
-            lImageSize / atoi(argv[2]),
+            lImageBlockSize,
             "../../data/magic/animation.mgc:" \
                 "../../data/magic/jpeg.mgc:" \
                 "../../data/magic/png.mgc", 
@@ -63,6 +70,7 @@ int main(int argc, char* argv[])
     pthread_mutex_destroy(&lData.mMutex);
 
     block_collection_free(lData.mStorage);
+
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
 
@@ -74,8 +82,9 @@ int callback_print(void* pData, unsigned long long pOffset,
 {
     thread_data* lData = (thread_data* )pData;
     pthread_mutex_lock(&lData->mMutex);
+#if 1
     block_collection_set(lData->mStorage, pOffset, pIsHeader);
-    /*
+#else
     pIsHeader ? printf("Header, ") : printf("        ");
     printf("Offset: % 10lld, Strength: %d, Type: ", 
             pOffset, pStrength);
@@ -106,7 +115,7 @@ int callback_print(void* pData, unsigned long long pOffset,
             printf("Unknown");
     }
     printf("\n");
-    */
+#endif
     pthread_mutex_unlock(&lData->mMutex);
     return 0;
 }

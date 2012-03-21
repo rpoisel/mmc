@@ -5,7 +5,8 @@
 
 typedef unsigned long long storage_t;
 
-#define STORAGE_SIZE(x) (x * BITS_PER_BLOCK / (sizeof(storage_t) * 8))
+/* no ceiling performed */
+#define STORAGE_SIZE(x) (x * BITS_PER_BLOCK / (sizeof(storage_t) * 8) + 1)
 
 struct _block_collection_t
 {
@@ -22,7 +23,7 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks, unsigned
 
     block_collection_t* lHandle = (block_collection_t*)malloc(sizeof(block_collection_t));
 
-    printf("Storage size: %llu\n", STORAGE_SIZE(pMaxBlocks));
+    printf("Storage size: %llu, Max Blocks: %lld\n", STORAGE_SIZE(pMaxBlocks), pMaxBlocks);
     if (STORAGE_SIZE(pMaxBlocks) * sizeof(storage_t) > sizeof(storage_t))
     {
         lHandle->mBlockArray = (storage_t*)malloc(STORAGE_SIZE(pMaxBlocks) * sizeof(storage_t));
@@ -49,14 +50,14 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks, unsigned
 int block_collection_set(block_collection_t* pCollection, 
         unsigned long long pOffset, int pIsHeader)
 {
-    unsigned long long lOffsetStorage = pOffset / (pCollection->mBlockSize * BLOCKS_PER_STORAGE);
+    unsigned long long lOffsetStorage = pOffset / BLOCKS_PER_STORAGE;
     storage_t* lStorage = pCollection->mBlockArray + lOffsetStorage;
-    unsigned lShifts = (BLOCKS_PER_STORAGE - 1 - (pOffset / pCollection->mBlockSize) % BLOCKS_PER_STORAGE) * BITS_PER_BLOCK;
+    unsigned lShifts = (BLOCKS_PER_STORAGE - 1 - pOffset % BLOCKS_PER_STORAGE) * BITS_PER_BLOCK;
 
     storage_t lBitmask = (((storage_t)0x01 | (pIsHeader ? 0x02 : 0x00)) << lShifts);
     (*lStorage) |= lBitmask;
 
-    printf("Offset: %9llu, Bitmask: 0x%016llX, Storage: 0x%016llX, Offset Storage: %llu, Shifts: %u\n", 
+    printf("Offset: %9llu, Bitmask: 0x%016llX, Storage: 0x%016llX, Offset Storage: %05llu, Shifts: %02u\n", 
             pOffset, lBitmask, *lStorage, lOffsetStorage, lShifts);
 
     /*

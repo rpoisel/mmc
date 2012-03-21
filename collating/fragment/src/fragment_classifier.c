@@ -205,8 +205,8 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         (lData + lCnt)->callback = pCallback;
         (lData + lCnt)->callback_data = pCallbackData; 
         (lData + lCnt)->mPathMagic = pPathMagic;
-        (lData + lCnt)->num_frags = pSize / (pNumThreads); /* * pFragmentClassifier->mFragmentSize); */
-        (lData + lCnt)->offset_img = lCnt * pSize / pNumThreads;
+        (lData + lCnt)->num_frags = pSize / (pNumThreads);
+        (lData + lCnt)->offset_img = lCnt * pSize / (pNumThreads);
         pthread_create((lThreads + lCnt), NULL, 
                 classify_thread, (void*)(lData + lCnt));
     }
@@ -227,11 +227,10 @@ void* classify_thread(void* pData)
 {
     thread_data* lData = (thread_data*)pData; 
     int lLen = lData->handle_fc->mFragmentSize;
-    unsigned long long lOffset = lData->offset_img;
+    unsigned long long lCntFrag = lData->offset_img;
     FILE* lImage = NULL;
     unsigned char* lBuf = NULL;
     ClassifyT lResult = { 0, 0, 0 };
-    int lCntFrag = 0;
     int lCnt = 0;
 
 #ifndef _MSC_VER
@@ -249,22 +248,19 @@ void* classify_thread(void* pData)
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
     lImage = fopen(lData->path_image, "r");
-    fseek(lImage, lOffset, SEEK_SET);
-
+    fseek(lImage, lData->offset_img * lData->handle_fc->mFragmentSize, SEEK_SET);
 
     /* classify fragments */
-    lCntFrag = 0;
     while (lLen == lData->handle_fc->mFragmentSize && 
-            lCntFrag < lData->num_frags)
+            (lCntFrag - lData->offset_img) < lData->num_frags)
     {
-        lCntFrag++;
         lLen = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
         fragment_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult);
         /* do something with the classification result */
         if (lData->handle_fc->mNumFileTypes == 0)
         {
-            lData->callback(lData->callback_data, lOffset, 
+            lData->callback(lData->callback_data, lCntFrag, 
                     lResult.mType, lResult.mStrength, lResult.mIsHeader);
         }
         else
@@ -274,13 +270,13 @@ void* classify_thread(void* pData)
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
                     /* relevant fragment */
-                    lData->callback(lData->callback_data, lOffset, 
+                    lData->callback(lData->callback_data, lCntFrag, 
                             lResult.mType, lResult.mStrength, lResult.mIsHeader);
                     break;
                 }
             }
         }
-        lOffset += lLen;
+        lCntFrag++;
     }
 
     fclose(lImage);

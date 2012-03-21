@@ -165,10 +165,11 @@ class CMain(object):
 
     def on_multiprocessing_changed(self, pState): 
         self.customwidget.maxCPUs.setEnabled(pState)
-        if pState == False:
-            self.customwidget.maxCPUs.setCurrentIndex(self.customwidget.maxCPUs.count() - 1)
-        else:
-            self.customwidget.maxCPUs.setCurrentIndex(0)
+        self.customwidget.maxCPUs.setCurrentIndex(0)
+#        if pState == False:
+#            self.customwidget.maxCPUs.setCurrentIndex(self.customwidget.maxCPUs.count() - 1)
+#        else:
+#            self.customwidget.maxCPUs.setCurrentIndex(0)
 
     def on_actionExit_triggered(self): 
         self.ui.close()
