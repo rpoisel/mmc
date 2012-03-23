@@ -135,6 +135,7 @@ class CPreprocessing:
             lClassifier.classify(pOptions.fragmentsize, lFragsTotal,
                     pOptions.imagefile, lTypes,
                     pOptions.maxcpus)
+            lClassifier.free()
 
         lQueue.put(True)
         lResultThread.join()

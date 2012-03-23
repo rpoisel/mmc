@@ -7,7 +7,7 @@
 int callback_collect(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader);
 
-int classify(int pBlockSize, 
+block_collection_t* classify(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
         ClassifyT* pTypes, 
@@ -20,7 +20,7 @@ int classify(int pBlockSize,
     lHandle = fragment_classifier_new_ct(NULL, 0, pBlockSize, pTypes, pNumTypes);
     if (!lHandle)
     {
-        return EXIT_FAILURE;
+        return NULL;
     }
 
     lBlocks = block_collection_new(pNumBlocks, pBlockSize); 
@@ -33,12 +33,19 @@ int classify(int pBlockSize,
                 "data/magic/png.mgc", 
             pNumThreads);
 
+#if 0
     block_collection_free(lBlocks);
+#endif
 
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
 
-    return EXIT_SUCCESS;
+    return lBlocks;
+}
+
+void classify_free(block_collection_t* pCollection)
+{
+    block_collection_free(pCollection);
 }
 
 int callback_collect(void* pData, unsigned long long pOffset, 
