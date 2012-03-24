@@ -40,7 +40,7 @@ class CResultThread(threading.Thread):
             self.__mCaller.progressCallback( \
                     lResults / len(self.__mResultArray) \
                     )
-            time.sleep(1)
+            time.sleep(.1)
             lStop = False
             try:
                 lStop = self.__mQueue.get_nowait()
@@ -130,7 +130,7 @@ class CPreprocessing:
         else:
             lClassifier = fragment_context.CFragmentClassifier()
             #lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
-            lSize = os.path.getsize(pOptions.imagefile);
+            lSize = os.path.getsize(pOptions.imagefile)
             lFragsTotal = lSize / pOptions.fragmentsize
             lClassifier.classify(pOptions.fragmentsize, lFragsTotal,
                     pOptions.imagefile, lTypes,

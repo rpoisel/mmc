@@ -7,7 +7,7 @@
 int callback_collect(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader);
 
-block_collection_t* classify(int pBlockSize, 
+fragment_collection_t* classify(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
         ClassifyT* pTypes, 
@@ -40,12 +40,26 @@ block_collection_t* classify(int pBlockSize,
     /* destruct fragment classifier */
     fragment_classifier_free(lHandle);
 
-    return lBlocks;
+    block_collection_free(lBlocks);
+
+    fragment_collection_t* lFragments = (fragment_collection_t* )malloc(sizeof(fragment_collection_t));
+
+    lFragments->mNumFrags = 1;
+    lFragments->mFrags = (fragment_t* )malloc(sizeof(fragment_t) * lFragments->mNumFrags);
+#if 1
+    lFragments->mFrags->mOffset = 1;
+    lFragments->mFrags->mSize = 2;
+    lFragments->mFrags->mNextIdx = 3;
+    lFragments->mFrags->mIsHeader = 4;
+#endif
+
+    return lFragments;
 }
 
-void classify_free(block_collection_t* pCollection)
+void classify_free(fragment_collection_t* pCollection)
 {
-    block_collection_free(pCollection);
+    free(pCollection->mFrags);
+    free(pCollection);
 }
 
 int callback_collect(void* pData, unsigned long long pOffset, 
