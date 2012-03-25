@@ -15,7 +15,6 @@ struct _block_collection_t
     storage_t* mBlockArray;
     unsigned mBlockSize;
     unsigned long long mMaxBlocks;
-    unsigned long long mNumBlocks;
     unsigned long long mNumHeaders;
 };
 
@@ -38,11 +37,10 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks, unsigned
     }
     lHandle->mBlockSize = pBlockSize;
     lHandle->mMaxBlocks = pMaxBlocks;
-    lHandle->mNumBlocks = 0;
     lHandle->mNumHeaders = 0;
 
     for (lCnt = 0; 
-            lCnt < STORAGE_SIZE(pMaxBlocks); /* / sizeof(unsigned long long);  */
+            lCnt < STORAGE_SIZE(pMaxBlocks);
             ++lCnt)
     {
         lHandle->mBlockArray[lCnt] = 0;
@@ -58,14 +56,14 @@ int block_collection_set(block_collection_t* pCollection,
     storage_t* lStorage = pCollection->mBlockArray + lOffsetStorage;
     unsigned lShifts = (BLOCKS_PER_STORAGE - 1 - pOffset % BLOCKS_PER_STORAGE) * BITS_PER_BLOCK;
 
-    storage_t lBitmask = (((storage_t)0x01 | (pIsHeader ? 0x02 : 0x00)) << lShifts);
+    storage_t lBitmask = ((pIsHeader ? (storage_t)0x03 : (storage_t)0x01) << lShifts);
     (*lStorage) |= lBitmask;
 
-    ++pCollection->mNumBlocks;
     pCollection->mNumHeaders += (pIsHeader ? 1 : 0);
 
 #if DEBUG == 1
-    printf("Offset: %9llu, Bitmask: 0x%016llX, Storage: 0x%016llX, Offset Storage: %05llu, Shifts: %02u\n", 
+    printf("Block %9llu, Bitmask: 0x%016llX, Storage: 0x%016llX, " \
+            "Offset Storage: %05llu, Shifts: %02u\n", 
             pOffset, lBitmask, *lStorage, lOffsetStorage, lShifts);
 #endif
 
@@ -73,14 +71,24 @@ int block_collection_set(block_collection_t* pCollection,
 }
 
 storage_t block_collection_get(block_collection_t* pCollection, 
-        unsigned long long pIndex)
+        unsigned long long pOffset)
 {
-    return OFFSET(pCollection->mBlockArray[pIndex]);
+    unsigned long long lOffsetStorage = pOffset / BLOCKS_PER_STORAGE;
+    storage_t* lStorage = pCollection->mBlockArray + lOffsetStorage;
+    unsigned lShifts = (BLOCKS_PER_STORAGE - 1 - pOffset % BLOCKS_PER_STORAGE) * BITS_PER_BLOCK;
+
+    /* printf("Storage: 0x%llx, Shifts: %u\n", *lStorage, lShifts); */
+    return ((*lStorage) & ((storage_t)0x03 << lShifts)) >> lShifts;
 }
 
 unsigned long long block_collection_len(block_collection_t* pCollection)
 {
-    return pCollection->mNumBlocks;
+    return pCollection->mMaxBlocks;
+}
+
+unsigned block_collection_get_bs(block_collection_t* pCollection)
+{
+    return pCollection->mBlockSize;
 }
 
 void block_collection_free(block_collection_t* pCollection)

@@ -34,6 +34,7 @@ fragment_collection_t* classify(int pBlockSize,
             pNumThreads);
 
     /* factor 1/4 is just an empirical value */
+    /* TODO perform this step on several CPU cores */
     fragment_collection_t* lFragments = fragment_collection_new(lBlocks, 4);
 
     /* destruct fragment classifier */

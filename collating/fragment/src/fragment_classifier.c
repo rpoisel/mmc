@@ -228,7 +228,7 @@ void* classify_thread(void* pData)
 {
     thread_data* lData = (thread_data*)pData; 
     int lLen = lData->handle_fc->mFragmentSize;
-    unsigned long long lCntFrag = lData->offset_img;
+    unsigned long long lCntBlock = lData->offset_img;
     FILE* lImage = NULL;
     unsigned char* lBuf = NULL;
     ClassifyT lResult = { 0, 0, 0 };
@@ -253,7 +253,7 @@ void* classify_thread(void* pData)
 
     /* classify fragments */
     while (lLen == lData->handle_fc->mFragmentSize && 
-            (lCntFrag - lData->offset_img) < lData->num_frags)
+            (lCntBlock - lData->offset_img) < lData->num_frags)
     {
         lLen = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
         fragment_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
@@ -261,7 +261,7 @@ void* classify_thread(void* pData)
         /* do something with the classification result */
         if (lData->handle_fc->mNumFileTypes == 0)
         {
-            lData->callback(lData->callback_data, lCntFrag, 
+            lData->callback(lData->callback_data, lCntBlock, 
                     lResult.mType, lResult.mStrength, lResult.mIsHeader);
         }
         else
@@ -271,13 +271,13 @@ void* classify_thread(void* pData)
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
                     /* relevant fragment */
-                    lData->callback(lData->callback_data, lCntFrag, 
+                    lData->callback(lData->callback_data, lCntBlock, 
                             lResult.mType, lResult.mStrength, lResult.mIsHeader);
                     break;
                 }
             }
         }
-        lCntFrag++;
+        lCntBlock++;
     }
 
     fclose(lImage);

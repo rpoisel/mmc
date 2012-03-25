@@ -82,7 +82,7 @@ int callback_print(void* pData, unsigned long long pOffset,
 {
     thread_data* lData = (thread_data* )pData;
     pthread_mutex_lock(&lData->mMutex);
-#if 1
+#if 0
     block_collection_set(lData->mStorage, pOffset, pIsHeader);
 #else
     pIsHeader ? printf("Header, ") : printf("        ");
