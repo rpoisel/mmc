@@ -47,10 +47,13 @@ fragment_collection_t* classify(int pBlockSize,
     lFragments->mNumFrags = 1;
     lFragments->mFrags = (fragment_t* )malloc(sizeof(fragment_t) * lFragments->mNumFrags);
 #if 1
-    lFragments->mFrags->mOffset = 1;
-    lFragments->mFrags->mSize = 2;
-    lFragments->mFrags->mNextIdx = 3;
-    lFragments->mFrags->mIsHeader = 4;
+    lFragments->mFrags->mOffset = 0;
+    lFragments->mFrags->mSize = 512;
+    lFragments->mFrags->mNextIdx = -1;
+    lFragments->mFrags->mIsHeader = 1;
+    lFragments->mFrags->mPicBegin = "";
+    lFragments->mFrags->mPicEnd = "";
+    lFragments->mFrags->mIsSmall = 0;
 #endif
 
     return lFragments;

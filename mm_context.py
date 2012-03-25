@@ -13,7 +13,6 @@ import multiprocessing
 #from contexts.media import frag_mm_meta_context
 from preprocessing import preprocessing_context
 from reassembly.reassembly import reassembly_context
-from reassembly.fragmentizer import fragmentizer_context
 from lib import datatypes
 
 
@@ -45,30 +44,9 @@ class CContext:
                     "")
             # initialize preprocessor
             lProcessor = preprocessing_context.CPreprocessing(pOptions)
-            lBlocks = lProcessor.classify(pOptions, pCaller)
+            self.mFragments = lProcessor.classify(pOptions, pCaller)
             logging.info("Back to the main context.")
 
-            if pOptions.verbose is True:
-                lBlocksAll = lBlocks.getBlocks()
-                lHeaders = lBlocks.getHeaders()
-                logging.info("Number of H.264 fragments %d" %
-                        len(lBlocks.getBlocks()))
-                logging.info("8<============ Headers ==============")
-                for lHeader in lHeaders:
-                    logging.info(str(lHeader))
-                logging.info("8<============ Blocks ==============")
-                for lBlock in lBlocksAll:
-                    logging.info(str(lBlock))
-
-            # initialize fragmentizer with parameters that describe
-            # the most important properties for blocks => fragments
-            # conversions
-            logging.info("Starting fragmentizing.")
-            lFragmentizer = fragmentizer_context.CFragmentizer()
-            self.mFragments = lFragmentizer.defrag(lBlocks,
-                    pOptions.fragmentsize, pOptions.blockgap,
-                    pOptions.minfragsize, pOptions.recoverfiletype)
-            logging.info("Finished fragmentizing.")
             logging.info("8<=============== FRAGMENTs ==============")
             for lIdx in xrange(len(self.mFragments)):
                 lFragment = self.mFragments[lIdx]

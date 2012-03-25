@@ -20,6 +20,7 @@ except ImportError, pExc:
     logging.error("Problem with importing a library: " + str(pExc))
     logging.error("Try making it with 'make' first.")
     sys.exit(-1)
+from reassembly.fragmentizer import fragmentizer_context
 from collating.magic import magic_context
 from lib import frags
 
@@ -110,6 +111,7 @@ class CPreprocessing:
         lResultThread = CResultThread(pCaller, lResultArray, lQueue)
         lResultThread.start()
 
+        lFragments = None
         if pOptions.multiprocessing == True:
             for lCnt in range(lPreprocessor.getNumParallel(pOptions.maxcpus)):
                 lProcess = multiprocessing.Process(target=self.classifyCore, \
@@ -127,25 +129,34 @@ class CPreprocessing:
 
             for lProcess in lProcesses:
                 lProcess.join(1000000L)
+            logging.info("Start gathering results ...")
+            lBlocks = frags.CFrags(lHeadersList, lBlocksList)
+            lNow = datetime.datetime.now()
+            logging.info("Finished gathering results.")
+            logging.info("Finished classifying. Duration: " + \
+                    str(lNow - lLast))
+            # initialize fragmentizer with parameters that describe
+            # the most important properties for blocks => fragments
+            # conversions
+            logging.info("Starting fragmentizing.")
+            lFragmentizer = fragmentizer_context.CFragmentizer()
+            lFragments = lFragmentizer.defrag(lBlocks,
+                    pOptions.fragmentsize, pOptions.blockgap,
+                    pOptions.minfragsize, pOptions.recoverfiletype)
+            logging.info("Finished fragmentizing.")
         else:
             lClassifier = fragment_context.CFragmentClassifier()
             #lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
             lSize = os.path.getsize(pOptions.imagefile)
             lFragsTotal = lSize / pOptions.fragmentsize
-            lClassifier.classify(pOptions.fragmentsize, lFragsTotal,
-                    pOptions.imagefile, lTypes,
+            lFragments = lClassifier.classify(pOptions.fragmentsize,
+                    lFragsTotal, pOptions.imagefile, lTypes,
                     pOptions.maxcpus)
-            lClassifier.free()
 
         lQueue.put(True)
         lResultThread.join()
 
-        logging.info("Start gathering results ...")
-        lVideoBlocks = frags.CFrags(lHeadersList, lBlocksList)
-        lNow = datetime.datetime.now()
-        logging.info("Finished gathering results.")
-        logging.info("Finished classifying. Duration: " + str(lNow - lLast))
-        return lVideoBlocks
+        return lFragments
 
     def classifyCore(self, pPid, pPreprocessor, pHeadersList,
             pBlocksList, pResultArray, pTypes, pOptions):

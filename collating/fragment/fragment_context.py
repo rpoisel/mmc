@@ -56,8 +56,19 @@ CClassifyHandlerPointer = POINTER(CClassifyHandler)
 class CFragmentStruct(Structure):
     _fields_ = [("mOffset", c_ulonglong),
             ("mSize", c_ulonglong),
-            ("mNextIdx", c_ulonglong),
-            ("mIsHeader", c_int)]
+            ("mNextIdx", c_longlong),
+            ("mIsHeader", c_int),
+            ("mPicBegin", c_char_p),
+            ("mPicEnd", c_char_p),
+            ("mIsSmall", c_int)]
+
+    def __str__(self):
+        lString = str(self.mOffset) + " / " + str(self.mSize)
+        if self.mIsHeader:
+            lString += " | Header"
+        if self.mNextIdx >= 0:
+            lString += " | NextIdx " + str(self.mNextIdx)
+        return lString
 
 
 CFragmentStructPointer = POINTER(CFragmentStruct)
@@ -69,6 +80,23 @@ class CFragmentCollection(Structure):
 
 
 CFragmentCollectionPointer = POINTER(CFragmentCollection)
+
+
+class CFragments(object):
+
+    def __init__(self, pCollection, pDestructor):
+        super(CFragments, self).__init__()
+        self.__mCollection = pCollection
+        self.__mDestructor = pDestructor
+
+    def __getitem__(self, pKey):
+        return self.__mCollection.contents.mFrags[pKey]
+
+    def __len__(self):
+        return self.__mCollection.contents.mNumFrags
+
+    def __del__(self):
+        self.__mDestructor(self.__mCollection)
 
 
 class CBlockClassifier:
@@ -113,11 +141,10 @@ class CBlockClassifier:
         return self.__mClassify(self.__mCH, pBuffer, len(pBuffer))
 
 
-class CFragmentClassifier:
+class CFragmentClassifier(object):
 
     def __init__(self):
-
-        self.__mFragmentCollection = None
+        super(CFragmentClassifier, self).__init__()
 
         # load library
         lLibname = r"libblock_reader"
@@ -125,17 +152,17 @@ class CFragmentClassifier:
             lLibname += ".dll"
         elif platform.system().lower() == "linux":
             lLibname += ".so"
-        self.__mLH = cdll.LoadLibrary(lLibname)
+        self._mLH = cdll.LoadLibrary(lLibname)
 
-        self.__mClassify = self.__mLH.classify
-        self.__mClassify.restype = CFragmentCollectionPointer
-        self.__mClassify.argtypes = \
+        self._mClassify = self._mLH.classify
+        self._mClassify.restype = CFragmentCollectionPointer
+        self._mClassify.argtypes = \
             [c_int, c_int, c_char_p, ClassifyTArray, \
             c_int, c_int]
 
-        self.__mClassifyFree = self.__mLH.classify_free
-        self.__mClassifyFree.restype = None
-        self.__mClassifyFree.argtypes = \
+        self._mClassifyFree = self._mLH.classify_free
+        self._mClassifyFree.restype = None
+        self._mClassifyFree.argtypes = \
             [CFragmentCollectionPointer]
 
     def classify(self, pBlockSize, pNumBlocks, pImage,
@@ -146,11 +173,5 @@ class CFragmentClassifier:
             lTypes[lCnt].mType = lType['mType']
             lTypes[lCnt].mStrength = lType['mStrength']
             lCnt += 1
-        self.__mFragmentCollection = self.__mClassify(pBlockSize, pNumBlocks,
-                pImage, lTypes, lCnt, pNumThreads)
-
-        # the following are just examples of how to use the return type
-        #print self.__mFragmentCollection.contents.mFrags[0].mOffset
-
-    def free(self):
-        self.__mClassifyFree(self.__mFragmentCollection)
+        return CFragments(self._mClassify(pBlockSize, pNumBlocks,
+                pImage, lTypes, lCnt, pNumThreads), self._mClassifyFree)

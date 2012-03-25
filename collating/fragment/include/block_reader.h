@@ -8,8 +8,11 @@ typedef struct
 {
     unsigned long long mOffset;
     unsigned long long mSize;
-    unsigned long long mNextIdx;
+    long long mNextIdx;
     int mIsHeader;
+    char* mPicBegin;
+    char* mPicEnd;
+    int mIsSmall;
 } fragment_t;
 
 typedef struct
