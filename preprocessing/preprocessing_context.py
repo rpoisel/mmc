@@ -64,15 +64,6 @@ class CPreprocessing:
 
     def classify(self, pOptions, pCaller):
 
-        # TODO load dynamically
-        if pOptions.preprocess == "sleuthkit":
-            if pOptions.fstype != "":
-                lPreprocessor = tsk_context.CTskImgProcessor(pOptions)
-            else:
-                lPreprocessor = plain_context.CPlainImgProcessor(pOptions)
-        else:
-            lPreprocessor = plain_context.CPlainImgProcessor(pOptions)
-
         lLast = datetime.datetime.now()
         logging.info(str(lLast) + " Start classifying.")
 
@@ -94,6 +85,16 @@ class CPreprocessing:
                 'mStrength': pOptions.strength})
 
         if pOptions.multiprocessing == True:
+
+            # TODO load dynamically
+            if pOptions.preprocess == "sleuthkit":
+                if pOptions.fstype != "":
+                    lPreprocessor = tsk_context.CTskImgProcessor(pOptions)
+                else:
+                    lPreprocessor = plain_context.CPlainImgProcessor(pOptions)
+            else:
+                lPreprocessor = plain_context.CPlainImgProcessor(pOptions)
+
             lManager = multiprocessing.Manager()
             lHeadersList = lManager.list()
             lBlocksList = lManager.list()
@@ -130,11 +131,14 @@ class CPreprocessing:
             for lProcess in lProcesses:
                 lProcess.join(1000000L)
             logging.info("Start gathering results ...")
+            lHeadersList.sort()
+            lBlocksList.sort()
+            print "Headers: "
+            print lHeadersList
+            print "Blocks: "
+            print lBlocksList
             lBlocks = frags.CFrags(lHeadersList, lBlocksList)
-            lNow = datetime.datetime.now()
             logging.info("Finished gathering results.")
-            logging.info("Finished classifying. Duration: " + \
-                    str(lNow - lLast))
             # initialize fragmentizer with parameters that describe
             # the most important properties for blocks => fragments
             # conversions
@@ -152,6 +156,10 @@ class CPreprocessing:
             lFragments = lClassifier.classify(pOptions.fragmentsize,
                     lFragsTotal, pOptions.imagefile, lTypes,
                     pOptions.maxcpus)
+
+        lNow = datetime.datetime.now()
+        logging.info("Finished classifying. Duration: " + \
+                str(lNow - lLast))
 
         lQueue.put(True)
         lResultThread.join()
@@ -189,7 +197,8 @@ class CPreprocessing:
             # check for beginning of files using libmagic(3)
             # TODO create more abstract method that allows to pass searched
             #      filetype as a parameter
-            if lMagic.determineMagic(lBlock[1]) == True:
+            lMagicResult = lMagic.determineMagic(lBlock[1])
+            if lMagicResult == magic_context.CMagic.HEADER:
                 lBlocks.addHeader(lBlock[0])
 
             # TODO ignore header fragments from other identifiable file types
@@ -197,7 +206,8 @@ class CPreprocessing:
             # generate a map of filetypes of fragments
             # TODO add block dependent on its filetype
             #      (instead of an int-value)
-            elif lFC.classify(lBlock[1]) > 0:
+            elif lMagicResult == magic_context.CMagic.UNKNOWN and \
+                    lFC.classify(lBlock[1]) > 0:
                 lBlocks.addBlock(lBlock[0])
 
         lFC.free()

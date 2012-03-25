@@ -109,11 +109,11 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         lMagicResult = magic_buffer(pMagic, pFragment, pLen);
         if (strcmp(lMagicResult, "data") != 0)
         {
-            if (strstr(lMagicResult, "text") == NULL)
+            if (strstr(lMagicResult, "text") != NULL)
             {
                 /* do not do anything yet */
             }
-            if (strstr(lMagicResult, "video") != NULL)
+            else if (strstr(lMagicResult, "video") != NULL)
             {
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
@@ -149,6 +149,7 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
 {
     ClassifyT lResult;
     int lCnt = 0;
+
     fragment_classifier_classify_result(pFragmentClassifier,
 #ifndef _MSC_VER
             NULL, 

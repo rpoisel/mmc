@@ -101,7 +101,6 @@ class CFragments(object):
 
     def free(self):
         if self.__mCollection != None:
-            print "destructing"
             self.__mDestructor(self.__mCollection)
         self.__mCollection = None
 

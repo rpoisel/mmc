@@ -17,6 +17,11 @@ class MagicDb:
 
 
 class CMagic:
+
+    HEADER = 0
+    IRRELEVANT = 1
+    UNKNOWN = 2
+
     def __init__(self, pType):
         self.mMagic = magic.open(magic.MAGIC_NONE)
         if pType in MagicDb.sSignatures:
@@ -27,8 +32,8 @@ class CMagic:
     def determineMagic(self, pBuffer):
         lMagic = self.mMagic.buffer(pBuffer)
         # exclude text based and unkown formats
-        if lMagic == None or \
-                lMagic.lower().find("text") != -1 or \
-                lMagic == "data":
-            return False
-        return True
+        if lMagic.lower().find("text") != -1:
+            return CMagic.IRRELEVANT
+        elif lMagic == "data":
+            return CMagic.UNKNOWN
+        return CMagic.HEADER

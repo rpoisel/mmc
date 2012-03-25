@@ -114,5 +114,6 @@ class CContext:
             sys.exit(-4)
 
     def cleanup(self):
-        if self.__mFragments != None:
+        if self.__mFragments != None and \
+                type(self.__mFragments) != list:
             self.__mFragments.free()
