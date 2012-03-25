@@ -27,42 +27,25 @@ fragment_collection_t* classify(int pBlockSize,
 
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_collect, 
-            lBlocks, pImage, pNumBlocks, 
+            lBlocks /* callback data */, pImage, pNumBlocks, 
             "data/magic/animation.mgc:" \
                 "data/magic/jpeg.mgc:" \
                 "data/magic/png.mgc", 
             pNumThreads);
 
-#if 0
-    block_collection_free(lBlocks);
-#endif
+    /* factor 1/4 is just an empirical value */
+    fragment_collection_t* lFragments = fragment_collection_new(lBlocks, 4);
 
     /* destruct fragment classifier */
-    fragment_classifier_free(lHandle);
-
     block_collection_free(lBlocks);
-
-    fragment_collection_t* lFragments = (fragment_collection_t* )malloc(sizeof(fragment_collection_t));
-
-    lFragments->mNumFrags = 1;
-    lFragments->mFrags = (fragment_t* )malloc(sizeof(fragment_t) * lFragments->mNumFrags);
-#if 1
-    lFragments->mFrags->mOffset = 0;
-    lFragments->mFrags->mSize = 512;
-    lFragments->mFrags->mNextIdx = -1;
-    lFragments->mFrags->mIsHeader = 1;
-    lFragments->mFrags->mPicBegin = "";
-    lFragments->mFrags->mPicEnd = "";
-    lFragments->mFrags->mIsSmall = 0;
-#endif
+    fragment_classifier_free(lHandle);
 
     return lFragments;
 }
 
 void classify_free(fragment_collection_t* pCollection)
 {
-    free(pCollection->mFrags);
-    free(pCollection);
+    fragment_collection_free(pCollection);
 }
 
 int callback_collect(void* pData, unsigned long long pOffset, 

@@ -12,7 +12,8 @@ LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm -lpthread -lmagic
 
 # ================ START =================
 BIN_BLOCK_READER=$(OUT_DIR)/libblock_reader.so
-OBJ_BLOCK_READER= $(BUILD_DIR)/block_reader.o 
+OBJ_BLOCK_READER= $(BUILD_DIR)/block_reader.o \
+		  $(BUILD_DIR)/fragment_collection.o
 CFLAGS_BLOCK_READER=$(CFLAGS) -fPIC
 LDFLAGS_BLOCK_READER=-shared -Wl,-soname, -L. \
 		     -lfragment_classifier \

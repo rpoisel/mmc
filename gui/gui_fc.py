@@ -281,6 +281,7 @@ class CMain(object):
         if len(self.mContext.fragments) is 0:
             QtGui.QMessageBox.about(self.ui, "Error",
                 "What would you like to reassemble? No fragments have been classified yet!")
+            return
         elif not os.path.isdir(self.customwidget.outputDir.text()):
             if self.__outputDirProblem() == False:
                 return

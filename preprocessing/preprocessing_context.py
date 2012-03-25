@@ -1,9 +1,7 @@
 import os
 import sys
-import math
 import logging
 import multiprocessing
-import platform
 import datetime
 import threading
 import time
@@ -12,7 +10,6 @@ from ctypes import *
 
 from preprocessing.tsk import tsk_context
 from preprocessing.plain import plain_context
-from preprocessing import fsstat_context
 try:
     #from collating.fragment import fragment_context
     from collating.fragment import fragment_context
@@ -131,12 +128,6 @@ class CPreprocessing:
             for lProcess in lProcesses:
                 lProcess.join(1000000L)
             logging.info("Start gathering results ...")
-            lHeadersList.sort()
-            lBlocksList.sort()
-            print "Headers: "
-            print lHeadersList
-            print "Blocks: "
-            print lBlocksList
             lBlocks = frags.CFrags(lHeadersList, lBlocksList)
             logging.info("Finished gathering results.")
             # initialize fragmentizer with parameters that describe

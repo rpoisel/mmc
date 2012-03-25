@@ -3,23 +3,7 @@
 
 #include "fragment_classifier.h"
 #include "block_collection.h"
-
-typedef struct
-{
-    unsigned long long mOffset;
-    unsigned long long mSize;
-    long long mNextIdx;
-    int mIsHeader;
-    char* mPicBegin;
-    char* mPicEnd;
-    int mIsSmall;
-} fragment_t;
-
-typedef struct
-{
-    unsigned long long mNumFrags;
-    fragment_t* mFrags;
-} fragment_collection_t;
+#include "fragment_collection.h"
 
 fragment_collection_t* classify(int pBlockSize, 
         int pNumBlocks, 

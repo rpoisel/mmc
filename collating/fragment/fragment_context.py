@@ -99,7 +99,7 @@ class CFragments(object):
         for lCnt in xrange(self.__mCollection.contents.mNumFrags):
             yield self.__mCollection.contents.mFrags[lCnt]
 
-    def free(self):
+    def __del__(self):
         if self.__mCollection != None:
             self.__mDestructor(self.__mCollection)
         self.__mCollection = None
