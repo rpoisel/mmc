@@ -95,8 +95,15 @@ class CFragments(object):
     def __len__(self):
         return self.__mCollection.contents.mNumFrags
 
-    def __del__(self):
-        self.__mDestructor(self.__mCollection)
+    def __iter__(self):
+        for lCnt in xrange(self.__mCollection.contents.mNumFrags):
+            yield self.__mCollection.contents.mFrags[lCnt]
+
+    def free(self):
+        if self.__mCollection != None:
+            print "destructing"
+            self.__mDestructor(self.__mCollection)
+        self.__mCollection = None
 
 
 class CBlockClassifier:

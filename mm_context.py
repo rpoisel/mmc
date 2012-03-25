@@ -27,11 +27,11 @@ class CContext:
     sDefaultOutputFormat = 'jpg'
 
     def __init__(self):
-        self.mFragments = []
+        self.__mFragments = None
 
     @property
     def fragments(self):
-        return self.mFragments
+        return self.__mFragments
 
     @staticmethod
     def getCPUs():
@@ -44,13 +44,14 @@ class CContext:
                     "")
             # initialize preprocessor
             lProcessor = preprocessing_context.CPreprocessing(pOptions)
-            self.mFragments = lProcessor.classify(pOptions, pCaller)
+            self.__mFragments = lProcessor.classify(pOptions, pCaller)
             logging.info("Back to the main context.")
 
             logging.info("8<=============== FRAGMENTs ==============")
-            for lIdx in xrange(len(self.mFragments)):
-                lFragment = self.mFragments[lIdx]
-                logging.info("FragmentIdx %04d" % lIdx + ": " + str(lFragment))
+            lCnt = 0
+            for lFragment in self.__mFragments:
+                logging.info("FragmentIdx %04d" % lCnt + ": " + str(lFragment))
+                lCnt += 1
             logging.info("8<=============== FRAGMENTs ==============")
 
             pCaller.progressCallback(100)
@@ -84,16 +85,16 @@ class CContext:
                 lReassembly = \
                     reassembly_context.CReassemblyFactory.getInstanceVideo(\
                     pOptions.assemblymethod)
-            elif pOptions.recoverfiletype == "video":
+            elif pOptions.recoverfiletype == "jpeg":
                 lReassembly = \
                     reassembly_context.CReassemblyFactory.getInstanceJpeg(\
                     pOptions.assemblymethod)
-            elif pOptions.recoverfiletype == "video":
+            elif pOptions.recoverfiletype == "png":
                 lReassembly = \
                     reassembly_context.CReassemblyFactory.getInstancePng(\
                     pOptions.assemblymethod)
             if lReassembly != None:
-                lReassembly.assemble(pOptions, self.mFragments, pCaller)
+                lReassembly.assemble(pOptions, self.__mFragments, pCaller)
             pCaller.finishedCallback()
         except LookupError, pExc:
             logging.error("LookupError: " + str(pExc))
@@ -111,3 +112,7 @@ class CContext:
             logging.error(str(pExc))
             traceback.print_exc()
             sys.exit(-4)
+
+    def cleanup(self):
+        if self.__mFragments != None:
+            self.__mFragments.free()

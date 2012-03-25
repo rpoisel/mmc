@@ -252,6 +252,8 @@ class CMain(object):
                 return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
+            if self.mContext != None:
+                self.mContext.cleanup()
             self.mContext = CContext()
             self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
@@ -278,7 +280,7 @@ class CMain(object):
     def on_reassembleButton_clicked(self, pChecked=None):
         if len(self.mContext.fragments) is 0:
             QtGui.QMessageBox.about(self.ui, "Error",
-                "What would you like to reassemble? No H.264 headers have been classified yet!")
+                "What would you like to reassemble? No fragments have been classified yet!")
         elif not os.path.isdir(self.customwidget.outputDir.text()):
             if self.__outputDirProblem() == False:
                 return
@@ -294,6 +296,8 @@ class CMain(object):
             return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
+            if self.mContext != None:
+                self.mContext.cleanup()
             self.mContext = CContext()
             self.__clearFragments()
             self.customwidget.progressBar.setValue(0)

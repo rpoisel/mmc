@@ -58,7 +58,7 @@ class CImgVisualizer(QGraphicsScene):
         #calculate the fragment under cursor
         lWidth = lSceneWidth / float(self.__mSize) #w of 1 fragment
         lX = (pPos.x()-lSceneX) / lWidth
-        for lFrag in self.__mCtx.mFragments:
+        for lFrag in self.__mCtx.fragments:
             if lX >= lFrag.mOffset and lX <= lFrag.mOffset+lFrag.mSize:
                 #logging.info('Paint tooltip')
                 self.__mHoverFragment = lFrag
@@ -160,14 +160,18 @@ class CImgVisualizer(QGraphicsScene):
         lWidth = lSceneWidth / float(self.__mSize)#self.parent().size().width() / float(self.__mSize)
         lHeight = lSceneHeight #self.parent().size().height()
 
-        for lFrag in self.__mCtx.mFragments:
-            lColor = None
-            if lFrag.mIsHeader:
-                lColor = QColor(255, 127, 127)
-            else:
-                lColor = QColor(127, 127, 255)
-            lFrameWidth = lWidth * lFrag.mSize
-            pPainter.fillRect(lSceneX + (lFrag.mOffset * lWidth)+1, lSceneY+1, lFrameWidth, lHeight-1, lColor)
+        try:
+            for lFrag in self.__mCtx.fragments:
+                lColor = None
+                if lFrag.mIsHeader:
+                    lColor = QColor(255, 127, 127)
+                else:
+                    lColor = QColor(127, 127, 255)
+                lFrameWidth = lWidth * lFrag.mSize
+                pPainter.fillRect(lSceneX + (lFrag.mOffset * lWidth)+1, lSceneY+1, lFrameWidth, lHeight-1, lColor)
+        except TypeError, pExc:
+            # sometimes this callback is invoked when this object is not ready
+            pass
         
     def drawForeground(self, pPainter, pRect):
         """
