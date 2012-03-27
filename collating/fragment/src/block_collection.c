@@ -5,8 +5,6 @@
 
 #define DEBUG 0
 
-typedef unsigned long long storage_t;
-
 /* no ceiling performed */
 #define STORAGE_SIZE(x) (x * BITS_PER_BLOCK / (sizeof(storage_t) * 8) + 1)
 

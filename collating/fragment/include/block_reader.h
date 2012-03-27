@@ -10,6 +10,8 @@ fragment_collection_t* classify(int pBlockSize,
         const char* pImage, 
         ClassifyT* pTypes, 
         int pNumTypes, 
+        unsigned long long pBlockGap,
+        unsigned long long pMinFragSize, 
         int pNumThreads); 
 
 void classify_free(fragment_collection_t* pCollection);

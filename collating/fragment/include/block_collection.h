@@ -9,6 +9,7 @@
 #define BITS_PER_BLOCK 2
 #define BLOCKS_PER_STORAGE (sizeof(unsigned long) * 8/ BITS_PER_BLOCK)
 
+typedef unsigned long long storage_t;
 typedef struct _block_collection_t block_collection_t;
 
 block_collection_t* block_collection_new(unsigned long long pMaxBlocks, 

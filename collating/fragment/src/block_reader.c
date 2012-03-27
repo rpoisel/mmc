@@ -12,6 +12,8 @@ fragment_collection_t* classify(int pBlockSize,
         const char* pImage, 
         ClassifyT* pTypes, 
         int pNumTypes, 
+        unsigned long long pBlockGap,
+        unsigned long long pMinFragSize,
         int pNumThreads)
 {
     FragmentClassifier* lHandle = NULL;
@@ -35,7 +37,7 @@ fragment_collection_t* classify(int pBlockSize,
 
     /* factor 1/4 is just an empirical value */
     /* TODO perform this step on several CPU cores */
-    fragment_collection_t* lFragments = fragment_collection_new(lBlocks, 4);
+    fragment_collection_t* lFragments = fragment_collection_new(lBlocks, 4, pBlockGap, pMinFragSize);
 
     /* destruct fragment classifier */
     block_collection_free(lBlocks);

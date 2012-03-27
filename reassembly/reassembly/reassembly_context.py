@@ -19,7 +19,6 @@ class CReassembly(object):
 
     def assemble(self, pOptions, pFragments, pCaller):
         # sort list so that header fragments are at the beginning
-        pFragments.sort(key=lambda lFrag: lFrag.mIsHeader, reverse=True)
         lIdxNoHeader = 0
         for lFrag in pFragments:
             if lFrag.mIsHeader == True:
@@ -93,48 +92,48 @@ class CReassemblyPUPVideo(CReassemblyPUP):
 
         # extract headers frames
         lCntHdr = 0
-        for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
-            logging.info("Extracting header: " + str(lFragHeader))
-            lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
+        for lFragHeaderIdx in xrange(0, pIdxNoHeader):
+            logging.info("Extracting header: " + str(pSortedFrags[lFragHeaderIdx]))
+            lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
-            if lFragHeader.mSize > pOptions.extractsize:
-                self.__decodeVideo(lFragHeader.mOffset + lFragHeader.mSize - \
+            if pSortedFrags[lFragHeaderIdx].mSize > pOptions.extractsize:
+                self.__decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + pSortedFrags[lFragHeaderIdx].mSize - \
                         pOptions.extractsize, pOptions.output,
-                        "hdr", lCntHdr, lFragHeader.mSize, lHdrData,
+                        "hdr", lCntHdr, pSortedFrags[lFragHeaderIdx].mSize, lHdrData,
                         CReassemblyPUPVideo.FRG_HDR,
                         lRecoverFH)
             else:
-                self.__decodeVideo(lFragHeader.mOffset + pOptions.hdrsize,
-                        pOptions.output, "hdr", lCntHdr, lFragHeader.mSize,
+                self.__decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + pOptions.hdrsize,
+                        pOptions.output, "hdr", lCntHdr, pSortedFrags[lFragHeaderIdx].mSize,
                         lHdrData, CReassemblyPUPVideo.FRG_HDR, lRecoverFH)
-                lFragHeader.mIsSmall = True
-            self.__determineCut(pOptions.output, "hdr", lFragHeader, lCntHdr,
+                pSortedFrags[lFragHeaderIdx].mIsSmall = True
+            self.__determineCut(pOptions.output, "hdr", pSortedFrags[lFragHeaderIdx], lCntHdr,
                     pOptions.minpicsize)
 
             # extract fragments frames
             # TODO check if fragment has already been decoded successfully
             lCntFrg = 0
-            for lFrag in pSortedFrags[pIdxNoHeader:]:
-                logging.info("Extracting fragment: " + str(lFrag))
+            for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
+                logging.info("Extracting fragment: " + str(pSortedFrags[lFragIdx]))
                 # extract begin
-                lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
-                if lFrag.mSize > pOptions.extractsize:
-                    self.__decodeVideo(lFrag.mOffset, pOptions.output, "frg",
+                lRecoverFH.seek(pSortedFrags[lFragIdx].mOffset, os.SEEK_SET)
+                if pSortedFrags[lFragIdx].mSize > pOptions.extractsize:
+                    self.__decodeVideo(pSortedFrags[lFragIdx].mOffset, pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
                             CReassemblyPUPVideo.FRG_BEGIN, lRecoverFH)
                     # extract end
-                    self.__decodeVideo(lFrag.mOffset + lFrag.mSize - \
+                    self.__decodeVideo(pSortedFrags[lFragIdx].mOffset + pSortedFrags[lFragIdx].mSize - \
                             pOptions.extractsize,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
                             CReassemblyPUPVideo.FRG_END, lRecoverFH)
                 else:
                     # extract the whole fragment at once
-                    self.__decodeVideo(lFrag.mOffset, pOptions.output, "frg",
-                            lCntFrg, lFrag.mSize, lHdrData,
+                    self.__decodeVideo(pSortedFrags[lFragIdx].mOffset, pOptions.output, "frg",
+                            lCntFrg, pSortedFrags[lFragIdx].mSize, lHdrData,
                             CReassemblyPUPVideo.FRG_SMALL, lRecoverFH)
-                    lFrag.mIsSmall = True
-                self.__determineCut(pOptions.output, "frg", lFrag, lCntFrg,
+                    pSortedFrags[lFragIdx].mIsSmall = True
+                self.__determineCut(pOptions.output, "frg", pSortedFrags[lFragIdx], lCntFrg,
                         pOptions.minpicsize)
                 lCntFrg += 1
 
@@ -281,16 +280,16 @@ class CReassemblyPerm(CReassembly):
     def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
         lCntHdr = 0
         logging.info("Trying combinations... ")
-        for lFragHeader in pSortedFrags[0:pIdxNoHeader]:
+        for lFragHeaderIdx in xrange(0, pIdxNoHeader):
             lDir = pOptions.output + os.sep + str(lCntHdr)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
             lRecoverFH = open(pOptions.imagefile, "rb")
-            for lCnt in xrange(len(pSortedFrags[pIdxNoHeader:]) + 1):
+            for lCnt in xrange(len(pSortedFrags) - pIdxNoHeader + 1):
                 for lPermutation in \
                         itertools.permutations(pSortedFrags[pIdxNoHeader:], \
                         lCnt):
-                    logging.info("Trying permutation: " + str(lFragHeader) + \
+                    logging.info("Trying permutation: " + str(pSortedFrags[lFragHeaderIdx]) + \
                             ' ' + \
                             ''.join([str(lFrag) + ' ' for lFrag in \
                             lPermutation]))
@@ -298,8 +297,8 @@ class CReassemblyPerm(CReassembly):
                             pOptions.outputformat \
                             )
                     lDecoder.open(lDir + os.sep + pOptions.outputformat)
-                    lRecoverFH.seek(lFragHeader.mOffset, os.SEEK_SET)
-                    lDecoder.write(lRecoverFH.read(lFragHeader.mSize))
+                    lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
+                    lDecoder.write(lRecoverFH.read(pSortedFrags[lFragHeaderIdx].mSize))
                     for lFrag in lPermutation:
                         lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                         lDecoder.write(lRecoverFH.read(lFrag.mSize))

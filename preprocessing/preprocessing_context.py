@@ -138,6 +138,7 @@ class CPreprocessing:
             lFragments = lFragmentizer.defrag(lBlocks,
                     pOptions.fragmentsize, pOptions.blockgap,
                     pOptions.minfragsize, pOptions.recoverfiletype)
+            lFragments.sort(key=lambda lFrag: lFrag.mIsHeader, reverse=True)
             logging.info("Finished fragmentizing.")
         else:
             lClassifier = fragment_context.CFragmentClassifier()
@@ -146,7 +147,7 @@ class CPreprocessing:
             lFragsTotal = lSize / pOptions.fragmentsize
             lFragments = lClassifier.classify(pOptions.fragmentsize,
                     lFragsTotal, pOptions.imagefile, lTypes,
-                    pOptions.maxcpus)
+                    pOptions.blockgap, pOptions.minfragsize, pOptions.maxcpus)
 
         lNow = datetime.datetime.now()
         logging.info("Finished classifying. Duration: " + \
