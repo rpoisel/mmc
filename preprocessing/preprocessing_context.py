@@ -146,7 +146,7 @@ class CPreprocessing:
             lSize = os.path.getsize(pOptions.imagefile)
             lFragsTotal = lSize / pOptions.fragmentsize
             lFragments = lClassifier.classify(pOptions.fragmentsize,
-                    lFragsTotal, pOptions.imagefile, lTypes,
+                    lFragsTotal, pOptions.imagefile, pOptions.offset, lTypes,
                     pOptions.blockgap, pOptions.minfragsize, pOptions.maxcpus)
 
         lNow = datetime.datetime.now()

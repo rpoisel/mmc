@@ -8,6 +8,7 @@
 fragment_collection_t* classify(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
+        unsigned long long pOffset, 
         ClassifyT* pTypes, 
         int pNumTypes, 
         unsigned long long pBlockGap,

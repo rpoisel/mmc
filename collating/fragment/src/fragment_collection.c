@@ -6,11 +6,12 @@
 #define DEBUG 0
 
 static int fragment_collection_add(fragment_collection_t* , 
-        fragment_t* , unsigned long long);
+        fragment_t* , unsigned long long, unsigned long long);
 
 fragment_collection_t* fragment_collection_new(
         block_collection_t* pBlocks, 
         int pFactor,
+        unsigned long long pOffset, 
         unsigned long long pBlockGap,
         unsigned long long pMinFragSize)
 {
@@ -42,6 +43,15 @@ fragment_collection_t* fragment_collection_new(
         {
             if (HEADER(lBlockTmp))
             {
+                /* temporary fragment is already existing */
+                if (lFlagExisting)
+                {
+                    if (fragment_collection_add(lFragments, &lFragTmp, pOffset, pMinFragSize * lBlockSize) != 0)
+                    {
+                        /* fragments buffer full => quit */
+                        break;
+                    }
+                }
                 /* reset lFragTmp to start a new fragment */
                 lFragTmp = (fragment_t){ lBlockSize * lCntBlock, lBlockSize, -1, 1, "", "", 0 };
                 lBlockGap = 0;
@@ -52,7 +62,7 @@ fragment_collection_t* fragment_collection_new(
                  * block gap being reached */
                 if (lBlockGap <= pBlockGap && lFlagExisting)
                 {
-                    lFragTmp.mSize = lBlockSize * lCntBlock - lFragTmp.mOffset;
+                    lFragTmp.mSize = (lBlockSize + 1) * lCntBlock - lFragTmp.mOffset;
                 }
                 else
                 {
@@ -68,7 +78,7 @@ fragment_collection_t* fragment_collection_new(
             /* if yes, add the fragment and set conditions to start a new one */
             if (lBlockGap > pBlockGap)
             {
-                if (fragment_collection_add(lFragments, &lFragTmp, pMinFragSize * lBlockSize) != 0)
+                if (fragment_collection_add(lFragments, &lFragTmp, pOffset, pMinFragSize * lBlockSize) != 0)
                 {
                     /* fragments buffer full => quit */
                     break;
@@ -88,20 +98,29 @@ fragment_collection_t* fragment_collection_new(
 
 static int fragment_collection_add(fragment_collection_t* pFragments, 
         fragment_t* pFragment, 
+        unsigned long long pOffset, 
         unsigned long long pMinFragSize)
 {
+#if DEBUG == 1
+    printf("Offset: %lld, Size: %lld%s\n",
+            pFragment->mOffset,
+            pFragment->mSize,
+            pFragment->mIsHeader ? ", Header" : "");
+#endif
     /* buffer full condition */
     if (pFragments->mNumFrags >= pFragments->mMaxFrags)
     {
         return -1;
     }
+    /* fragment is too small */
     else if (pFragment->mSize <= pMinFragSize)
     {
-        return 0;
+        return 0; /* this is not an error case */
     }
 
     /* add fragment to buffer */
     *(pFragments->mFrags + pFragments->mNumFrags) = *pFragment;
+    (pFragments->mFrags + pFragments->mNumFrags)->mOffset += pOffset;
     (pFragments->mNumFrags)++;
 
     return 0;

@@ -10,6 +10,7 @@ int callback_collect(void* pData, unsigned long long pOffset,
 fragment_collection_t* classify(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
+        unsigned long long pOffset, 
         ClassifyT* pTypes, 
         int pNumTypes, 
         unsigned long long pBlockGap,
@@ -29,7 +30,7 @@ fragment_collection_t* classify(int pBlockSize,
 
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_collect, 
-            lBlocks /* callback data */, pImage, pNumBlocks, 
+            lBlocks /* callback data */, pImage, pOffset, pNumBlocks, 
             "data/magic/animation.mgc:" \
                 "data/magic/jpeg.mgc:" \
                 "data/magic/png.mgc", 
@@ -37,7 +38,8 @@ fragment_collection_t* classify(int pBlockSize,
 
     /* factor 1/4 is just an empirical value */
     /* TODO perform this step on several CPU cores */
-    fragment_collection_t* lFragments = fragment_collection_new(lBlocks, 4, pBlockGap, pMinFragSize);
+    fragment_collection_t* lFragments = fragment_collection_new(lBlocks, 4, pOffset, 
+            pBlockGap, pMinFragSize);
 
     /* destruct fragment classifier */
     block_collection_free(lBlocks);

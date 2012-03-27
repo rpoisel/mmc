@@ -84,7 +84,8 @@ __declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pF
         fragment_cb pCallback, 
         void* pCallbackData, 
         const char* pImage, 
-        unsigned long long pSize, 
+        unsigned long long pOffset, 
+        unsigned long long pSizeReal, 
         const char* pPathMagic, 
         unsigned int pNumThreads);
 #endif

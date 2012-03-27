@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <math.h>
 
 #ifndef _MSC_VER
 #include <magic.h>
@@ -10,6 +11,7 @@
 #include "fragment_classifier.h"
 #include "entropy/entropy.h"
 
+#define DEBUG 0
 /* turn to 1 for verbose messages */
 #define VERBOSE 0
 #define MAX_FILETYPES 24
@@ -29,6 +31,7 @@ typedef struct
     int result;
     char path_image[MAX_STR_LEN];
     unsigned long long offset_img;
+    unsigned long long offset_fs;
     unsigned long long num_frags;
 #ifndef _MSC_VER
     const char* mPathMagic;
@@ -186,7 +189,8 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         fragment_cb pCallback, 
         void* pCallbackData, 
         const char* pImage, 
-        unsigned long long pSize,
+        unsigned long long pOffset, 
+        unsigned long long pSizeReal,
         const char* pPathMagic, 
         unsigned int pNumThreads
         )
@@ -194,6 +198,10 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     pthread_t* lThreads = NULL;
     int lCnt = 0;
     thread_data* lData = NULL;
+    unsigned long long lSize = pSizeReal * pFragmentClassifier->mFragmentSize - pOffset;
+    unsigned long long lFragsTotal = lSize / pFragmentClassifier->mFragmentSize;
+    unsigned long long lFragsPerCpu = ceill(((long double)lFragsTotal)/pNumThreads);
+    unsigned long long lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
 
     /* TODO check return value */
     lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
@@ -206,8 +214,22 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         (lData + lCnt)->callback = pCallback;
         (lData + lCnt)->callback_data = pCallbackData; 
         (lData + lCnt)->mPathMagic = pPathMagic;
-        (lData + lCnt)->num_frags = pSize / (pNumThreads);
-        (lData + lCnt)->offset_img = lCnt * pSize / (pNumThreads);
+        if (lCnt == pNumThreads - 1 && lFragsPerCpuR > 0)
+        {
+            (lData + lCnt)->num_frags = lFragsPerCpuR;
+        }
+        else
+        {
+            (lData + lCnt)->num_frags = lFragsPerCpu;
+        }
+#if 0
+        (lData + lCnt)->offset_img = 
+            lCnt * lFragsPerCpu * pFragmentClassifier->mFragmentSize + pOffset;
+#else
+        (lData + lCnt)->offset_img = lCnt * lFragsPerCpu;
+        (lData + lCnt)->offset_fs = pOffset;
+#endif
+
         pthread_create((lThreads + lCnt), NULL, 
                 classify_thread, (void*)(lData + lCnt));
     }
@@ -247,9 +269,13 @@ void* classify_thread(void* pData)
     }
 #endif
 
+#if DEBUG == 1
+    printf("Offset: %lld\n", lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
+#endif
+
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
     lImage = fopen(lData->path_image, "r");
-    fseek(lImage, lData->offset_img * lData->handle_fc->mFragmentSize, SEEK_SET);
+    fseek(lImage, lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs, SEEK_SET);
 
     /* classify fragments */
     while (lLen == lData->handle_fc->mFragmentSize && 

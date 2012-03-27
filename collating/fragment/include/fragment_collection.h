@@ -24,6 +24,7 @@ typedef struct
 fragment_collection_t* fragment_collection_new(
         block_collection_t* pBlocks, 
         int pFactor,
+        unsigned long long pOffset, 
         unsigned long long pBlockGap,
         unsigned long long pMinFragSize);
 
