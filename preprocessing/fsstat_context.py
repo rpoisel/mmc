@@ -3,9 +3,11 @@ import os
 import os.path
 import platform
 
+
 class CFsOptions:
 
-    def __init__(self, pSize = 0, pOffset = 0, pIncrement = 512, pBlockSize = 512, pFsType = '', pTskProperties = {}):
+    def __init__(self, pSize=0, pOffset=0, pIncrement=512,
+            pBlockSize=512, pFsType='', pTskProperties={}):
         self.size = pSize
         self.offset = pOffset
         self.increment = pIncrement
@@ -15,10 +17,11 @@ class CFsOptions:
 
     def __str__(self):
         lString = str(self.size) + " bytes, " + \
-                self.fstype if self.fstype != '' else 'N/A' + \
-                    ", block size = " + str(self.blocksize) + \
+                self.fstype if self.fstype != '' else 'N/A'
+        lString += ", block size = " + str(self.blocksize) + \
                     ", offset = " + str(self.offset)
         return lString
+
 
 class CFsStatContext:
     @staticmethod
@@ -27,15 +30,19 @@ class CFsStatContext:
         # dirty hack
         lTsk = None
         if platform.system().lower() == 'windows':
-            lTsk = subprocess.Popen(['bin' + os.sep + 'fsstat.exe', pOptions.imagefile], bufsize=512, stdout=subprocess.PIPE)
+            lTsk = subprocess.Popen(['bin' + os.sep + 'fsstat.exe',
+                pOptions.imagefile], bufsize=512, stdout=subprocess.PIPE)
         else:
-            lTsk = subprocess.Popen(['fsstat', pOptions.imagefile], bufsize=512, stdout=subprocess.PIPE)
+            lTsk = subprocess.Popen(['fsstat', pOptions.imagefile],
+                    bufsize=512, stdout=subprocess.PIPE)
         lTskOutput = lTsk.communicate()
         lTskProperties = {}
-        for lPair in [lElem for lElem in [lLine.split(': ') for lLine in lTskOutput[0].split('\n')] if len(lElem) == 2]:
+        for lPair in [lElem for lElem in [lLine.split(': ') \
+                for lLine in lTskOutput[0].split('\n')] if len(lElem) == 2]:
             lTskProperties[lPair[0].strip()] = lPair[1].strip()
 
-        lBlockSize = lTskProperties["Cluster Size"] if "Cluster Size" in lTskProperties else "512"
+        lBlockSize = lTskProperties["Cluster Size"] \
+                if "Cluster Size" in lTskProperties else "512"
 
         if "* Data Area" in lTskProperties:
             # first sector index * sector size (512 bytes)
@@ -43,10 +50,10 @@ class CFsStatContext:
         else:
             lOffset = 0
 
-        return CFsOptions(pSize = lSize,
-                pOffset = lOffset,
-                pBlockSize = lBlockSize,
-                pIncrement = lBlockSize,
-                pFsType = lTskProperties["File System Type"] if "File System Type" in lTskProperties else '',
-                pTskProperties = lTskProperties)
-
+        return CFsOptions(pSize=lSize,
+                pOffset=lOffset,
+                pBlockSize=lBlockSize,
+                pIncrement=lBlockSize,
+                pFsType=lTskProperties["File System Type"] if \
+                        "File System Type" in lTskProperties else '',
+                pTskProperties=lTskProperties)
