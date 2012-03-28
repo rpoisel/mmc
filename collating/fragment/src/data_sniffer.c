@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_print, 
             (void *)&lData, argv[1], 
+            0 /* filesystem offset */, 
             lImageBlockSize,
             "../../data/magic/animation.mgc:" \
                 "../../data/magic/jpeg.mgc:" \
