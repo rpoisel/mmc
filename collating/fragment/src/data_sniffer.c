@@ -112,6 +112,9 @@ int callback_print(void* pData, unsigned long long pOffset,
         case FT_H264:
             printf("H264");
             break;
+        case FT_TXT:
+            printf("TEXT");
+            break;
         default:
             printf("Unknown");
     }
