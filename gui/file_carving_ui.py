@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Fri Mar 16 11:08:24 2012
+# Created: Wed Mar 28 21:52:13 2012
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -336,7 +336,7 @@ class Ui_filecarvingWidget(object):
         self.partitionOffset.setText(QtGui.QApplication.translate("filecarvingWidget", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_2.setTitle(QtGui.QApplication.translate("filecarvingWidget", "Fragmentizer Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("filecarvingWidget", "Block Gap", None, QtGui.QApplication.UnicodeUTF8))
-        self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "16384", None, QtGui.QApplication.UnicodeUTF8))
+        self.blockGap.setText(QtGui.QApplication.translate("filecarvingWidget", "4096", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("filecarvingWidget", "Minimum Fragment Size", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setStatusTip(QtGui.QApplication.translate("filecarvingWidget", "Minimum fragment size in blocks", None, QtGui.QApplication.UnicodeUTF8))
         self.minimumFragmentSize.setText(QtGui.QApplication.translate("filecarvingWidget", "4", None, QtGui.QApplication.UnicodeUTF8))

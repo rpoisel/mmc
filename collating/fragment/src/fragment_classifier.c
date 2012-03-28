@@ -206,6 +206,11 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     /* TODO check return value */
     lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
+
+#if DEBUG == 1
+    printf("Fragments range: %lld\n", lFragsTotal);
+    printf("Filesystem offset: %lld\n", pOffset);
+#endif
     
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
@@ -230,6 +235,10 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         (lData + lCnt)->offset_fs = pOffset;
 #endif
 
+#if DEBUG == 1
+        printf("Starting thread %d with block range %lld to %lld.\n",
+                lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
+#endif
         pthread_create((lThreads + lCnt), NULL, 
                 classify_thread, (void*)(lData + lCnt));
     }

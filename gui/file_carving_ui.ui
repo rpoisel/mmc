@@ -335,7 +335,7 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="blockGap">
             <property name="text">
-             <string>16384</string>
+             <string>4096</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

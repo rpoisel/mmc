@@ -5,6 +5,7 @@
 
 #define DEBUG 0
 
+static int sort_callback(const void* pFrag1, const void* pFrag2);
 static int fragment_collection_add(fragment_collection_t* , 
         fragment_t* , unsigned long long, unsigned long long);
 
@@ -93,7 +94,27 @@ fragment_collection_t* fragment_collection_new(
         }
     }
 
+    /* sort fragments */
+    qsort(lFragments->mFrags, lFragments->mNumFrags, sizeof(fragment_t),
+            sort_callback);
+
     return lFragments;
+}
+
+static int sort_callback(const void* pFrag1, const void* pFrag2)
+{
+    if (((const fragment_t* )pFrag1)->mIsHeader &&
+            !((const fragment_t* )pFrag2)->mIsHeader)
+    {
+        return -1;
+    }
+    else if (!((const fragment_t* )pFrag1)->mIsHeader &&
+            ((const fragment_t* )pFrag2)->mIsHeader)
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 static int fragment_collection_add(fragment_collection_t* pFragments, 
