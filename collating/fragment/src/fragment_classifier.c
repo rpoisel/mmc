@@ -114,7 +114,8 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         {
             if (strstr(lMagicResult, "text") != NULL)
             {
-                /* do not do anything yet */
+                pResult->mType = FT_TXT;
+                pResult->mStrength = 1;
             }
             else if (strstr(lMagicResult, "video") != NULL)
             {
@@ -139,6 +140,11 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         if (lEntropy > 0.625) /* empiric value ;-) */
         {
             pResult->mType = FT_HIGH_ENTROPY;
+            pResult->mStrength = 1;
+        }
+        else
+        {
+            pResult->mType = FT_LOW_ENTROPY;
             pResult->mStrength = 1;
         }
     }

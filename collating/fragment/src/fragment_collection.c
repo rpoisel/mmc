@@ -134,7 +134,7 @@ static int fragment_collection_add(fragment_collection_t* pFragments,
         return -1;
     }
     /* fragment is too small */
-    else if (pFragment->mSize <= pMinFragSize)
+    else if (pFragment->mSize <= pMinFragSize && !pFragment->mIsHeader)
     {
         return 0; /* this is not an error case */
     }
