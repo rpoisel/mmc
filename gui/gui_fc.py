@@ -8,7 +8,8 @@ import sys
 import platform
 import multiprocessing
 import logging
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+        level=logging.DEBUG)
 import datetime
 # PyQt4, PySide stuff
 from PySide import QtCore
@@ -19,7 +20,7 @@ from PySide import QtUiTools
 sys.path.append('.')
 if platform.system().lower() == "windows":
     lBits = 32
-    if sys.maxsize > 2**32:
+    if sys.maxsize > 2 ** 32:
         lBits = 64
     lPath = r"collating\magic\lib\magic\dll" + str(lBits)
     lPath += r";collating\fragment"
@@ -35,16 +36,18 @@ from reassembly.reassembly import reassembly_context
 
 import gui.gui_imgvisualizer
 
+
 class Jobs:
-    NONE=0x0
-    CLASSIFY=0x1
-    REASSEMBLE=0x2
+    NONE = 0x0
+    CLASSIFY = 0x1
+    REASSEMBLE = 0x2
 
 
 class CThreadWorker(QtCore.QThread):
     sBegin = QtCore.Signal(int, int, int, str)
     sProgress = QtCore.Signal(int)
     sFinished = QtCore.Signal(int, int)
+    sError = QtCore.Signal(str)
 
     def __init__(self, pOptions, pContext, pJobs):
         super(CThreadWorker, self).__init__()
@@ -74,7 +77,19 @@ class CThreadWorker(QtCore.QThread):
     def run(self):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
             self.mRunningJob = Jobs.CLASSIFY
-            self.mContext.runClassify(self.mOptions, self)
+            try:
+                self.mContext.runClassify(self.mOptions, self)
+            except OSError, pExc:
+                logging.error(str(pExc) + ". Please make sure the "\
+                        "classifier binaries are compiled. ")
+                self.sError.emit(str(pExc) + ". Please make sure the "\
+                        "classifier binaries are compiled. ")
+            except Exception, pExc:
+                logging.error(str(pExc))
+                self.sError.emit(str(pExc))
+            finally:
+                self.sFinished.emit(self.mRunningJob, self.mJobs)
+                return
         if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
             self.mRunningJob = Jobs.REASSEMBLE
             self.mContext.runReassembly(self.mOptions, self)
@@ -110,7 +125,8 @@ class CMain(object):
         # adjust widget elements
         self.customwidget.imageView.setMouseTracking(True)
 
-        for lPreprocessor in preprocessing_context.CPreprocessing.getPreprocessors():
+        for lPreprocessor in \
+                preprocessing_context.CPreprocessing.getPreprocessors():
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
 
         self.customwidget.outputformat.addItem("MKV")
@@ -121,22 +137,24 @@ class CMain(object):
         self.customwidget.recoverfiletypes.addItem("Video")
         self.customwidget.recoverfiletypes.addItem("JPEG (not implemented)")
         self.customwidget.recoverfiletypes.addItem("PNG (not implemented)")
-        #self.customwidget.recoverfiletypes.addItem("Text (not implemented yet)")
-        #self.customwidget.recoverfiletypes.addItem("Documents (not implemented yet)")
 
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
         self.on_multiprocessing_changed(False)
 
-        for lAssembly in reassembly_context.CReassemblyFactory.getAssemblyMethodsVideo():
+        for lAssembly in \
+                reassembly_context.\
+                CReassemblyFactory.getAssemblyMethodsVideo():
             self.customwidget.assemblyMethod.addItem(lAssembly)
 
         self.customwidget.blockStatus.addItem("allocated")
         self.customwidget.blockStatus.addItem("unallocated")
 
         self.customwidget.resultTable.setColumnCount(4)
-        self.customwidget.resultTable.setHorizontalHeaderLabels(("Header", "Fragment", "Offset", "Size"))
-        self.customwidget.resultTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.customwidget.resultTable.setHorizontalHeaderLabels((\
+                "Header", "Fragment", "Offset", "Size"))
+        self.customwidget.resultTable.horizontalHeader().\
+                setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
 
         self.customwidget.progressBar.setMaximum(100)
@@ -147,31 +165,46 @@ class CMain(object):
         # actions
         self.ui.actionExit.triggered.connect(self.on_actionExit_triggered)
         self.ui.actionAbout.triggered.connect(self.on_actionAbout_triggered)
-        self.ui.actionChooseOutputDir.triggered.connect(self.on_outputDirButton_clicked)
-        self.ui.actionOpenImage.triggered.connect(self.on_inputFileButton_clicked)
-        self.customwidget.classifyButton.clicked.connect(self.on_classifyButton_clicked)
-        self.customwidget.reassembleButton.clicked.connect(self.on_reassembleButton_clicked)
-        self.customwidget.processButton.clicked.connect(self.on_processButton_clicked)
-        self.customwidget.inputFileButton.clicked.connect(self.on_inputFileButton_clicked)
-        self.customwidget.outputDirButton.clicked.connect(self.on_outputDirButton_clicked)
-        self.customwidget.inputFile.textChanged.connect(self.on_inputFile_changed)
-        self.customwidget.outputDir.textChanged.connect(self.on_outputDir_changed)
-        self.customwidget.recoverfiletypes.currentIndexChanged.connect(self.on_recoverFT_changed)
-        self.customwidget.multiprocessing.stateChanged.connect(self.on_multiprocessing_changed)
+        self.ui.actionChooseOutputDir.triggered.connect(\
+                self.on_outputDirButton_clicked)
+        self.ui.actionOpenImage.triggered.connect(\
+                self.on_inputFileButton_clicked)
+        self.customwidget.classifyButton.clicked.connect(\
+                self.on_classifyButton_clicked)
+        self.customwidget.reassembleButton.clicked.connect(\
+                self.on_reassembleButton_clicked)
+        self.customwidget.processButton.clicked.connect(\
+                self.on_processButton_clicked)
+        self.customwidget.inputFileButton.clicked.connect(\
+                self.on_inputFileButton_clicked)
+        self.customwidget.outputDirButton.clicked.connect(\
+                self.on_outputDirButton_clicked)
+        self.customwidget.inputFile.textChanged.connect(\
+                self.on_inputFile_changed)
+        self.customwidget.outputDir.textChanged.connect(\
+                self.on_outputDir_changed)
+        self.customwidget.recoverfiletypes.currentIndexChanged.connect(\
+                self.on_recoverFT_changed)
+        self.customwidget.multiprocessing.stateChanged.connect(\
+                self.on_multiprocessing_changed)
 
         # init values
-        self.customwidget.inputFile.setText(os.getcwd() + os.sep + "data" + os.sep + "image_ref_h264_ntfs_formatted.img")
-        self.customwidget.outputDir.setText(r"c:\temp" if platform.system().lower() == "windows" else "/tmp/temp")
+        self.customwidget.inputFile.setText(\
+                os.path.join(os.getcwd(), "data",
+                    "image_ref_h264_ntfs_formatted.img"))
+        self.customwidget.outputDir.setText(r"c:\temp" \
+                if platform.system().lower() == "windows" else "/tmp/temp")
 
-    def on_multiprocessing_changed(self, pState): 
+    def on_multiprocessing_changed(self, pState):
         self.customwidget.maxCPUs.setEnabled(pState)
         #self.customwidget.maxCPUs.setCurrentIndex(0)
 #        if pState == False:
-#            self.customwidget.maxCPUs.setCurrentIndex(self.customwidget.maxCPUs.count() - 1)
+#            self.customwidget.maxCPUs.setCurrentIndex(\
+#                    self.customwidget.maxCPUs.count() - 1)
 #        else:
 #            self.customwidget.maxCPUs.setCurrentIndex(0)
 
-    def on_actionExit_triggered(self): 
+    def on_actionExit_triggered(self):
         self.ui.close()
 
     def on_recoverFT_changed(self, pIdx):
@@ -185,23 +218,30 @@ class CMain(object):
     def on_inputFile_changed(self, pPath):
         if os.path.exists(pPath):
             lOptions = self.__getOptions()
-            self.__mGeometry = fsstat_context.CFsStatContext.getFsGeometry(lOptions)
+            self.__mGeometry = \
+                    fsstat_context.CFsStatContext.getFsGeometry(lOptions)
             logging.info("FS Info: " + str(self.__mGeometry))
             self.customwidget.offset.setText(str(self.__mGeometry.offset))
-            self.customwidget.fragmentSize.setText(str(self.__mGeometry.blocksize))
-            self.customwidget.fsInfo.setText("FS Info: " + str(self.__mGeometry))
+            self.customwidget.fragmentSize.setText(\
+                    str(self.__mGeometry.blocksize))
+            self.customwidget.fsInfo.setText(\
+                    "FS Info: " + str(self.__mGeometry))
             pass
         else:
-            self.customwidget.fsInfo.setText("<html><font color=\"#FF0000\">Imagefile does not exist.</font></html>")
+            self.customwidget.fsInfo.setText(\
+                    "<html><font color=\"#FF0000\">"\
+                    "Imagefile does not exist.</font></html>")
 
     def on_outputDir_changed(self, pPath):
         if os.path.isdir(pPath):
             self.customwidget.outputDirInfo.setText("Output directory exists.")
         else:
-            self.customwidget.outputDirInfo.setText("<html><font color=\"#FF0000\">Output directory does not exist.</font></html>")
+            self.customwidget.outputDirInfo.setText(\
+                    "<html><font color=\"#FF0000\">"\
+                    "Output directory does not exist.</font></html>")
 
     def on_actionAbout_triggered(self, pChecked=None):
-        QtGui.QMessageBox.about(self.ui, 
+        QtGui.QMessageBox.about(self.ui,
             "Multimedia File Carver",
             "<html>Key developers:  \
             <ul> \
@@ -210,16 +250,21 @@ class CMain(object):
                 <li>Manfred Ruzicka</li> \
                 <li>Markus Mannel</li> \
             </ul> \
-            &copy; 2011, 2012 St. Poelten University of Applied Sciences</html> \
+            &copy; 2011, 2012 St. Poelten University of Applied "\
+            "Sciences</html> \
             <p> \
             This software is released under the terms of the LGPLv3:<br /> \
-            <a href=\"http://www.gnu.org/licenses/lgpl.html\">http://www.gnu.org/licenses/lgpl.html</a> \
+            <a href=\"http://www.gnu.org/licenses/lgpl.html\">"\
+            "http://www.gnu.org/licenses/lgpl.html</a> \
             </p> \
-            Regarding software required for running our file carver we kindly refer to their respective licenses: \
+            Regarding software required for running our file carver we "\
+            "kindly refer to their respective licenses: \
             <ul> \
             <li><a href=\"http://ffmpeg.org/legal.html\">FFmpeg</a></li> \
-            <li><a href=\"http://www.gzip.org/zlib/zlib_license.html\">zlib</a></li> \
-            <li><a href=\"http://www.sleuthkit.org/sleuthkit/licenses.php\">The Sleuth Kit</a></li> \
+            <li><a href=\"http://www.gzip.org/zlib/zlib_license.html\">"\
+            "zlib</a></li> \
+            <li><a href=\"http://www.sleuthkit.org/sleuthkit/licenses.php\">"\
+            "The Sleuth Kit</a></li> \
             </ul> \
             "
             )
@@ -257,13 +302,14 @@ class CMain(object):
             self.mContext = CContext()
             self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
-            self.__startWorker(Jobs.CLASSIFY|Jobs.REASSEMBLE)
+            self.__startWorker(Jobs.CLASSIFY | Jobs.REASSEMBLE)
 
     def __outputDirProblem(self):
         lMsgBox = QtGui.QMessageBox()
         lMsgBox.setText("The specified output directory does not exist. ")
         lMsgBox.setInformativeText("Do you want to create it?")
-        lCreateButton = lMsgBox.addButton(self.ui.tr("Create directory"), QtGui.QMessageBox.ActionRole)
+        lCreateButton = lMsgBox.addButton(self.ui.tr("Create directory"),\
+                QtGui.QMessageBox.ActionRole)
         lCancelButton = lMsgBox.addButton(QtGui.QMessageBox.Abort)
         lMsgBox.exec_()
         if lMsgBox.clickedButton() == lCreateButton:
@@ -280,7 +326,8 @@ class CMain(object):
     def on_reassembleButton_clicked(self, pChecked=None):
         if len(self.mContext.fragments) is 0:
             QtGui.QMessageBox.about(self.ui, "Error",
-                "What would you like to reassemble? No fragments have been classified yet!")
+                "What would you like to reassemble? "\
+                        "No fragments have been classified yet!")
             return
         elif not os.path.isdir(self.customwidget.outputDir.text()):
             if self.__outputDirProblem() == False:
@@ -312,7 +359,6 @@ class CMain(object):
         self.numRowsResult = 0
         self.customwidget.resultTable.update()
 
-
     def __enableElements(self, pEnabled):
         self.customwidget.classifyButton.setEnabled(pEnabled)
         self.customwidget.reassembleButton.setEnabled(pEnabled)
@@ -332,6 +378,8 @@ class CMain(object):
         self.__mWorker.sProgress.connect(self.on_progress_callback, \
                 QtCore.Qt.QueuedConnection)
         self.__mWorker.sFinished.connect(self.on_finished_callback, \
+                QtCore.Qt.QueuedConnection)
+        self.__mWorker.sError.connect(self.on_error_callback, \
                 QtCore.Qt.QueuedConnection)
         self.__enableElements(False)
         self.__mWorker.start(QtCore.QThread.IdlePriority)
@@ -365,15 +413,18 @@ class CMain(object):
         lOptions.fragmentsize = int(self.customwidget.fragmentSize.text())
         lOptions.incrementsize = lOptions.fragmentsize
         lOptions.blockgap = int(self.customwidget.blockGap.text())
-        lOptions.minfragsize = int(self.customwidget.minimumFragmentSize.text())
+        lOptions.minfragsize = int(\
+                self.customwidget.minimumFragmentSize.text())
         lOptions.hdrsize = int(self.customwidget.headerSize.text())
         lOptions.extractsize = int(self.customwidget.extractSize.text()) * 1024
-        lOptions.assemblymethod = self.customwidget.assemblyMethod.currentText()
+        lOptions.assemblymethod = \
+                self.customwidget.assemblyMethod.currentText()
         lOptions.minpicsize = int(self.customwidget.minPicSize.text())
         lOptions.similarity = int(self.customwidget.similarity.text())
         lOptions.blockstatus = self.customwidget.blockStatus.currentText()
         lOptions.maxcpus = int(self.customwidget.maxCPUs.currentText())
-        lOptions.multiprocessing = self.customwidget.multiprocessing.isChecked()
+        lOptions.multiprocessing = \
+                self.customwidget.multiprocessing.isChecked()
         if self.__mGeometry != None:
             lOptions.fstype = self.__mGeometry.fstype
             lOptions.tskProperties = self.__mGeometry.tskProperties
@@ -384,8 +435,11 @@ class CMain(object):
 
     def on_begin_callback(self, pJob, pSize, pOffset, pFsType):
         if pJob == Jobs.CLASSIFY:
-            logging.info("Beginning classifying. Imagesize is " + str(pSize) + " bytes.")
-            self.__mImgVisualizer = gui.gui_imgvisualizer.CImgVisualizer(self.mContext, pSize, pOffset, pFsType, self.customwidget.imageView)
+            logging.info("Beginning classifying. Imagesize is " +\
+                    str(pSize) + " bytes.")
+            self.__mImgVisualizer = gui.gui_imgvisualizer.CImgVisualizer(\
+                    self.mContext, pSize, pOffset, pFsType,\
+                    self.customwidget.imageView)
             self.customwidget.imageView.setScene(self.__mImgVisualizer)
         elif pJob == Jobs.REASSEMBLE:
             logging.info("Beginning reassembling.")
@@ -402,32 +456,40 @@ class CMain(object):
         self.customwidget.duration.setText(str(lDelta))
         if pFinishedJob == Jobs.CLASSIFY:
             lNumRowsResult = 0
-            for lFrag in self.mContext.fragments:
-                self.customwidget.resultTable.insertRow(lNumRowsResult) 
-                if lFrag.mIsHeader == True:
-                    lItem = QtGui.QTableWidgetItem("H")
-                else:
-                    lItem = QtGui.QTableWidgetItem("")
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 0, lItem)
+            if self.mContext.fragments != None:
+                for lFrag in self.mContext.fragments:
+                    self.customwidget.resultTable.insertRow(lNumRowsResult)
+                    if lFrag.mIsHeader == True:
+                        lItem = QtGui.QTableWidgetItem("H")
+                    else:
+                        lItem = QtGui.QTableWidgetItem("")
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.customwidget.resultTable.setItem(lNumRowsResult, 0,
+                            lItem)
 
-                lItem = QtGui.QTableWidgetItem("Fragment " + str(lNumRowsResult + 1))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 1, lItem)
+                    lItem = QtGui.QTableWidgetItem("Fragment " +\
+                            str(lNumRowsResult + 1))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.customwidget.resultTable.setItem(lNumRowsResult, 1,
+                            lItem)
 
-                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 2, lItem)
+                    lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(\
+                            QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+                    self.customwidget.resultTable.setItem(lNumRowsResult, 2,
+                            lItem)
 
-                lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 3, lItem)
+                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(\
+                            QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+                    self.customwidget.resultTable.setItem(lNumRowsResult, 3,
+                            lItem)
 
-                lNumRowsResult += 1
+                    lNumRowsResult += 1
             self.__mImgVisualizer.update()
         if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
                 or (pFinishedJob == Jobs.REASSEMBLE):
@@ -436,11 +498,16 @@ class CMain(object):
 
         if pFinishedJob == Jobs.REASSEMBLE and \
             lOptions.showResults == True:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://" + lOptions.output))
+                QtGui.QDesktopServices.openUrl(QtCore.QUrl(\
+                        "file://" + lOptions.output))
         if pFinishedJob == Jobs.CLASSIFY:
             logging.info("Classification finished. ")
         elif pFinishedJob == Jobs.REASSEMBLE:
             logging.info("Reassembling finished. ")
+
+    def on_error_callback(self, pError):
+        QtGui.QMessageBox.about(self.ui, "Error",\
+                "An error occured: " + pError)
 
     def run(self):
         #self.__mWindow.show()

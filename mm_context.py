@@ -38,7 +38,7 @@ class CContext:
         return multiprocessing.cpu_count()
 
     def runClassify(self, pOptions, pCaller):
-        try:
+#        try:
             pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
                     pOptions.offset,
                     "")
@@ -57,22 +57,22 @@ class CContext:
             pCaller.progressCallback(100)
             pCaller.finishedCallback()
 
-        except LookupError, pExc:
-            logging.error("LookupError: " + str(pExc))
-            traceback.print_exc()
-            sys.exit(-1)
-        except NameError, pExc:
-            logging.error("NameError: " + str(pExc))
-            traceback.print_exc()
-            sys.exit(-2)
-        except EOFError, pExc:
-            logging.error("EOFError: " + str(pExc))
-            traceback.print_exc()
-            sys.exit(-3)
-        except Exception, pExc:
-            logging.error(str(pExc))
-            traceback.print_exc()
-            sys.exit(-4)
+#        except LookupError, pExc:
+#            logging.error("LookupError: " + str(pExc))
+#            traceback.print_exc()
+#            raise pExc
+#        except NameError, pExc:
+#            logging.error("NameError: " + str(pExc))
+#            traceback.print_exc()
+#            raise pExc
+#        except EOFError, pExc:
+#            logging.error("EOFError: " + str(pExc))
+#            traceback.print_exc()
+#            raise pExc
+#        except Exception, pExc:
+#            logging.error(str(pExc))
+#            traceback.print_exc()
+#            raise pExc
 
     def runReassembly(self, pOptions, pCaller):
         try:

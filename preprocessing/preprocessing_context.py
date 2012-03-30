@@ -141,13 +141,20 @@ class CPreprocessing:
             lFragments.sort(key=lambda lFrag: lFrag.mIsHeader, reverse=True)
             logging.info("Finished fragmentizing.")
         else:
-            lClassifier = fragment_context.CFragmentClassifier()
-            #lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
-            lSize = os.path.getsize(pOptions.imagefile)
-            lFragsTotal = lSize / pOptions.fragmentsize
-            lFragments = lClassifier.classify(pOptions.fragmentsize,
-                    lFragsTotal, pOptions.imagefile, pOptions.offset, lTypes,
-                    pOptions.blockgap, pOptions.minfragsize, pOptions.maxcpus)
+            try:
+                lClassifier = fragment_context.CFragmentClassifier()
+                #lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
+                lSize = os.path.getsize(pOptions.imagefile)
+                lFragsTotal = lSize / pOptions.fragmentsize
+                lFragments = lClassifier.classify(pOptions.fragmentsize,
+                        lFragsTotal, pOptions.imagefile, pOptions.offset,
+                                lTypes,
+                        pOptions.blockgap, pOptions.minfragsize,\
+                                pOptions.maxcpus)
+            except OSError, pExc:
+                lQueue.put(True)
+                lResultThread.join()
+                raise pExc
 
         lNow = datetime.datetime.now()
         logging.info("Finished classifying. Duration: " + \

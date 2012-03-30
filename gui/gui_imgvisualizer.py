@@ -58,15 +58,16 @@ class CImgVisualizer(QGraphicsScene):
         #calculate the fragment under cursor
         lWidth = lSceneWidth / float(self.__mSize) #w of 1 fragment
         lX = (pPos.x()-lSceneX) / lWidth
-        for lFrag in self.__mCtx.fragments:
-            if lX >= lFrag.mOffset and lX <= lFrag.mOffset+lFrag.mSize:
-                #logging.info('Paint tooltip')
-                self.__mHoverFragment = lFrag
-                self.__mHoverPosition = pPos
-                break
-            else:
-                self.__mHoverFragment = None
-                self.__mHoverPosition = None 
+        if self.__mCtx.fragments != None:
+            for lFrag in self.__mCtx.fragments:
+                if lX >= lFrag.mOffset and lX <= lFrag.mOffset+lFrag.mSize:
+                    #logging.info('Paint tooltip')
+                    self.__mHoverFragment = lFrag
+                    self.__mHoverPosition = pPos
+                    break
+                else:
+                    self.__mHoverFragment = None
+                    self.__mHoverPosition = None 
         self.update()
 
     def paintTooltip(self, pPainter, pRect):
