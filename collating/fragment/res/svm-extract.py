@@ -2,6 +2,7 @@
 
 import sys
 import os
+import zlib
 
 sys.path.append("..")
 
@@ -22,6 +23,9 @@ def main():
                     lFH.seek(lBlockSize, os.SEEK_SET)
                     lBlock = lFH.read(lBlockSize)
                     while lBlock != "" and len(lBlock) == lBlockSize:
+                        # calculate Kolmogorov complexity
+                        lCompr = zlib.compress(lBlock)
+                        lComplexity = len(lCompr)
                         # calc BFD
                         lBFD = [0 for lCnt in xrange(256)]
                         for lCnt in xrange(lBlockSize):
@@ -35,6 +39,7 @@ def main():
                         for lCnt in xrange(256):
                             lFeatureStr += " " + str(lCnt) + ":" + \
                                     str(lBFD[lCnt])
+                        lFeatureStr += " 256:" + str(lComplexity)
                         print lFeatureStr
                         lBlock = lFH.read(lBlockSize)
     except Exception, pExc:
