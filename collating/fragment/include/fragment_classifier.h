@@ -11,17 +11,17 @@
 /* data types */
 typedef enum _FileType
 {
-    FT_UNKNOWN = 0, 
-    FT_HIGH_ENTROPY, 
-    FT_LOW_ENTROPY, 
-    FT_TXT, 
-    FT_HTML, 
-    FT_XML, 
-    FT_JPG, 
+    FT_JPG = 0, 
     FT_PNG,
-    FT_DOC, 
+    FT_DOC,
     FT_PDF, 
     FT_H264, 
+    FT_TXT,
+    FT_HTML,
+    FT_XML, 
+    FT_UNKNOWN,
+    FT_HIGH_ENTROPY,
+    FT_LOW_ENTROPY,
     FT_VIDEO,
     FT_IMAGE,
 } FileType;

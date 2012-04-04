@@ -3,17 +3,17 @@ from ctypes import *
 
 
 class FileType:
-    FT_UNKNOWN = 0
-    FT_HIGH_ENTROPY = 1
-    FT_LOW_ENTROPY = 2
-    FT_TXT = 3
-    FT_HTML = 4
-    FT_XML = 5
-    FT_JPG = 6
-    FT_PNG = 7
-    FT_DOC = 8
-    FT_PDF = 9
-    FT_H264 = 10
+    FT_JPG = 0
+    FT_PNG = 1
+    FT_DOC = 2
+    FT_PDF = 3
+    FT_H264 = 4
+    FT_TXT = 5
+    FT_HTML = 6
+    FT_XML = 7
+    FT_UNKNOWN = 8
+    FT_HIGH_ENTROPY = 9
+    FT_LOW_ENTROPY = 10
     FT_VIDEO = 11
     FT_IMAGE = 12
 

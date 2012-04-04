@@ -117,8 +117,10 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                 pResult->mType = FT_TXT;
                 pResult->mStrength = 1;
             }
+            /* further distinguish between different text formats */
             else if (strstr(lMagicResult, "video") != NULL)
             {
+                /* check for specific video headers */
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
                 pResult->mIsHeader = 1;
@@ -131,7 +133,9 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             }
         }
     }
-    if (pResult->mType == FT_UNKNOWN)
+
+    if (pResult->mType >= FT_UNKNOWN &&
+            pResult->mIsHeader != 1)
 #endif
 
     /* statistical examination */
@@ -141,6 +145,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         {
             pResult->mType = FT_HIGH_ENTROPY;
             pResult->mStrength = 1;
+            /* perform SVM classification */
         }
         else
         {
