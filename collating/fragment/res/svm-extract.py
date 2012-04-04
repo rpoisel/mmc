@@ -30,12 +30,19 @@ def main():
                         lBFD = [0 for lCnt in xrange(256)]
                         for lCnt in xrange(lBlockSize):
                             lBFD[ord(lBlock[lCnt])] += 1
+
                         if lFile.lower().endswith(".jpg"):
                             lFeatureStr = str(FileType.FT_JPG)
                         elif lFile.lower().endswith(".png"):
                             lFeatureStr = str(FileType.FT_PNG)
+                        elif lFile.lower().endswith(".h264"):
+                            lFeatureStr = str(FileType.FT_H264)
+                        elif lFile.lower().endswith(".mp3"):
+                            lFeatureStr = str(FileType.FT_MP3)
+                        elif lFile.lower().endswith(".pdf"):
+                            lFeatureStr = str(FileType.FT_PDF)
                         else:
-                            lFeatureStr = str(FileType.FT_UNKNOWN)
+                            break
                         for lCnt in xrange(256):
                             lFeatureStr += " " + str(lCnt) + ":" + \
                                     str(lBFD[lCnt])
