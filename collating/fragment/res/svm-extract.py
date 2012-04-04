@@ -42,7 +42,7 @@ def main():
                         lFeatureStr += " 256:" + str(lComplexity)
                         print lFeatureStr
                         lBlock = lFH.read(lBlockSize)
-    except Exception, pExc:
+    except IOError, pExc:
         print "Error: " + str(pExc)
 
 if __name__ == "__main__":
