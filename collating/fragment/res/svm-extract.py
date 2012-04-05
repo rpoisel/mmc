@@ -10,12 +10,9 @@ from fragment_context import FileType
 
 
 def main():
-    if len(sys.argv) != 3:
-        print "Usage: " + sys.argv[0] + " <path> <block-size>"
-        sys.exit(-1)
-    lPath = sys.argv[1]
-    lBlockSize = int(sys.argv[2])
     try:
+        lBlockSize = int(sys.argv[2])
+        lPath = sys.argv[1]
         for lRoot, lDirs, lFiles in os.walk(lPath):
             for lFile in lFiles:
                 with open(os.path.join(lRoot, lFile), "rb") as lFH:
@@ -46,9 +43,13 @@ def main():
                         for lCnt in xrange(256):
                             lFeatureStr += " " + str(lCnt) + ":" + \
                                     str(lBFD[lCnt])
-                        lFeatureStr += " 256:" + str(lComplexity)
+                        # add Kolmogorov complexity
+                        #lFeatureStr += " 256:" + str(lComplexity)
                         print lFeatureStr
                         lBlock = lFH.read(lBlockSize)
+    except IndexError, pExc:
+        print "Usage: " + sys.argv[0] + " <path> <block-size>"
+        sys.exit(-1)
     except IOError, pExc:
         print "Error: " + str(pExc)
 
