@@ -41,7 +41,7 @@ def main():
                         else:
                             break
                         for lCnt in xrange(256):
-                            lFeatureStr += " " + str(lCnt) + ":" + \
+                            lFeatureStr += " " + str(lCnt + 1) + ":" + \
                                     str(lBFD[lCnt])
                         # add Kolmogorov complexity
                         #lFeatureStr += " 256:" + str(lComplexity)
