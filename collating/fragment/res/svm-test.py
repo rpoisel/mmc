@@ -5,7 +5,10 @@ import sys
 
 import svmutil
 
-import copy
+sys.path.append("..")
+
+from fragment_context import FileType
+
 
 def read_ranges(pPathRange):
     lReturn = {}
@@ -17,39 +20,61 @@ def read_ranges(pPathRange):
     lFH.close()
     return lReturn
 
-def scale_values(pX, pLower, pUpper, pRanges):
-    # TODO: WRONG, scale to range file which contains the 
-    #       min/max values of features
 
-    # do this for the first feature only
-    for lDict in pX:
-        #print "Dict: " + str(lDict)
-        lMin = lDict[min(lDict, key=lambda x : lDict[x])]
-        #print "Min: " + str(lMin)
-        lMax = lDict[max(lDict, key=lambda x : lDict[x])]
-        #print "Max: " + str(lMax)
-        for lKey in lDict.keys():
-            if lDict[lKey] == lMin:
-                lDict[lKey] = pLower
-            elif lDict[lKey] == lMax:
-                lDict[lKey] = pUpper
-            else:
-                lDict[lKey] = pLower + (pUpper - pLower) * (lDict[lKey] - lMin) / (lMax - lMin)
-
-    # scale according to values from ranges file
+def scale_values(pBFD, pLower, pUpper, pRanges):
+    for lKey in pBFD.keys():
+        if pBFD[lKey] == pRanges[lKey][0]:
+            pBFD[lKey] = pLower
+        elif pBFD[lKey] == pRanges[lKey][1]:
+            pBFD[lKey] = pUpper
+        else:
+            pBFD[lKey] = pLower + (pUpper - pLower) * \
+                    (pBFD[lKey] - pRanges[lKey][0]) / \
+                    (pRanges[lKey][1] - pRanges[lKey][0])
 
 
 def main():
     try:
         lModel = svmutil.svm_load_model(sys.argv[1])
-        lY, lX = svmutil.svm_read_problem(sys.argv[3])
         lRanges = read_ranges(sys.argv[2])
-        scale_values(lX, -1., 1., lRanges)
-        lPredict = svmutil.svm_predict(lY, lX, lModel)[0]
-        #print svmutil.svm_predict(lY, lX, lModel)[0]
-        #print lX
+        lFile = sys.argv[3]
+        lBlockSize = int(sys.argv[4])
     except IndexError, pExc:
-        print "Usage: " + sys.argv[0] + " <model-file> <range-file> <problem-file>"
+        print "Usage: " + sys.argv[0] + " <model-file> <range-file> "\
+                "<problem-file> <block-size>"
+        sys.exit(-1)
+
+    if lFile.lower().endswith(".jpg"):
+        lFileType = FileType.FT_JPG
+    elif lFile.lower().endswith(".png"):
+        lFileType = FileType.FT_PNG
+    elif lFile.lower().endswith(".h264"):
+        lFileType = FileType.FT_H264
+    elif lFile.lower().endswith(".mp3"):
+        lFileType = FileType.FT_MP3
+    elif lFile.lower().endswith(".pdf"):
+        lFileType = FileType.FT_PDF
+    else:
+        lFileType = FileType.FT_UNKNOWN
+
+    lFH = open(lFile, "rb")
+    while True:
+        lBlock = lFH.read(lBlockSize)
+        if lBlock == '':
+            break
+        lBFD = {}
+        for lCnt in xrange(len(lBlock)):
+            lByteVal = ord(lBlock[lCnt]) + 1
+            if lByteVal not in lBFD:
+                lBFD[lByteVal] = 0
+            lBFD[lByteVal] += 1
+        scale_values(lBFD, -1., 1., lRanges)
+        #print lBFD
+        lPredict = svmutil.svm_predict([lFileType], [lBFD], lModel)[0]
+        print lPredict
+
+    lFH.close()
+
 
 if __name__ == "__main__":
     main()
