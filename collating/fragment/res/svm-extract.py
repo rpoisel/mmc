@@ -38,6 +38,10 @@ def main():
                             lFeatureStr = str(FileType.FT_MP3)
                         elif lFile.lower().endswith(".pdf"):
                             lFeatureStr = str(FileType.FT_PDF)
+                        elif lFile.lower().endswith(".zip"):
+                            lFeatureStr = str(FileType.FT_ZIP)
+                        elif lFile.lower().endswith(".rar"):
+                            lFeatureStr = str(FileType.FT_RAR)
                         else:
                             break
                         for lCnt in xrange(256):

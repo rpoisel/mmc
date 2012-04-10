@@ -8,14 +8,16 @@ class FileType:
     FT_DOC = 2
     FT_PDF = 3
     FT_H264 = 4
-    FT_TXT = 5
-    FT_HTML = 6
-    FT_XML = 7
-    FT_UNKNOWN = 8
-    FT_HIGH_ENTROPY = 9
-    FT_LOW_ENTROPY = 10
-    FT_VIDEO = 11
-    FT_IMAGE = 12
+    FT_ZIP = 5
+    FT_RAR = 6
+    FT_TXT = 7
+    FT_HTML = 8
+    FT_XML = 9
+    FT_UNKNOWN = 10
+    FT_HIGH_ENTROPY = 11
+    FT_LOW_ENTROPY = 12
+    FT_VIDEO = 13
+    FT_IMAGE = 14
 
 
 class ClassifyT(Structure):
