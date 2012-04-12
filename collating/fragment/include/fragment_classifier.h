@@ -14,6 +14,7 @@ typedef enum _FileType
     FT_JPG = 0, 
     FT_PNG,
     FT_DOC,
+    FT_XLS,
     FT_PDF, 
     FT_H264, 
     FT_MP3, 

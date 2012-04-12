@@ -6,19 +6,20 @@ class FileType:
     FT_JPG = 0
     FT_PNG = 1
     FT_DOC = 2
-    FT_PDF = 3
-    FT_H264 = 4
-    FT_MP3 = 5
-    FT_ZIP = 6
-    FT_RAR = 7
-    FT_TXT = 8
-    FT_HTML = 9
-    FT_XML = 10
-    FT_UNKNOWN = 11
-    FT_HIGH_ENTROPY = 12
-    FT_LOW_ENTROPY = 13
-    FT_VIDEO = 14
-    FT_IMAGE = 15
+    FT_XLS = 3
+    FT_PDF = 4
+    FT_H264 = 5
+    FT_MP3 = 6
+    FT_ZIP = 7
+    FT_RAR = 8
+    FT_TXT = 9
+    FT_HTML = 10
+    FT_XML = 11
+    FT_UNKNOWN = 12
+    FT_HIGH_ENTROPY = 13
+    FT_LOW_ENTROPY = 14
+    FT_VIDEO = 15
+    FT_IMAGE = 16
 
 
 class ClassifyT(Structure):

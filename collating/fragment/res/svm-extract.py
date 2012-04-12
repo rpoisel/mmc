@@ -42,6 +42,10 @@ def main():
                             lFeatureStr = str(FileType.FT_ZIP)
                         elif lFile.lower().endswith(".rar"):
                             lFeatureStr = str(FileType.FT_RAR)
+                        elif lFile.lower().endswith(".doc"):
+                            lFeatureStr = str(FileType.FT_DOC)
+                        elif lFile.lower().endswith(".xls"):
+                            lFeatureStr = str(FileType.FT_XLS)
                         else:
                             break
                         for lCnt in xrange(256):
