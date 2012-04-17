@@ -38,41 +38,23 @@ class CContext:
         return multiprocessing.cpu_count()
 
     def runClassify(self, pOptions, pCaller):
-#        try:
-            pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
-                    pOptions.offset,
-                    "")
-            # initialize preprocessor
-            lProcessor = preprocessing_context.CPreprocessing(pOptions)
-            self.__mFragments = lProcessor.classify(pOptions, pCaller)
-            logging.info("Back to the main context.")
+        pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
+                pOptions.offset,
+                "")
+        # initialize preprocessor
+        lProcessor = preprocessing_context.CPreprocessing(pOptions)
+        self.__mFragments = lProcessor.classify(pOptions, pCaller)
+        logging.info("Back to the main context.")
 
-            logging.info("8<=============== FRAGMENTs ==============")
-            lCnt = 0
-            for lFragment in self.__mFragments:
-                logging.info("FragmentIdx %04d" % lCnt + ": " + str(lFragment))
-                lCnt += 1
-            logging.info("8<=============== FRAGMENTs ==============")
+        logging.info("8<=============== FRAGMENTs ==============")
+        lCnt = 0
+        for lFragment in self.__mFragments:
+            logging.info("FragmentIdx %04d" % lCnt + ": " + str(lFragment))
+            lCnt += 1
+        logging.info("8<=============== FRAGMENTs ==============")
 
-            pCaller.progressCallback(100)
-            pCaller.finishedCallback()
-
-#        except LookupError, pExc:
-#            logging.error("LookupError: " + str(pExc))
-#            traceback.print_exc()
-#            raise pExc
-#        except NameError, pExc:
-#            logging.error("NameError: " + str(pExc))
-#            traceback.print_exc()
-#            raise pExc
-#        except EOFError, pExc:
-#            logging.error("EOFError: " + str(pExc))
-#            traceback.print_exc()
-#            raise pExc
-#        except Exception, pExc:
-#            logging.error(str(pExc))
-#            traceback.print_exc()
-#            raise pExc
+        pCaller.progressCallback(100)
+        pCaller.finishedCallback()
 
     def runReassembly(self, pOptions, pCaller):
         try:
