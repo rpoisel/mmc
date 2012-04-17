@@ -7,34 +7,22 @@ import os
 import sys
 import platform
 import multiprocessing
-import logging
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
-        level=logging.DEBUG)
 import datetime
+import logging
 # PyQt4, PySide stuff
 from PySide import QtCore
 from PySide import QtGui
 from PySide import QtXml
 from PySide import QtUiTools
 
-sys.path.append('.')
-if platform.system().lower() == "windows":
-    lBits = 32
-    if sys.maxsize > 2 ** 32:
-        lBits = 64
-    lPath = r"collating\magic\lib\magic\dll" + str(lBits)
-    lPath += r";collating\fragment"
-    os.environ['PATH'] += ";" + lPath
-
 # Import the compiled UI module
-import gui.gui_resources
+import gui_resources
+import gui_options
+import gui_imgvisualizer
 from mm_context import CContext
-import gui.gui_options
 from preprocessing import preprocessing_context
 from preprocessing import fsstat_context
 from reassembly.reassembly import reassembly_context
-
-import gui.gui_imgvisualizer
 
 
 class Jobs:
@@ -386,7 +374,7 @@ class CMain(object):
 
     def __getOptions(self):
         # TODO rename fragmentsize to blocksize
-        lOptions = gui.gui_options.CGuiOptions()
+        lOptions = gui_options.CGuiOptions()
         lOptions.preprocess = self.customwidget.preprocessing.currentText()
         if self.customwidget.outputformat.currentText() == "PNG":
             lOptions.outputformat = "%08d.png"
@@ -437,7 +425,7 @@ class CMain(object):
         if pJob == Jobs.CLASSIFY:
             logging.info("Beginning classifying. Imagesize is " +\
                     str(pSize) + " bytes.")
-            self.__mImgVisualizer = gui.gui_imgvisualizer.CImgVisualizer(\
+            self.__mImgVisualizer = gui_imgvisualizer.CImgVisualizer(\
                     self.mContext, pSize, pOffset, pFsType,\
                     self.customwidget.imageView)
             self.customwidget.imageView.setScene(self.__mImgVisualizer)
@@ -514,12 +502,3 @@ class CMain(object):
         self.ui.show()
         lReturn = self.__mApp.exec_()
         sys.exit(lReturn)
-
-
-def main():
-    lMain = CMain()
-    lMain.run()
-
-if __name__ == "__main__":
-    multiprocessing.freeze_support()
-    main()
