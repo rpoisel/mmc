@@ -94,6 +94,8 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     const char* lMagicResult = NULL;
 #endif
     float lEntropy = 0;
+    int lCnt = 0;
+    int lCntJpeg = 0;
     /* non-relevant fragment <= 0 > relevant fragment */
 
     pResult->mType = FT_UNKNOWN;
@@ -145,6 +147,32 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         {
             pResult->mType = FT_HIGH_ENTROPY;
             pResult->mStrength = 1;
+            /* comparably cheap check for JPEG file fragments */
+            for (lCnt = 0; lCnt < pLen - 1; lCnt++)
+            {
+                if (pFragment[lCnt] == 0xFF)
+                {
+                    /* these usually occur in JPEG file fragments */
+                    if (pFragment[lCnt + 1] == 0x00)
+                    {
+                        lCntJpeg++;
+                    }
+                    /* illegal sequence in JPEG files */
+                    if (pFragment[lCnt + 1] < 0xC0 || pFragment[lCnt + 1] > 0xFE)
+                    {
+                        lCntJpeg = 0;
+                        break;
+                    }
+                }
+            }
+
+            if (lCntJpeg > 0)
+            {
+                pResult->mType = FT_JPG;
+                pResult->mStrength = 1;
+                return pResult->mStrength;
+            }
+
             /* perform SVM classification */
         }
         else
