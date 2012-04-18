@@ -40,8 +40,10 @@ fragment_collection_t* fragment_collection_new(
     {
         lBlockTmp = block_collection_get(pBlocks, lCntBlock);
 
+        /* deterine if it is a relevant block */
         if (BLOCK(lBlockTmp))
         {
+            /* determine if current block is a header block */
             if (HEADER(lBlockTmp))
             {
                 /* temporary fragment is already existing */
@@ -61,9 +63,17 @@ fragment_collection_t* fragment_collection_new(
             {
                 /* start new fragment or update current fragment depending on
                  * block gap being reached */
-                if (lBlockGap <= pBlockGap && lFlagExisting)
+                if (lFlagExisting)
                 {
-                    lFragTmp.mSize = (lBlockSize + 1) * lCntBlock - lFragTmp.mOffset;
+                    if (lBlockGap <= pBlockGap)
+                    {
+                        lFragTmp.mSize = (lBlockSize + 1) * lCntBlock - lFragTmp.mOffset;
+#if DEBUG == 1
+                        printf("Fragment offset: %llu, size: %llu\n", 
+                                lFragTmp.mOffset,
+                                lFragTmp.mSize);
+#endif
+                    }
                 }
                 else
                 {
@@ -93,6 +103,13 @@ fragment_collection_t* fragment_collection_new(
             }
         }
     }
+
+    if (lFlagExisting && lFragTmp.mSize > 0)
+    {
+        /* TODO check if buffer full */
+        fragment_collection_add(lFragments, &lFragTmp, pOffset, pMinFragSize * lBlockSize);
+    }
+
 
     /* sort fragments */
     qsort(lFragments->mFrags, lFragments->mNumFrags, sizeof(fragment_t),

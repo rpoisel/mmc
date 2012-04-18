@@ -1,7 +1,7 @@
 #ifndef __BLOCK_COLLECTION_H__
 #define __BLOCK_COLLECTION_H__ 1
 
-/* returns only the offset portion */
+/* returns only if this is a relevant block */
 #define BLOCK(x) ((x) & 0x01)
 /* returns the offset with header bit set */
 #define HEADER(x) ((x) & 0x02)

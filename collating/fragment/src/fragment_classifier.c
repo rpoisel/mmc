@@ -126,12 +126,23 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
                 pResult->mIsHeader = 1;
+                return pResult->mStrength;
             }
             else if (strstr(lMagicResult, "image") != NULL)
             {
-                pResult->mType = FT_IMAGE;
-                pResult->mStrength = 1;
-                pResult->mIsHeader = 1;
+                if (strstr(lMagicResult, "JPEG") != NULL)
+                {
+                    pResult->mType = FT_JPG;
+                    pResult->mStrength = 1;
+                    pResult->mIsHeader = 1;
+                }
+                else
+                {
+                    pResult->mType = FT_IMAGE;
+                    pResult->mStrength = 1;
+                    pResult->mIsHeader = 1;
+                }
+                return pResult->mStrength;
             }
         }
     }
@@ -147,6 +158,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         {
             pResult->mType = FT_HIGH_ENTROPY;
             pResult->mStrength = 1;
+
             /* comparably cheap check for JPEG file fragments */
             for (lCnt = 0; lCnt < pLen - 1; lCnt++)
             {
@@ -158,7 +170,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                         lCntJpeg++;
                     }
                     /* illegal sequence in JPEG files */
-                    if (pFragment[lCnt + 1] < 0xC0 || pFragment[lCnt + 1] > 0xFE)
+                    else if (pFragment[lCnt + 1] < 0xC0 || pFragment[lCnt + 1] > 0xFE)
                     {
                         lCntJpeg = 0;
                         break;

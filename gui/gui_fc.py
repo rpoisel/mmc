@@ -72,12 +72,11 @@ class CThreadWorker(QtCore.QThread):
                         "classifier binaries are compiled. ")
                 self.sError.emit(str(pExc) + ". Please make sure the "\
                         "classifier binaries are compiled. ")
+                self.sFinished.emit(self.mRunningJob, self.mJobs)
             except Exception, pExc:
                 logging.error(str(pExc))
                 self.sError.emit(str(pExc))
-            finally:
-                self.sFinished.emit(self.mRunningJob, self.mJobs)
-                return
+
         if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
             self.mRunningJob = Jobs.REASSEMBLE
             self.mContext.runReassembly(self.mOptions, self)
@@ -123,7 +122,7 @@ class CMain(object):
         self.customwidget.outputformat.addItem("PNG")
 
         self.customwidget.recoverfiletypes.addItem("Video")
-        self.customwidget.recoverfiletypes.addItem("JPEG (not implemented)")
+        self.customwidget.recoverfiletypes.addItem("JPEG")
         self.customwidget.recoverfiletypes.addItem("PNG (not implemented)")
 
         for lCPU in reversed(range(CContext.getCPUs())):
