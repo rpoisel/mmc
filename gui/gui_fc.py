@@ -122,9 +122,9 @@ class CMain(object):
 
         for lFiletype in sorted(self.mRecoverFiletypes.keys()):
             self.customwidget.recoverfiletypes.addItem(lFiletype)
-        self.customwidget.recoverfiletypes.setCurrentIndex(0)
+        self.customwidget.recoverfiletypes.setCurrentIndex(2)
         self.on_recoverFT_changed(\
-                self.customwidget.recoverfiletypes.itemText(0))
+                self.customwidget.recoverfiletypes.itemText(2))
 
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
@@ -437,19 +437,30 @@ class CMain(object):
         lOptions = gui_options.CGuiOptions()
         lOptions.preprocess = self.customwidget.preprocessing.currentText()
         if self.customwidget.outputformat.currentText() == "PNG":
-            lOptions.outputformat = "%08d.png"
+            if self.customwidget.recoveryfiletypes.currentText.upper() == \
+                    "VIDEO":
+                lOptions.outputformat = "%08d.png"
+            else:
+                lOptions.outputformat = "picture.png"
         elif self.customwidget.outputformat.currentText() == "MKV":
             lOptions.outputformat = "movie.mkv"
         elif self.customwidget.outputformat.currentText() == "Copy":
             lOptions.outputformat = "movie.dd"
         else:
-            lOptions.outputformat = "%08d.jpg"
+            if self.customwidget.recoveryfiletypes.currentText.upper() == \
+                    "VIDEO":
+                lOptions.outputformat = "%08d.jpg"
+            else:
+                lOptions.outputformat = "picture.png"
 
-        if self.customwidget.recoverfiletypes.currentIndex() == 0:
+        if self.customwidget.recoverfiletypes.currentText().upper() == "VIDEO":
             lOptions.recoverfiletype = "video"
-        elif self.customwidget.recoverfiletypes.currentIndex() == 1:
+            lOptions.similarity = int(self.customwidget.similarityVideo.text())
+        elif self.customwidget.recoverfiletypes.currentText().upper() == \
+                "JPEG":
             lOptions.recoverfiletype = "jpeg"
-        elif self.customwidget.recoverfiletypes.currentIndex() == 2:
+            lOptions.similarity = int(self.customwidget.similarityJpeg.text())
+        elif self.customwidget.recoverfiletypes.currentText().upper() == "PNG":
             lOptions.recoverfiletype = "png"
 
         lOptions.strength = self.customwidget.strength.value()
@@ -472,7 +483,8 @@ class CMain(object):
         if self.customwidget.recoverfiletypes.currentText().upper() == "VIDEO":
             lOptions.recoverfiletype = "video"
             lOptions.similarity = int(self.customwidget.similarityVideo.text())
-        elif self.customwidget.recoverfiletypes.currentText().upper() == "JPEG":
+        elif self.customwidget.recoverfiletypes.currentText().upper() == \
+                "JPEG":
             lOptions.recoverfiletype = "jpeg"
             lOptions.similarity = int(self.customwidget.similarityJpeg.text())
         elif self.customwidget.recoverfiletypes.currentText().upper() == "PNG":
@@ -596,33 +608,33 @@ class CMain(object):
         elif pFinishedJob == Jobs.REASSEMBLE:
             logging.info("Reassembling finished. ")
 
-            lRowCount = 0
-
-            for lFrag in self.mContext.fragments:
-                if lFrag.mIsHeader == True:
-                    self.customwidget.fileTable.insertRow(lRowCount)
-                    #Header Number
-                    lItem = QtGui.QTableWidgetItem("File " + str(lRowCount))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 0, lItem)
-                    #Filetype
-                    lItem = QtGui.QTableWidgetItem(lFrag.mFileType)
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 1, lItem)
-                    #Size
-                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 2, lItem)
-                    #Path
-                    lItem = QtGui.QTableWidgetItem(lFrag.mFilePath)
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 3, lItem)
-
-                    lRowCount += 1
+#            lRowCount = 0
+#
+#            for lFrag in self.mContext.fragments:
+#                if lFrag.mIsHeader == True:
+#                    self.customwidget.fileTable.insertRow(lRowCount)
+#                    #Header Number
+#                    lItem = QtGui.QTableWidgetItem("File " + str(lRowCount))
+#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+#                    self.customwidget.fileTable.setItem(lRowCount, 0, lItem)
+#                    #Filetype
+#                    lItem = QtGui.QTableWidgetItem(lFrag.mFileType)
+#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+#                    self.customwidget.fileTable.setItem(lRowCount, 1, lItem)
+#                    #Size
+#                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+#                    self.customwidget.fileTable.setItem(lRowCount, 2, lItem)
+#                    #Path
+#                    lItem = QtGui.QTableWidgetItem(lFrag.mFilePath)
+#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+#                    self.customwidget.fileTable.setItem(lRowCount, 3, lItem)
+#
+#                    lRowCount += 1
 
     def on_error_callback(self, pError):
         QtGui.QMessageBox.about(self.ui, "Error",\

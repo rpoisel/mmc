@@ -345,3 +345,27 @@ class CReassemblyFactory:
     @staticmethod
     def getInstancePng(pWhich):
         return CReassemblyFactory.sReassemblyMethodsPng[pWhich]()
+
+
+# TODO inherit for all different file types
+class CFiles(object):
+
+    def __init__(self, pBlockSize):
+        super(CFiles, self).__init__()
+        self.mFileType = "JPEG"
+        self.mDataBegin = -1
+        self.mPicBegin = ""
+        self.mPicEnd = ""
+        #All Markers have a relative Position
+        self.mMarker = [-1] * 255
+        self.mHeaderData = ""
+        self.mCut = (-1, -1)
+        self.mRawDataPath = ""
+        self.mName = ""
+        self.mComplete = False
+        mReassemblyPathSize = 0
+
+    def __str__(self):
+        lString = super(CFragmentJpeg, self).__str__()
+        lString += "| JPEG"
+        return lString
