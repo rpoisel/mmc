@@ -4,13 +4,15 @@ import platform
 
 class CDecoder:
     @staticmethod
-    def getDecoder(pOutputFormat):
+    def getDecoder(pInputFormat, pOutputFormat):
         if pOutputFormat.find('.dd') != -1:
             return CCopyDecoder()
-        elif pOutputFormat.find('.mkv') != -1 or \
-                pOutputFormat.find('.jpg') != -1 or \
-                pOutputFormat.find('.png') != -1:
+        elif pInputFormat.find('h264') != -1:
             return CFFMpegDecoder()
+        elif pInputFormat.find('jpg') != -1:
+            return CJpegDecoder()
+        elif pInputFormat.find('jpeg') != -1:
+            return CJpegDecoder()
         else:
             return None
 
@@ -25,16 +27,36 @@ class CDecoder:
 
 class CJpegDecoder(CDecoder):
     def __init__(self):
-        pass
+        self.__mJpeg = None
+        self.__mFH = None
+        self.__mJpegProc = None
+        self.__mPngPath = None
 
     def open(self, pPath):
-        pass
+        self.__mPngPath = pPath
+        self.__mJpeg = open(pPath.replace(".png",".jpg"), 'w')
+        
 
     def write(self, pData):
-        pass
+        self.__mJpeg.write(pData)
+
 
     def close(self):
-        pass
+        self.__mJpeg.close()
+        if platform.system().lower() == "linux":
+            self.__mFH = open("/dev/null", "w")
+            self.__mJpegProc = subprocess.Popen(
+                    ["convert", self.__mPngPath.replace(".png",".jpg"), self.__mPngPath], 
+                    bufsize = 512, stdin = subprocess.PIPE, stdout = self.__mFH.fileno(), 
+                    stderr = self.__mFH.fileno())
+            
+        self.__mJpegProc.communicate()
+        try:
+            self.__mJpegProc.kill()
+        except OSError:
+            pass
+        if self.__mFH != None:
+            self.__mFH.close()
 
 class CFFMpegDecoder(CDecoder):
     def __init__(self):
