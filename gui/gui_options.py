@@ -1,4 +1,4 @@
-class CGuiOptions:
+class CGuiOptions(object):
     __shared_state = {}
     
     def __init__(self):
