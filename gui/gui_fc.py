@@ -116,7 +116,7 @@ class CMain(object):
                 preprocessing_context.CPreprocessing.getPreprocessors():
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
 
-        self.mRecoverFiletypes = {"Video": ["MKV", "Copy", "JPEG"],
+        self.mRecoverFiletypes = {"Video": ["MKV", "Copy", "JPEG", "PNG"],
                     "JPEG": ["JPEG", "PNG"],
                 "PNG (not implemented)": ["PNG"]}
 
@@ -437,7 +437,7 @@ class CMain(object):
         lOptions = gui_options.CGuiOptions()
         lOptions.preprocess = self.customwidget.preprocessing.currentText()
         if self.customwidget.outputformat.currentText() == "PNG":
-            if self.customwidget.recoveryfiletypes.currentText.upper() == \
+            if self.customwidget.recoverfiletypes.currentText().upper() == \
                     "VIDEO":
                 lOptions.outputformat = "%08d.png"
             else:
@@ -447,11 +447,11 @@ class CMain(object):
         elif self.customwidget.outputformat.currentText() == "Copy":
             lOptions.outputformat = "movie.dd"
         else:
-            if self.customwidget.recoveryfiletypes.currentText.upper() == \
+            if self.customwidget.recoverfiletypes.currentText().upper() == \
                     "VIDEO":
                 lOptions.outputformat = "%08d.jpg"
             else:
-                lOptions.outputformat = "picture.png"
+                lOptions.outputformat = "picture.jpg"
 
         if self.customwidget.recoverfiletypes.currentText().upper() == "VIDEO":
             lOptions.recoverfiletype = "video"
