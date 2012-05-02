@@ -7,11 +7,13 @@ import platform
 class CFsOptions:
 
     def __init__(self, pSize=0, pOffset=0, pIncrement=512,
-            pBlockSize=512, pFsType='', pTskProperties={}):
+            pBlockSize=512, pSectorSize=512, pFsType='',
+            pTskProperties={}):
         self.size = pSize
         self.offset = pOffset
         self.increment = pIncrement
         self.blocksize = pBlockSize
+        self.sectorsize = pSectorSize
         self.fstype = pFsType
         self.tskProperties = pTskProperties
 
@@ -43,6 +45,8 @@ class CFsStatContext:
 
         lBlockSize = lTskProperties["Cluster Size"] \
                 if "Cluster Size" in lTskProperties else "512"
+        lSectorSize = lTskProperties["Sector Size"] \
+                if "Sector Size" in lTskProperties else "512"
 
         if "* Data Area" in lTskProperties:
             # first sector index * sector size (512 bytes)

@@ -316,7 +316,7 @@ class CReassemblyFactory:
     sReassemblyMethodsVideo = {'Parallel Unique Path': CReassemblyPUPVideo, \
             'Permutations': CReassemblyPerm}
 
-    sReassemblyMethodsJpeg = {}
+    sReassemblyMethodsJpeg = {'Parallel Unique Path': CReassemblyPUPJpeg}
 
     sReassemblyMethodsPng = {}
 
@@ -327,3 +327,21 @@ class CReassemblyFactory:
     @staticmethod
     def getInstanceVideo(pWhich):
         return CReassemblyFactory.sReassemblyMethodsVideo[pWhich]()
+
+    #JPEG
+    @staticmethod
+    def getAssemblyMethodsJpeg():
+        return sorted(CReassemblyFactory.sReassemblyMethodsJpeg.keys())
+
+    @staticmethod
+    def getInstanceJpeg(pWhich):
+        return CReassemblyFactory.sReassemblyMethodsJpeg[pWhich]()
+
+    #PNG
+    @staticmethod
+    def getAssemblyMethodsPng():
+        return sorted(CReassemblyFactory.sReassemblyMethodsPng.keys())
+
+    @staticmethod
+    def getInstancePng(pWhich):
+        return CReassemblyFactory.sReassemblyMethodsPng[pWhich]()

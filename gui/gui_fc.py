@@ -116,30 +116,28 @@ class CMain(object):
                 preprocessing_context.CPreprocessing.getPreprocessors():
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
 
-        self.customwidget.outputformat.addItem("MKV")
-        self.customwidget.outputformat.addItem("Copy")
-        self.customwidget.outputformat.addItem("JPEG")
-        self.customwidget.outputformat.addItem("PNG")
+        self.mRecoverFiletypes = {"Video": ["MKV", "Copy", "JPEG"],
+                    "JPEG": ["JPEG", "PNG"],
+                "PNG (not implemented)": ["PNG"]}
 
-        self.customwidget.recoverfiletypes.addItem("Video")
-        self.customwidget.recoverfiletypes.addItem("JPEG")
-        self.customwidget.recoverfiletypes.addItem("PNG (not implemented)")
+        for lFiletype in sorted(self.mRecoverFiletypes.keys()):
+            self.customwidget.recoverfiletypes.addItem(lFiletype)
+        self.customwidget.recoverfiletypes.setCurrentIndex(0)
+        self.on_recoverFT_changed(\
+                self.customwidget.recoverfiletypes.itemText(0))
 
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
         self.on_multiprocessing_changed(False)
 
-        for lAssembly in \
-                reassembly_context.\
-                CReassemblyFactory.getAssemblyMethodsVideo():
-            self.customwidget.assemblyMethod.addItem(lAssembly)
-
         self.customwidget.blockStatus.addItem("allocated")
         self.customwidget.blockStatus.addItem("unallocated")
 
-        self.customwidget.resultTable.setColumnCount(4)
+        self.customwidget.resultTable.setColumnCount(7)
         self.customwidget.resultTable.setHorizontalHeaderLabels((\
-                "Header", "Fragment", "Offset", "Size"))
+                "Header", "Fragment", "Start [B]",
+                "End [B]", "Start [Sector]",
+                "End [Sector]", "Size [B]"))
         self.customwidget.resultTable.horizontalHeader().\
                 setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
@@ -147,7 +145,7 @@ class CMain(object):
         self.customwidget.progressBar.setMaximum(100)
         self.customwidget.progressBar.setMinimum(0)
 
-        self.on_recoverFT_changed(0)
+        #self.on_recoverFT_changed(0)
 
         # actions
         self.ui.actionExit.triggered.connect(self.on_actionExit_triggered)
@@ -170,7 +168,8 @@ class CMain(object):
                 self.on_inputFile_changed)
         self.customwidget.outputDir.textChanged.connect(\
                 self.on_outputDir_changed)
-        self.customwidget.recoverfiletypes.currentIndexChanged.connect(\
+        self.customwidget.recoverfiletypes.\
+                currentIndexChanged[unicode].connect(\
                 self.on_recoverFT_changed)
         self.customwidget.multiprocessing.stateChanged.connect(\
                 self.on_multiprocessing_changed)
@@ -194,13 +193,51 @@ class CMain(object):
     def on_actionExit_triggered(self):
         self.ui.close()
 
-    def on_recoverFT_changed(self, pIdx):
-        for lCnt in xrange(self.customwidget.tabWidget.count() - 2):
-            self.customwidget.tabWidget.setTabEnabled(lCnt + 2, False)
-        if pIdx == 0:
-            self.customwidget.tabWidget.setTabEnabled(2, True)
-        elif 0 < pIdx < 3:
-            self.customwidget.tabWidget.setTabEnabled(3, True)
+    def on_recoverFT_changed(self, pSelectedValue):
+        lOutputFileTypes = self.mRecoverFiletypes[pSelectedValue]
+
+        if lOutputFileTypes == None:
+            return
+
+        self.customwidget.outputformat.clear()
+        for lOutputFiletype in lOutputFileTypes:
+            self.customwidget.outputformat.addItem(lOutputFiletype)
+
+        #Enable and Disable the specific Preprocessing Tab
+        for lTabCnt in range(self.customwidget.tabWidgetReassembly.count()):
+            if self.customwidget.tabWidgetReassembly.tabText(lTabCnt).upper() \
+                    == pSelectedValue.upper():
+                self.customwidget.tabWidgetReassembly.setTabEnabled(\
+                        lTabCnt, True)
+            else:
+                self.customwidget.tabWidgetReassembly.setTabEnabled(\
+                        lTabCnt, False)
+
+        #Some Filetype specific value customizations
+        lAssemblyMethods = None
+        if pSelectedValue == "Video":
+            self.customwidget.minimumFragmentSize.setText("4")
+            lAssemblyMethods = reassembly_context.CReassemblyFactory.\
+                    getAssemblyMethodsVideo()
+        elif pSelectedValue == "JPEG":
+            self.customwidget.minimumFragmentSize.setText("0")
+            lAssemblyMethods = reassembly_context.CReassemblyFactory.\
+                    getAssemblyMethodsJpeg()
+        elif pSelectedValue == "PNG":
+            lAssemblyMethods = reassembly_context.CReassemblyFactory.\
+                    getAssemblyMethodsPng()
+
+        #Get the Filetype specific Reassembly Algorithms
+        self.customwidget.assemblyMethod.clear()
+        if lAssemblyMethods != None:
+            for lAssembly in lAssemblyMethods:
+                self.customwidget.assemblyMethod.addItem(lAssembly)
+#        for lCnt in xrange(self.customwidget.tabWidget.count() - 2):
+#            self.customwidget.tabWidget.setTabEnabled(lCnt + 2, False)
+#        if pIdx == 0:
+#            self.customwidget.tabWidget.setTabEnabled(2, True)
+#        elif 0 < pIdx < 3:
+#            self.customwidget.tabWidget.setTabEnabled(3, True)
 
     def on_inputFile_changed(self, pPath):
         if os.path.exists(pPath):
@@ -407,7 +444,15 @@ class CMain(object):
         lOptions.assemblymethod = \
                 self.customwidget.assemblyMethod.currentText()
         lOptions.minpicsize = int(self.customwidget.minPicSize.text())
-        lOptions.similarity = int(self.customwidget.similarity.text())
+        #lOptions.similarity = int(self.customwidget.similarity.text())
+        if self.customwidget.recoverfiletypes.currentText().upper() == "VIDEO":
+            lOptions.recoverfiletype = "video"
+            lOptions.similarity = int(self.customwidget.similarityVideo.text())
+        elif self.customwidget.recoverfiletypes.currentText().upper() == "JPEG":
+            lOptions.recoverfiletype = "jpeg"
+            lOptions.similarity = int(self.customwidget.similarityJpeg.text())
+        elif self.customwidget.recoverfiletypes.currentText().upper() == "PNG":
+            lOptions.recoverfiletype = "png"
         lOptions.blockstatus = self.customwidget.blockStatus.currentText()
         lOptions.maxcpus = int(self.customwidget.maxCPUs.currentText())
         lOptions.multiprocessing = \
@@ -461,6 +506,8 @@ class CMain(object):
                     lItem.setTextAlignment(QtCore.Qt.AlignCenter)
                     self.customwidget.resultTable.setItem(lNumRowsResult, 1,
                             lItem)
+                    self.customwidget.resultTable.horizontalHeader().\
+                            resizeSection(1, 10)
 
                     lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -469,12 +516,45 @@ class CMain(object):
                     self.customwidget.resultTable.setItem(lNumRowsResult, 2,
                             lItem)
 
-                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+                    #End Address in Bytes
+                    lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset + \
+                            lFrag.mSize))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
                     lItem.setTextAlignment(\
                             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
                     self.customwidget.resultTable.setItem(lNumRowsResult, 3,
                             lItem)
+
+                    #Start Address in Sectors
+                    lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
+                    # TODO this assumes that one cluster contains four sectors
+                    lItem = QtGui.QTableWidgetItem(str(lSector) + \
+                            "/" + str(lSector / 4))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignRight | \
+                            QtCore.Qt.AlignVCenter)
+                    self.customwidget.resultTable.setItem(lNumRowsResult,
+                            4, lItem)
+
+                    #End Address in Sectors
+                    lSector = (lFrag.mOffset + lFrag.mSize) / \
+                            int(self.__mGeometry.sectorsize) - 1
+                    # TODO this assumes that one cluster contains four sectors
+                    lItem = QtGui.QTableWidgetItem(str(lSector) + \
+                            "/" + str(lSector / 4))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignRight | \
+                            QtCore.Qt.AlignVCenter)
+                    self.customwidget.resultTable.setItem(lNumRowsResult, \
+                            5, lItem)
+
+                    #Size in Bytes
+                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignRight | \
+                            QtCore.Qt.AlignVCenter)
+                    self.customwidget.resultTable.setItem(lNumRowsResult, \
+                            6, lItem)
 
                     lNumRowsResult += 1
             self.__mImgVisualizer.update()
