@@ -142,6 +142,13 @@ class CMain(object):
                 setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
 
+        self.customwidget.fileTable.setColumnCount(4)
+        self.customwidget.fileTable.setHorizontalHeaderLabels(("File",\
+                "Filetype", "Size", "Path"))
+        self.customwidget.fileTable.horizontalHeader().setResizeMode(\
+                QtGui.QHeaderView.Stretch)
+        self.customwidget.fileTable.verticalHeader().setVisible(False)
+
         self.customwidget.progressBar.setMaximum(100)
         self.customwidget.progressBar.setMinimum(0)
 
@@ -173,6 +180,8 @@ class CMain(object):
                 self.on_recoverFT_changed)
         self.customwidget.multiprocessing.stateChanged.connect(\
                 self.on_multiprocessing_changed)
+        self.customwidget.fileTable.cellDoubleClicked.connect(\
+                self.on_fileTable_cellDoubleClicked)
 
         # init values
         self.customwidget.inputFile.setText(\
@@ -180,6 +189,12 @@ class CMain(object):
                     "image_ref_h264_ntfs_formatted.img"))
         self.customwidget.outputDir.setText(r"c:\temp" \
                 if platform.system().lower() == "windows" else "/tmp/temp")
+
+    def on_fileTable_cellDoubleClicked(self, pRow, pColumn):
+        lFile = self.customwidget.fileTable.item(pRow, 3).text()
+        if lFile != None:
+            webbrowser.open_new_tab(self.customwidget.fileTable.item(pRow, \
+                    3).text())
 
     def on_multiprocessing_changed(self, pState):
         self.customwidget.maxCPUs.setEnabled(pState)
@@ -325,6 +340,7 @@ class CMain(object):
                 self.mContext.cleanup()
             self.mContext = CContext()
             self.__clearFragments()
+            self.__clearFiles()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.CLASSIFY | Jobs.REASSEMBLE)
 
@@ -358,6 +374,7 @@ class CMain(object):
                 return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
+            self.__clearFiles()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.REASSEMBLE)
 
@@ -380,8 +397,15 @@ class CMain(object):
         while (lCnt >= 0):
             self.customwidget.resultTable.removeRow(lCnt)
             lCnt -= 1
-        self.numRowsResult = 0
+        #self.numRowsResult = 0
         self.customwidget.resultTable.update()
+
+    def __clearFiles(self):
+        lCnt = self.customwidget.fileTable.rowCount() - 1
+        while (lCnt >= 0):
+            self.customwidget.fileTable.removeRow(lCnt)
+            lCnt -= 1
+        self.customwidget.fileTable.update()
 
     def __enableElements(self, pEnabled):
         self.customwidget.classifyButton.setEnabled(pEnabled)
@@ -571,6 +595,34 @@ class CMain(object):
             logging.info("Classification finished. ")
         elif pFinishedJob == Jobs.REASSEMBLE:
             logging.info("Reassembling finished. ")
+
+            lRowCount = 0
+
+            for lFrag in self.mContext.fragments:
+                if lFrag.mIsHeader == True:
+                    self.customwidget.fileTable.insertRow(lRowCount)
+                    #Header Number
+                    lItem = QtGui.QTableWidgetItem("File " + str(lRowCount))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.customwidget.fileTable.setItem(lRowCount, 0, lItem)
+                    #Filetype
+                    lItem = QtGui.QTableWidgetItem(lFrag.mFileType)
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.customwidget.fileTable.setItem(lRowCount, 1, lItem)
+                    #Size
+                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.customwidget.fileTable.setItem(lRowCount, 2, lItem)
+                    #Path
+                    lItem = QtGui.QTableWidgetItem(lFrag.mFilePath)
+                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self.customwidget.fileTable.setItem(lRowCount, 3, lItem)
+
+                    lRowCount += 1
 
     def on_error_callback(self, pError):
         QtGui.QMessageBox.about(self.ui, "Error",\
