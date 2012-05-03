@@ -285,9 +285,10 @@ class CMain(object):
             "<html>Key developers:  \
             <ul> \
                 <li>Rainer Poisel</li> \
-                <li>Vasileios Miskos</li> \
+                <li>Bernhard Schildendorfer</li> \
                 <li>Manfred Ruzicka</li> \
                 <li>Markus Mannel</li> \
+                <li>Vasileios Miskos</li> \
             </ul> \
             &copy; 2011, 2012 St. Poelten University of Applied "\
             "Sciences</html> \
