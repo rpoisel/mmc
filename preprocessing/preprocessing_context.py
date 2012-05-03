@@ -17,9 +17,7 @@ except ImportError, pExc:
     logging.error("Problem with importing a library: " + str(pExc))
     logging.error("Try making it with 'make' first.")
     sys.exit(-1)
-from reassembly.fragmentizer import fragmentizer_context
 from collating.magic import magic_context
-from lib import frags
 
 
 class CResultThread(threading.Thread):
