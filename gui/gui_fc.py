@@ -34,7 +34,8 @@ class Jobs(object):
 class CThreadWorker(QtCore.QThread):
     sBegin = QtCore.Signal(int, int, int, str)
     sProgress = QtCore.Signal(int)
-    sFinished = QtCore.Signal(int, int)
+    # job, jobs, error
+    sFinished = QtCore.Signal(int, int, int)
     sError = QtCore.Signal(str)
 
     def __init__(self, pOptions, pContext, pJobs):
@@ -60,7 +61,7 @@ class CThreadWorker(QtCore.QThread):
             self.sProgress.emit(pProgress)
 
     def finishedCallback(self):
-        self.sFinished.emit(self.mRunningJob, self.mJobs)
+        self.sFinished.emit(self.mRunningJob, self.mJobs, False)
 
     def run(self):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
@@ -72,7 +73,7 @@ class CThreadWorker(QtCore.QThread):
                         "classifier binaries are compiled. ")
                 self.sError.emit(str(pExc) + ". Please make sure the "\
                         "classifier binaries are compiled. ")
-                self.sFinished.emit(self.mRunningJob, self.mJobs)
+                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
             except Exception, pExc:
                 logging.error(str(pExc))
                 self.sError.emit(str(pExc))
@@ -519,7 +520,7 @@ class CMain(object):
         if 0 <= pValue <= 100:
             self.customwidget.progressBar.setValue(pValue)
 
-    def on_finished_callback(self, pFinishedJob, pJobs):
+    def on_finished_callback(self, pFinishedJob, pJobs, pError):
         lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
@@ -597,8 +598,10 @@ class CMain(object):
             self.__mImgVisualizer.update()
         if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
                 or (pFinishedJob == Jobs.REASSEMBLE):
-            self.__mLock.unlock()
             self.__enableElements(True)
+            if pError == True:
+                self.customwidget.reassembleButton.setEnabled(False)
+            self.__mLock.unlock()
 
         if pFinishedJob == Jobs.REASSEMBLE and \
             lOptions.showResults == True:
