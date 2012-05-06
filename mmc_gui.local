@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export INSTALL_PATH=.
-export LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment"
+export ARCH=`uname -m`
+export LD_LIBRARY_PATH="${INSTALL_PATH}/collating/fragment:${INSTALL_PATH}/collating/magic/lib/magic/linux-${ARCH}"
 
 (cd ${INSTALL_PATH} && env python ${INSTALL_PATH}/mmc.py $*)
