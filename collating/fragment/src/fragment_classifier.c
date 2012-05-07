@@ -113,7 +113,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         lMagicResult = magic_buffer(pMagic, pFragment, pLen);
         if (strcmp(lMagicResult, "data") != 0)
         {
-        	//TODO printf("Magic Result: %s\n",lMagicResult);
+            /* printf("Magic Result: %s\n",lMagicResult); */
             if (strstr(lMagicResult, "text") != NULL)
             {
                 pResult->mType = FT_TXT;
@@ -195,45 +195,6 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     return pResult->mStrength;
 }
 
-//Deprecated
-/*int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
-        const unsigned char* pFragment,
-        int pLen)
-{
-    ClassifyT lResult;
-    int lCnt = 0;
-
-    fragment_classifier_classify_result(pFragmentClassifier,
-#ifndef _MSC_VER
-            NULL, 
-#endif
-            pFragment, 
-            pLen, 
-            &lResult);
-
-    if (lResult.mStrength)
-    {
-        if (pFragmentClassifier->mNumFileTypes > 0)
-        {
-            for (lCnt = 0; lCnt < pFragmentClassifier->mNumFileTypes; ++lCnt)
-            {
-                if (pFragmentClassifier->mFileTypes[lCnt].mType == lResult.mType)
-                {
-                    // relevant fragment
-                    return 1;
-                }
-            }
-        }
-        else
-        {
-            return 1;
-        }
-    }
-
-    // irrelevant fragment
-    return 0;
-}*/
-
 #ifndef _MSC_VER
 int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         fragment_cb pCallback, 
@@ -253,7 +214,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     unsigned long long lFragsPerCpu = ceill(((long double)lFragsTotal)/pNumThreads);
     unsigned long long lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
 
-    // TODO check return value
+    /* TODO check return value */
     lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
 
@@ -294,7 +255,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
                 classify_thread, (void*)(lData + lCnt));
     }
 
-    // join threads
+    /* join threads */
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
         pthread_join(*(lThreads + lCnt), NULL);
@@ -358,7 +319,7 @@ void* classify_thread(void* pData)
                 {
                 	/* relevant fragment */
 #if DEBUG == 1
-                	printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d) \n",lCntBlock,lResult.mType, lResult.mStrength, lResult.mIsHeader);
+                    printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d) \n",lCntBlock,lResult.mType, lResult.mStrength, lResult.mIsHeader);
 #endif
                     lData->callback(lData->callback_data, lCntBlock, 
                             lResult.mType, lResult.mStrength, lResult.mIsHeader);

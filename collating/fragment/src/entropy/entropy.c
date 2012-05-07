@@ -15,10 +15,11 @@ float calc_entropy(const unsigned char* pFragment, int pLen)
 {
     /* http://stackoverflow.com/questions/990477/how-to-calculate-the-entropy-of-a-file */
     /* http://ezbitz.com/2009/05/08/calculate-a-file-shannon-entropy-in-c/ */
+    /* in the following lg(N) is the logarithm with base 2 */
     /* (float) entropy = 0
      * for i in the array[256]:Counts do 
      *   (float)p = Counts[i] / filesize
-     *     if (p > 0) entropy = entropy - p*lg(p) // lgN is the logarithm with base 2
+     *     if (p > 0) entropy = entropy - p*lg(p) 
      */
 
     float entropy = 0;
