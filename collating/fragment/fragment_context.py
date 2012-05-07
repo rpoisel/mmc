@@ -159,6 +159,7 @@ class CFragmentClassifier(object):
 
         # load library
         lLibname = r"libblock_reader"
+
         if platform.system().lower() == "windows":
             lLibname += ".dll"
         elif platform.system().lower() == "linux":
@@ -179,12 +180,14 @@ class CFragmentClassifier(object):
     def classify(self, pBlockSize, pNumBlocks, pImage,
             pOffset, pTypes, pBlockGap, pMinFragSize,
             pNumThreads):
+
         lCnt = 0
         lTypes = ClassifyTArray()
         for lType in pTypes:
             lTypes[lCnt].mType = lType['mType']
             lTypes[lCnt].mStrength = lType['mStrength']
             lCnt += 1
+
         return CFragments(self._mClassify(pBlockSize, pNumBlocks,
                 pImage, pOffset, lTypes, lCnt, pBlockGap,
                 pMinFragSize, pNumThreads), self._mClassifyFree)

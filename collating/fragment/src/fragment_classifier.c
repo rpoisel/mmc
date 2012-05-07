@@ -101,7 +101,6 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     pResult->mType = FT_UNKNOWN;
     pResult->mStrength = 0;
     pResult->mIsHeader = 0;
-
     if (pLen == 0)
     {
         return 0;
@@ -114,6 +113,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         lMagicResult = magic_buffer(pMagic, pFragment, pLen);
         if (strcmp(lMagicResult, "data") != 0)
         {
+        	//TODO printf("Magic Result: %s\n",lMagicResult);
             if (strstr(lMagicResult, "text") != NULL)
             {
                 pResult->mType = FT_TXT;
@@ -150,7 +150,6 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     if (pResult->mType >= FT_UNKNOWN &&
             pResult->mIsHeader != 1)
 #endif
-
     /* statistical examination */
     {
         lEntropy = calc_entropy(pFragment, pLen);
@@ -193,11 +192,11 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             pResult->mStrength = 1;
         }
     }
-
     return pResult->mStrength;
 }
 
-int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
+//Deprecated
+/*int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
         const unsigned char* pFragment,
         int pLen)
 {
@@ -220,7 +219,7 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
             {
                 if (pFragmentClassifier->mFileTypes[lCnt].mType == lResult.mType)
                 {
-                    /* relevant fragment */
+                    // relevant fragment
                     return 1;
                 }
             }
@@ -231,12 +230,12 @@ int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier,
         }
     }
 
-    /* irrelevant fragment */
+    // irrelevant fragment
     return 0;
-}
+}*/
 
 #ifndef _MSC_VER
-int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
+int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         fragment_cb pCallback, 
         void* pCallbackData, 
         const char* pImage, 
@@ -254,7 +253,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     unsigned long long lFragsPerCpu = ceill(((long double)lFragsTotal)/pNumThreads);
     unsigned long long lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
 
-    /* TODO check return value */
+    // TODO check return value
     lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
 
@@ -270,6 +269,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         (lData + lCnt)->callback = pCallback;
         (lData + lCnt)->callback_data = pCallbackData; 
         (lData + lCnt)->mPathMagic = pPathMagic;
+
         if (lCnt == pNumThreads - 1 && lFragsPerCpuR > 0)
         {
             (lData + lCnt)->num_frags = lFragsPerCpuR;
@@ -294,7 +294,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
                 classify_thread, (void*)(lData + lCnt));
     }
 
-    /* join threads */
+    // join threads
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
         pthread_join(*(lThreads + lCnt), NULL);
@@ -356,7 +356,10 @@ void* classify_thread(void* pData)
             {
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
-                    /* relevant fragment */
+                	/* relevant fragment */
+#if DEBUG == 1
+                	printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d) \n",lCntBlock,lResult.mType, lResult.mStrength, lResult.mIsHeader);
+#endif
                     lData->callback(lData->callback_data, lCntBlock, 
                             lResult.mType, lResult.mStrength, lResult.mIsHeader);
                     break;
