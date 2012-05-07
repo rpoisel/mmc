@@ -15,13 +15,16 @@ class CReassembly(object):
 
     def __init__(self, *args, **kwargs):
         super(CReassembly, self).__init__(*args, **kwargs)
+        self.mFiles = []
 
     def assemble(self, pOptions, pFragments, pCaller):
+        #TODO: No sorting at all??
         # sort list so that header fragments are at the beginning
         lIdxNoHeader = 0
-        for lFrag in pFragments:
-            if lFrag.mIsHeader == True:
+        for lIdx in xrange(len(pFragments)):
+            if pFragments[lIdx].mIsHeader == True:
                 lIdxNoHeader += 1
+
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader, pCaller)
 
     # interface only
@@ -287,6 +290,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         super(CReassemblyPUPJpeg, self).__init__(*args, **kwargs)
 
     def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+               
         for lDir in [pOptions.output + "/hdr", pOptions.output + "/frg",
                 pOptions.output + "/path"]:
             if os.path.exists(lDir):
@@ -297,16 +301,20 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         lRecoverFH = open(pOptions.imagefile, "rb")
 
         # extract headers frames
-        lCntHdr = 0
-        for lFragment in pSortedFrags[0:pIdxNoHeader]:
-            logging.info("Extracting header: " + str(lFragment))
-
+        for lFragHeaderIdx in xrange(0, pIdxNoHeader):
+            logging.info("Extracting header: " + str(lFragHeaderIdx))
+            
+            #Creating reassembly File Objects
+            lFile = CFileJpeg(lFragHeaderIdx)
+            lFile.mFileType = "JPEG"
+            lFile.mFileName = "h%d" % (lFragHeaderIdx)
+            self.mFiles.append(lFile)
+            
+            lFragment = pSortedFrags[lFragHeaderIdx]
             lRecoverFH.seek(lFragment.mOffset, os.SEEK_SET)
             lData = lRecoverFH.read(lFragment.mSize)
             lPath = pOptions.output + os.sep + "hdr" + os.sep
-            lName = "h%d" % (lCntHdr)
-            lFragment.mName = lName
-            self.__analyzeJpeg(lFragment, lData)
+            self.__analyzeJpeg(lFile, lData)
 
             #Write RAW Data
             lFilename = lPath + lFragment.mName + ".raw"
@@ -323,19 +331,16 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lDecoder.write(lData)
             lDecoder.write("\xFF\xD9")
             lDecoder.close()
-            lCntHdr += 1
 
         # extract non-header fragments
-        lCntFrg = 0
-        for lFragment in pSortedFrags[pIdxNoHeader:]:
+        for lFragHeaderIdx in xrange[pIdxNoHeader,len(pSortedFrags)]:
+            lFragment = pSortedFrags[lFragHeaderIdx]
             logging.info("Extracting fragments: " + str(lFragment))
             lRecoverFH.seek(lFragment.mOffset, os.SEEK_SET)
             lData = lRecoverFH.read(lFragment.mSize)
 
-            #self.__analyzeJpeg(lFragment,lData)
-
             lPath = pOptions.output + os.sep + "frg" + os.sep
-            lName = "f%d" % (lCntFrg)
+            lName = "f%d" % (lFragHeaderIdx)
             lFragment.mName = lName
 
             #Write RAW Data (No Header and no EOI Marker)
@@ -345,14 +350,13 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lFile.write(lData)
             lFile.close()
 
-            lCntFrg += 1
 
         lRecoverFH.close()
-        pCaller.progressCallback(50 * \
-                lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
+        #pCaller.progressCallback(50 * \
+        #        lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
+        pCaller.progressCallback(50)
 
         # the place to invoke _reassemblePUP
-        #
         self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
                 self._compareFrags)
 
@@ -546,26 +550,26 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         return PictureEnd
 
     #Analyzes the JPEG Fragment for Markers
-    def __analyzeJpeg(self, pFrag, pFragData):
-        for i in range(len(pFragData)):
+    def __analyzeJpeg(self, pFile, pData):
+        for i in range(len(pData)):
         #Not the last Byte
-            if i < len(pFragData) - 1:
+            if i < len(pData) - 1:
                 #We have found a Marker
-                if ord(pFragData[i]) == 0xFF:
-                    b2 = ord(pFragData[i + 1])
-                    if b2 == pFrag.MRK_SOS:
-                        pFrag.mMarker[pFrag.MRK_SOS] = i
-                    elif b2 == pFrag.MRK_SOI:
-                        pFrag.mMarker[pFrag.MRK_SOI] = i
+                if ord(pData[i]) == 0xFF:
+                    b2 = ord(pData[i + 1])
+                    if b2 == CFileJpeg.MRK_SOS:
+                        pFile.mMarker[CFileJpeg.MRK_SOS] = i
+                    elif b2 == CFileJpeg.MRK_SOI:
+                        pFile.mMarker[CFileJpeg.MRK_SOI] = i
 
         #Calculate the Scan Header Length. It is positioned right after the
         #SOS marker and is part of the image section (scan section) it contains
         #additional information about the image.
         #Ls is the Length of the "Scan Header Length" of two bytes size
-        Ls = ord(pFragData[(pFrag.mMarker[pFrag.MRK_SOS] + 2)]) * 255 + \
-                ord(pFragData[(pFrag.mMarker[pFrag.MRK_SOS] + 3)])
-        pFrag.mDataBegin = pFrag.mMarker[pFrag.MRK_SOS] + Ls + 2
-        pFrag.mHeaderData = pFragData[:pFrag.mDataBegin]
+        Ls = ord(pData[(pFile.mMarker[CFileJpeg.MRK_SOS] + 2)]) * 255 + \
+                ord(pData[(pFile.mMarker[CFileJpeg.MRK_SOS] + 3)])
+        pFile.mDataBegin = pFile.mMarker[CFileJpeg.MRK_SOS] + Ls + 2
+        pFile.mHeaderData = pData[:pFile.mDataBegin]
 
     def __writeJpeg(self, pOffset, pOut, pDir, pIdx, pLen,
             pHdrData, pWhence, pFH):
@@ -622,3 +626,61 @@ class CReassemblyFactory:
     @staticmethod
     def getInstancePng(pWhich):
         return CReassemblyFactory.sReassemblyMethodsPng[pWhich]()
+
+class CFile(object):
+
+    def __init__(self, pFragmentId):
+        self.mFileName = "",pFragmentId
+        self.mFragmentId = pFragmentId
+        self.mDataBegin = -1
+        self.mComplete = False
+        self.mFragments = []
+        #TODO
+        self.mFragments.append(pFragmentId)
+
+    def getLastFragment(self):
+        self.mFragments[len(self.mFragments)-1]
+
+    def __str__(self):
+        return "H(%s)" % self.mFragmentId
+
+class CFileJpeg(CFile):
+    
+    MRK_SOS = 0xDA
+    MRK_SOI = 0xD8
+    MRK_EOI = 0xD9
+    
+    def __init__(self,pBlockSize):
+        super(CFile, self).__init__()
+
+        self.mFileType = "JPEG"
+        #All Markers have a relative Position
+        self.mMarker = [-1] * 255
+        self.mCut = (-1, -1)
+        self.mRawDataPath = ""
+        self.mReassemblyPathSize = 0  #TODO: What is that?
+        self.mDataBegin = None
+        self.mHeaderData = None
+
+
+    def __str__(self):
+        lString = super(CFile, self).__str__()
+        lString += " (JPEG)"
+        return lString
+    
+class CFileH264(CFile):
+    
+    def __init__(self,pBlockSize):
+        super(CFile, self).__init__()
+        self.mPicBegin = ""
+        self.mPicEnd = ""
+    
+    def __str__(self):
+        lString = super(CFile, self).__str__()
+        lString += " (H264)"
+        return lString
+    
+    
+    
+    
+    
