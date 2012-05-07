@@ -6,7 +6,6 @@
 import os
 import sys
 import platform
-import multiprocessing
 import logging
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
         level=logging.DEBUG)
@@ -28,5 +27,4 @@ def main():
     lMain.run()
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
     main()

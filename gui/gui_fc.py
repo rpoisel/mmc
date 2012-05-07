@@ -6,7 +6,6 @@
 import os
 import sys
 import platform
-import multiprocessing
 import datetime
 import logging
 # PyQt4, PySide stuff
@@ -135,7 +134,6 @@ class CMain(object):
 
         for lCPU in reversed(range(CContext.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
-        self.on_multiprocessing_changed(False)
 
         self.customwidget.blockStatus.addItem("allocated")
         self.customwidget.blockStatus.addItem("unallocated")
@@ -185,8 +183,6 @@ class CMain(object):
         self.customwidget.recoverfiletypes.\
                 currentIndexChanged[unicode].connect(\
                 self.on_recoverFT_changed)
-        self.customwidget.multiprocessing.stateChanged.connect(\
-                self.on_multiprocessing_changed)
         self.customwidget.fileTable.cellDoubleClicked.connect(\
                 self.on_fileTable_cellDoubleClicked)
 
@@ -202,15 +198,6 @@ class CMain(object):
         if lFile != None:
             webbrowser.open_new_tab(self.customwidget.fileTable.item(pRow, \
                     3).text())
-
-    def on_multiprocessing_changed(self, pState):
-        self.customwidget.maxCPUs.setEnabled(pState)
-        #self.customwidget.maxCPUs.setCurrentIndex(0)
-#        if pState == False:
-#            self.customwidget.maxCPUs.setCurrentIndex(\
-#                    self.customwidget.maxCPUs.count() - 1)
-#        else:
-#            self.customwidget.maxCPUs.setCurrentIndex(0)
 
     def on_actionExit_triggered(self):
         self.ui.close()
@@ -499,8 +486,6 @@ class CMain(object):
             lOptions.recoverfiletype = "png"
         lOptions.blockstatus = self.customwidget.blockStatus.currentText()
         lOptions.maxcpus = int(self.customwidget.maxCPUs.currentText())
-        lOptions.multiprocessing = \
-                self.customwidget.multiprocessing.isChecked()
         if self.__mGeometry != None:
             lOptions.fstype = self.__mGeometry.fstype
             lOptions.tskProperties = self.__mGeometry.tskProperties

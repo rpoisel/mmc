@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Wed May  2 16:40:14 2012
+# Created: Mon May  7 09:55:45 2012
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -120,14 +120,6 @@ class Ui_filecarvingWidget(object):
         self.maxCPUs = QtGui.QComboBox(self.tab_general)
         self.maxCPUs.setObjectName("maxCPUs")
         self.horizontalLayout_3.addWidget(self.maxCPUs)
-        self.multiprocessing = QtGui.QCheckBox(self.tab_general)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.multiprocessing.sizePolicy().hasHeightForWidth())
-        self.multiprocessing.setSizePolicy(sizePolicy)
-        self.multiprocessing.setObjectName("multiprocessing")
-        self.horizontalLayout_3.addWidget(self.multiprocessing)
         self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         self.actionLayout = QtGui.QHBoxLayout()
         self.actionLayout.setObjectName("actionLayout")
@@ -348,7 +340,6 @@ class Ui_filecarvingWidget(object):
         self.progressLabel.setText(QtGui.QApplication.translate("filecarvingWidget", "progressLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.duration.setText(QtGui.QApplication.translate("filecarvingWidget", "00:00:00", None, QtGui.QApplication.UnicodeUTF8))
         self.label_13.setText(QtGui.QApplication.translate("filecarvingWidget", "Max CPUs:", None, QtGui.QApplication.UnicodeUTF8))
-        self.multiprocessing.setText(QtGui.QApplication.translate("filecarvingWidget", "Multiprocessing", None, QtGui.QApplication.UnicodeUTF8))
         self.classifyButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Classify", None, QtGui.QApplication.UnicodeUTF8))
         self.reassembleButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Reassemble", None, QtGui.QApplication.UnicodeUTF8))
         self.processButton.setText(QtGui.QApplication.translate("filecarvingWidget", "&Process (do it all)", None, QtGui.QApplication.UnicodeUTF8))

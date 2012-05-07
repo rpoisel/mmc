@@ -4,10 +4,10 @@ import sys
 import os
 import os.path
 import subprocess
+import multiprocessing
 import traceback
 import logging
 import datetime
-import multiprocessing
 
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
