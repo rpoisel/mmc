@@ -57,43 +57,26 @@ class CContext:
         pCaller.finishedCallback()
 
     def runReassembly(self, pOptions, pCaller):
-        try:
-            pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
-                    pOptions.offset,
-                    "")
+        pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
+                pOptions.offset,
+                "")
 
-            lReassembly = None
-            if pOptions.recoverfiletype == "video":
-                lReassembly = \
-                    reassembly_context.CReassemblyFactory.getInstanceVideo(\
-                    pOptions.assemblymethod)
-            elif pOptions.recoverfiletype == "jpeg":
-                lReassembly = \
-                    reassembly_context.CReassemblyFactory.getInstanceJpeg(\
-                    pOptions.assemblymethod)
-            elif pOptions.recoverfiletype == "png":
-                lReassembly = \
-                    reassembly_context.CReassemblyFactory.getInstancePng(\
-                    pOptions.assemblymethod)
-            if lReassembly != None:
-                lReassembly.assemble(pOptions, self.__mFragments, pCaller)
-            pCaller.finishedCallback()
-        except LookupError, pExc:
-            logging.error("LookupError: " + str(pExc))
-            traceback.print_exc()
-            sys.exit(-1)
-        except NameError, pExc:
-            logging.error("NameError: " + str(pExc))
-            traceback.print_exc()
-            sys.exit(-2)
-        except EOFError, pExc:
-            logging.error("EOFError: " + str(pExc))
-            traceback.print_exc()
-            sys.exit(-3)
-        except Exception, pExc:
-            logging.error(str(pExc))
-            traceback.print_exc()
-            sys.exit(-4)
+        lReassembly = None
+        if pOptions.recoverfiletype == "video":
+            lReassembly = \
+                reassembly_context.CReassemblyFactory.getInstanceVideo(\
+                pOptions.assemblymethod)
+        elif pOptions.recoverfiletype == "jpeg":
+            lReassembly = \
+                reassembly_context.CReassemblyFactory.getInstanceJpeg(\
+                pOptions.assemblymethod)
+        elif pOptions.recoverfiletype == "png":
+            lReassembly = \
+                reassembly_context.CReassemblyFactory.getInstancePng(\
+                pOptions.assemblymethod)
+        if lReassembly != None:
+            lReassembly.assemble(pOptions, self.__mFragments, pCaller)
+        pCaller.finishedCallback()
 
     def cleanup(self):
         del(self.__mFragments)

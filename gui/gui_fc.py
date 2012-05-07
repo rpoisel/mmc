@@ -80,7 +80,13 @@ class CThreadWorker(QtCore.QThread):
 
         if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
             self.mRunningJob = Jobs.REASSEMBLE
-            self.mContext.runReassembly(self.mOptions, self)
+            try:
+                self.mContext.runReassembly(self.mOptions, self)
+            except TypeError, pExc:
+                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
+            except Exception, pExc:
+                logging.error(str(pExc))
+                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
 
 
 # Create a class for our main window
