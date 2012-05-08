@@ -10,6 +10,12 @@ import Image
 
 import decoder
 
+#####################
+#TODO:
+## - readFragment everywhere
+## - Look at all Todos
+#####################
+
 
 class CReassembly(object):
 
@@ -34,29 +40,35 @@ class CReassembly(object):
         # extract determined files
         lRecoverFH = open(pOptions.imagefile, "rb")
         logging.info("8<=============== FRAGMENT PATHs ==============")
-        for lIdxHdr in xrange(pIdxNoHeader):
-            lFrag = pSortedFrags[lIdxHdr]
-            lFrag.mFilePath = pOptions.output + os.sep + str(lIdxHdr)
-            if not os.path.exists(lFrag.mFilePath):
-                os.makedirs(lFrag.mFilePath)
-            lFrag.mFilePath = lFrag.mFilePath + os.sep + pOptions.outputformat
+        for lFile in self.mFiles:
+            #lFrag = pSortedFrags[lIdxHdr]
+            lFile.mFilePath = pOptions.output + os.sep + \
+                                str(lFile.getHeaderFragmentId())
+            if not os.path.exists(lFile.mFilePath):
+                os.makedirs(lFile.mFilePath)
+            lFile.mFilePath = lFile.mFilePath + os.sep + pOptions.outputformat
 
             lDecoder = decoder.CDecoder.getDecoder(pInputFileType,
                     pOptions.outputformat)
-            lDecoder.open(lFrag.mFilePath)
+            lDecoder.open(lFile.mFilePath)
 
-            while True:
+            for lFragIdx in lFile.mFragments:
+                lFrag = pSortedFrags[lFragIdx]
                 lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
                 lDecoder.write(lRecoverFH.read(lFrag.mSize))
                 logging.info("Current Fragment: " + str(lFrag))
-                if lFrag.mNextIdx == -1:
-                    break
-                lFrag = pSortedFrags[lFrag.mNextIdx]
             lDecoder.close()
         if lRecoverFH != None:
             lRecoverFH.close()
         logging.info("8<=============== FRAGMENT PATHs ==============")
         return
+
+    def readFragment(self, pFragment, pOptions):
+        lRecoverFH = open(pOptions.imagefile, "rb")
+        lRecoverFH.seek(pFragment.mOffset, os.SEEK_SET)
+        lData = lRecoverFH.read(pFragment.mSize)
+        lRecoverFH.close()
+        return lData
 
 
 class CReassemblyPUP(CReassembly):
@@ -69,41 +81,44 @@ class CReassemblyPUP(CReassembly):
         self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
                 self._compareFrags)
 
-    def _compareFrags(self, pPath, pFragment, pSimilarity):
+    def _compareFrags(self, pFrags, pPath, pFragmentId, pOptions):
         # compares pFragment with the Fragments stored in pPath
         return -1
 
     def _reassemblePUP(self, pSortedFrags, pIdxNoHeader, pOptions, pCmp):
         lNumFrg = len(pSortedFrags) - pIdxNoHeader
-        lReassemblyPaths = [lCnt for lCnt in xrange(pIdxNoHeader)]
+        lReassemblyPaths = self.mFiles
         # TODO check number of non-header frags
         lRemainingFrags = [lCnt for lCnt in xrange(pIdxNoHeader,
             lNumFrg + pIdxNoHeader)]
 
-        for lHdr in xrange(pIdxNoHeader):
-            lReassemblyPaths[lHdr] = [pSortedFrags[lHdr]]
-
         #As long as there are Fragments
         while len(lRemainingFrags) > 0:
-            lBestResult = {'idxHdr': -1, 'idxFrag': -1, 'result': 0}
+            lBestResult = {'idxPath': -1, 'idxFrag': -1, 'result': 0}
             #Iterate all Header Fragments
-            for lIdxHdr in xrange(pIdxNoHeader):
+            for lPathId in xrange(len(lReassemblyPaths)):
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
-                    lResult = pCmp(lReassemblyPaths[lIdxHdr], \
-                              pSortedFrags[lIdxFrag], \
-                              pOptions.similarity)
+                    lResult = pCmp(pSortedFrags, \
+                              lReassemblyPaths[lPathId], \
+                              lIdxFrag, \
+                              pOptions)
+                    logging.info("Comparing " + \
+                                 str(lReassemblyPaths[lPathId].mFragments) + \
+                                 " <=> f(" + str(lIdxFrag) + "): " + \
+                                 str(lResult))
                     if lResult > lBestResult['result']:
-                        lBestResult = {'idxHdr': lIdxHdr, \
+                        lBestResult = {'idxPath': lPathId, \
                                     'idxFrag': lIdxFrag, \
                                     'result': lResult}
+
             # check for ambiguous result
             if lBestResult['result'] == 0:
                 break
-            pSortedFrags[lBestResult['idxHdr']].mNextIdx = \
-                    lBestResult['idxFrag']
-            lReassemblyPaths[lBestResult['idxHdr']].\
-                    append(pSortedFrags[lBestResult['idxFrag']])
+            #pSortedFrags[lBestResult['idxHdr']].mNextIdx = \
+            #        lBestResult['idxFrag']
+            lReassemblyPaths[lBestResult['idxPath']].\
+                    addFragmentId(lBestResult['idxFrag'])
             lRemainingFrags.remove(lBestResult['idxFrag'])
 
 
@@ -132,6 +147,13 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         for lFragHeaderIdx in xrange(0, pIdxNoHeader):
             logging.info("Extracting header: " + \
                     str(pSortedFrags[lFragHeaderIdx]))
+
+            #Creating reassembly File Objects
+            lFile = CFileH264(lFragHeaderIdx)
+            lFile.mFileType = "H264"
+            lFile.mFileName = "h%d" % (lFragHeaderIdx)
+            self.mFiles.append(lFile)
+
             lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if pSortedFrags[lFragHeaderIdx].mSize > pOptions.extractsize:
@@ -213,10 +235,11 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                 lIdxNoHeader, pOptions, "h264")
         pCaller.progressCallback(100)
 
-    def _compareVideoFrags(self, pPath, pFragment2, pSimilarity):
-        pFragment1 = pPath[len(pPath) - 1]
-        lImage1 = Image.open(pFragment1.mPicEnd, "r")
-        lImage2 = Image.open(pFragment2.mPicBegin, "r")
+    def _compareVideoFrags(self, pFragments, pPath, pFragmentId, pOptions):
+        lFragment1 = pFragments[pPath.getLastFragmentId()]
+        lFragment2 = pFragments[pFragmentId]
+        lImage1 = Image.open(lFragment1.mPicEnd, "r")
+        lImage2 = Image.open(lFragment2.mPicBegin, "r")
 
         # size check
         if lImage1.size != lImage2.size or \
@@ -231,11 +254,11 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         for lChannel in xrange(3):
             for lIntensity in xrange(256):
                 lIdx = lChannel * 256 + lIntensity
-                if abs(lHist1[lIdx] - lHist2[lIdx]) < pSimilarity:
+                if abs(lHist1[lIdx] - lHist2[lIdx]) < pOptions.similarity:
                     lReturn += 1
 
-        logging.info("Value for " + pFragment1.mPicEnd + " <=> " + \
-                pFragment2.mPicBegin + ": " + str(lReturn))
+        logging.info("Value for " + lFragment1.mPicEnd + " <=> " + \
+                lFragment2.mPicBegin + ": " + str(lReturn))
 
         return lReturn
 
@@ -305,11 +328,8 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
 
-        lRecoverFH = open(pOptions.imagefile, "rb")
-
         # extract headers frames
         for lFragHeaderIdx in xrange(0, pIdxNoHeader):
-            logging.info("Extracting header: " + str(lFragHeaderIdx))
 
             #Creating reassembly File Objects
             lFile = CFileJpeg(lFragHeaderIdx)
@@ -318,20 +338,18 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             self.mFiles.append(lFile)
 
             lFragment = pSortedFrags[lFragHeaderIdx]
-            lRecoverFH.seek(lFragment.mOffset, os.SEEK_SET)
-            lData = lRecoverFH.read(lFragment.mSize)
+            lData = self.readFragment(lFragment, pOptions)
             lPath = os.path.join(pOptions.output, "hdr") + os.sep
             self.__analyzeJpeg(lFile, lData)
 
-            #Write RAW Data
-            lFilename = lPath + lFragment.mName + ".raw"
-            lFragment.mRawDataPath = lFilename
-            lFile = open(lFilename, "wb")
-            lFile.write(lData)
-            lFile.close()
+            #Write RAW Data of t
+            #lFile.mRawDataPath = lPath + lFragment.mName + ".raw"
+            #lFile = open(lFile.mRawDataPath, "wb")
+            #lFile.write(lData)
+            #lFile.close()
 
-            #Convert to PNG
-            lFilename = lPath + lFragment.mName + ".png"
+            #Convert to PNG: Important for the Preview
+            lFilename = lPath + lFile.mFileName + ".png"
             lFragment.mPicBegin = lFilename
             lDecoder = decoder.CDecoder.getDecoder("jpg", lFilename)
             lDecoder.open(lFilename)
@@ -340,89 +358,66 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lDecoder.close()
 
         # extract non-header fragments
-        for lFragHeaderIdx in xrange[pIdxNoHeader, len(pSortedFrags)]:
-            lFragment = pSortedFrags[lFragHeaderIdx]
-            logging.info("Extracting fragments: " + str(lFragment))
-            lRecoverFH.seek(lFragment.mOffset, os.SEEK_SET)
-            lData = lRecoverFH.read(lFragment.mSize)
+        #for lFragHeaderIdx in xrange[pIdxNoHeader, len(pSortedFrags)]:
+        #    lFragment = pSortedFrags[lFragHeaderIdx]
+        #    logging.info("Extracting fragments: " + str(lFragment))
+        #    lData = self.readFragment(lFragment, pOptions)
 
-            lPath = os.path.join(pOptions.output, "frg") + os.sep
-            lName = "f%d" % (lFragHeaderIdx)
-            lFragment.mName = lName
-
-            #Write RAW Data (No Header and no EOI Marker)
-            lFilename = lPath + lFragment.mName + ".raw"
-            lFragment.mRawDataPath = lFilename
-            lFile = open(lFilename, "wb")
-            lFile.write(lData)
-            lFile.close()
-
-        lRecoverFH.close()
+            
+            
         #pCaller.progressCallback(50 * \
         #        lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
         pCaller.progressCallback(50)
 
         # the place to invoke _reassemblePUP
         self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
-                self._compareFrags)
+                self._compareJpegFrags)
 
         self._extractReassembledFragments(pSortedFrags,
                 pIdxNoHeader, pOptions, "jpg")
 
         pCaller.progressCallback(100)
 
-    def _compareFrags(self, pPath, pFragment, pSimilarity):
-
-        #The first Fragment in the Path must be an Header
-        if not pPath[0].mIsHeader:
-            return -1
-
+    def _compareJpegFrags(self, pFragments, pPath, pFragmentId, pOptions):
+        #Terms:
+        #(Reassembly)Path: All fragments up to the fragmentation point. This
+        #                  Includes the header fragment and other frags.
+        #CompareFragment: Fragment which gets compared to the Path
+        #ReassemblyImage:  ReassemblyPath + CompareFragment
         #The Header doesn't need any more fragments
-        if pPath[0].mComplete:
+        if pPath.mComplete:
             return 0
 
-        # Path image which is deleted if path changes.
-        # this makes it more performant
-        lPathImage = "/tmp/temp/path/"
-        for lFragment in pPath:
-            lPathImage += lFragment.mName
+        # Write all reassembled fragments in the reassembly path to the
+        # disk. This includes the header fragment and reassembled fragments
+        if pPath.mBaseImagePath == None:
+            pPath.mBaseImagePath = os.path.join(pOptions.output, "path") + os.sep
+            pPath.mBaseImagePath += pPath.mFileName + ".jpg"
+            lFile = open(pPath.mBaseImagePath, "wb")
+            for lFragId in pPath.mFragments:
+                lFile.write(self.readFragment(pFragments[lFragId], pOptions))
+            lFile.write("\xFF\xD9")
+            lFile.close()   
 
-        #Assemble the current reassemblypath with the fragment
-        lReassemblyImage = lPathImage.replace("/tmp/temp/path",
-                "/tmp/temp/frg")
-        lReassemblyImage += pFragment.mName + ".jpg"
-        lPathImage += ".jpg"
-
-        #Write the ReassemblyPathImage (All fragments up to now)
-        #if not os.path.exists(lPathImage):
-        pPath[0].mReassemblyPathSize = 0
-        lFile = open(lPathImage, "wb")
-        for lFrag in pPath:
-            lRead = open(lFrag.mRawDataPath, "rb")
-            lFile.write(lRead.read(lFrag.mSize))
-            pPath[0].mReassemblyPathSize += lFrag.mSize
-            lRead.close()
-        lFile.close()
-
+        #TODO: Store combinations
         #Reassemble the Base Path with the new fragment
-        lBaseFragments = open(lPathImage, "rb")
-        lFragment = open(pFragment.mRawDataPath, "rb")
-        lReassembly = open(lReassemblyImage, "wb")
-        lReassembly.write(lBaseFragments.read(pPath[0].mReassemblyPathSize))
-        lReassembly.write(lFragment.read(pFragment.mSize))
-        lReassembly.write("\xFF\xD9")
-        lReassembly.close()
-        lBaseFragments.close()
-
-        lFile = open(lPathImage, "ab")
-        lFile.write("\xFF\xD9")
-        lFile.close()
+        lCompareImagePath = os.path.join(pOptions.output, "frg") + os.sep
+        lCompareImagePath += "f" + str(pFragmentId) + ".jpg"
+        lBaseImage    = open(pPath.mBaseImagePath, "rb")
+        lCompareImage = open(lCompareImagePath, "wb")
+        lFragmentData = self.readFragment(pFragments[pFragmentId], pOptions)
+        #Remove the tailing EOI marker (0xFFD9)
+        lCompareImage.write(lBaseImage.read()[:-2])
+        lCompareImage.write(lFragmentData)
+        lCompareImage.write("\xFF\xD9")
+        lCompareImage.close()
+        lBaseImage.close()
 
         ###### Analysis of the Image #####
 
         # Open the base fragment image and the full image (base + compare)
-        lBaseFragmentImage = Image.open(lPathImage)
-        lCompareFragmentImage = Image.open(lReassemblyImage)
+        lBaseFragmentImage = Image.open(pPath.mBaseImagePath)
+        lCompareFragmentImage = Image.open(lCompareImagePath)
 
         # Determine the end of the base fragment image and the compare image
         lBaseFragmentCut = self.__determineJpegCut(lBaseFragmentImage)
@@ -499,12 +494,12 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         #According to the Header, enough image data is already in place
         if lBaseFragmentCut[1][X] >= lBaseFragmentImage.size[WIDTH] \
                 and lBaseFragmentCut[1][Y] >= lBaseFragmentImage.size[HEIGHT]:
-            pPath[0].mComplete = True
+            pPath.mComplete = True
             return 0
 
         #Histogram of the base fragments last data line
         lHist1 = lBaseFragmentImage.crop(lBaseFragmentLine[0]).histogram() + \
-                BaseFragmentImage.crop(lBaseFragmentLine[1]).histogram()
+                    lBaseFragmentImage.crop(lBaseFragmentLine[1]).histogram()
 
         #Histogram of the compare fragments last data line
         lHist2 = lCompareFragmentImage.crop(lCompareFragmentLine[0]).\
@@ -514,11 +509,8 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         #Do the Histogram intersection
         lWeight = 0
         for lIdx in xrange(len(lHist1)):
-            if abs(lHist1[lIdx] - lHist2[lIdx]) < pSimilarity:
+            if abs(lHist1[lIdx] - lHist2[lIdx]) < pOptions.similarity:
                 lWeight += 1
-
-        logging.info("Value for " + pPath[0].mName + " <=> " + \
-                pFragment.mName + ": " + str(lWeight))
 
         return lWeight
 
@@ -634,21 +626,26 @@ class CReassemblyFactory:
         return CReassemblyFactory.sReassemblyMethodsPng[pWhich]()
 
 class CFile(object):
-
+    
     def __init__(self, pFragmentId):
-        self.mFileName = "",pFragmentId
-        self.mFragmentId = pFragmentId
+        self.mFileName = None
+        self.mFilePath = None
         self.mDataBegin = -1
         self.mComplete = False
         self.mFragments = []
-        #TODO
+        self.mFragments.append(pFragmentId)        
+
+    def getHeaderFragmentId(self):
+        return self.mFragments[0]
+
+    def getLastFragmentId(self):
+        return self.mFragments[len(self.mFragments)-1]
+    
+    def addFragmentId(self,pFragmentId):
         self.mFragments.append(pFragmentId)
-
-    def getLastFragment(self):
-        self.mFragments[len(self.mFragments)-1]
-
-    def __str__(self):
-        return "H(%s)" % self.mFragmentId
+    
+    def __str__(self):        
+        return "%s%s " % (self.mFileName,self.mFragments) 
 
 class CFileJpeg(CFile):
     
@@ -656,32 +653,32 @@ class CFileJpeg(CFile):
     MRK_SOI = 0xD8
     MRK_EOI = 0xD9
     
-    def __init__(self,pBlockSize):
-        super(CFile, self).__init__()
-
+    def __init__(self,pFragmentId):
+        CFile.__init__(self, pFragmentId)
         self.mFileType = "JPEG"
         #All Markers have a relative Position
         self.mMarker = [-1] * 255
         self.mCut = (-1, -1)
-        self.mRawDataPath = ""
+        self.mRawDataPath = None
         self.mReassemblyPathSize = 0  #TODO: What is that?
-        self.mDataBegin = None
         self.mHeaderData = None
+        self.mBaseImagePath = None
 
+    def addFragmentId(self,pFragmentId):
+        CFile.addFragmentId(self,pFragmentId)
+        #The calculated Image changed with the new Fragment
+        self.mBaseImagePath = None
 
     def __str__(self):
-        lString = super(CFile, self).__str__()
-        lString += " (JPEG)"
-        return lString
+        return "%s%s (JPEG)" % (self.mFileName,self.mFragments) 
     
 class CFileH264(CFile):
     
-    def __init__(self,pBlockSize):
-        super(CFile, self).__init__()
+    def __init__(self,pFragmentId):
+        CFile.__init__(self, pFragmentId)
+        self.mFileType = "H264"
         self.mPicBegin = ""
         self.mPicEnd = ""
     
     def __str__(self):
-        lString = super(CFile, self).__str__()
-        lString += " (H264)"
-        return lString
+        return "%s%s (H264)" % (self.mFileName,self.mFragments) 
