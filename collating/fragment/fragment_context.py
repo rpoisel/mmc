@@ -113,13 +113,11 @@ class CFragments(object):
 class CBlockClassifier:
 
     def __init__(self):
-        # open library handle
-        lLibname = r"libfragment_classifier"
+        # open library handle (do not change)
         if platform.system().lower() == "windows":
-            lLibname += ".dll"
+            self.__mLH = cdll.LoadLibrary("libfragment_classifier.dll")
         elif platform.system().lower() == "linux":
-            lLibname += ".so"
-        self.__mLH = cdll.LoadLibrary(lLibname)
+            self.__mLH = cdll.LoadLibrary("libfragment_classifier.so")
 
         self.__mOpen = self.__mLH.fragment_classifier_new_ct
         self.__mOpen.restype = CClassifyHandlerPointer
@@ -157,14 +155,11 @@ class CFragmentClassifier(object):
     def __init__(self):
         super(CFragmentClassifier, self).__init__()
 
-        # load library
-        lLibname = r"libblock_reader"
-
+        # load library (do not change)
         if platform.system().lower() == "windows":
-            lLibname += ".dll"
+            self._mLH = cdll.LoadLibrary("libblock_reader.dll")
         elif platform.system().lower() == "linux":
-            lLibname += ".so"
-        self._mLH = cdll.LoadLibrary(lLibname)
+            self._mLH = cdll.LoadLibrary("libblock_reader.so")
 
         self._mClassify = self._mLH.classify
         self._mClassify.restype = CFragmentCollectionPointer

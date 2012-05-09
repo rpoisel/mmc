@@ -1,5 +1,5 @@
 ### MM Carver Framework Invocation ###
-# Rainer Poisel (rainer.poisel@fhstp.ac.at), 03062011
+# Rainer Poisel (rainer.poisel@fhstp.ac.at), 09052012
 
 # Preamble
 
@@ -13,17 +13,31 @@ also available as shared objects) running the framework requires some
 environmental variables to be set. The following line has to be executed in
 order to start the framework:
 
-$ ./mm_carver --help
+$ ./mmc_gui.local
 
-Here is a short execution example:
+# Building static binaries from the source-code
 
-$ ./mm_carver -f /tmp/practical.floppy.dd
+Python scripts can be compiled into stand-alone executables. All dependencies
+like dynamic link libraires (even ctype-ones) are also compiled in. 
+
+Use the provided Makefile as follows:
+$ make -j static
+
+Manually, the following procedure is necessary:
+ * Install PyInstaller: http://www.pyinstaller.org/
+ * Setup LD_LIBRARY_PATH to enable PyInstaller to find your libraries:
+   $ export LD_LIBRARY_PATH=/home/rpoisel/svn/mmc/trunk/collating/fragment
+ * Compile the binary:
+   $ python pyinstaller.py --onefile -o /tmp/mmc /home/rpoisel/svn/mmc/trunk/mmc.py
+ * Add data files:
+   $ svn export /home/rpoisel/svn/mmc/trunk/data /tmp/mmc/dist/data
+ * Delete unnecessary files and directories:
+   $ rm -rf /tmp/mmc/data/frags_ref
+   $ rm -rf /tmp/mmc/data/{animation,png,jpeg}
+ * Bundle the whole thing:
+   $ tar -cjpf /tmp/mmc/mmc.tar.bz2 -C /tmp/mmc/dist .
 
 # Caveats
 
-Starting the framework without compilation (see INSTALL) results in the
-following error message:
-
-$ ./mm_carver -f /tmp/practical.floppy.dd
-Error: __init__() takes exactly 1 argument (2 given)
+None at the moment. ;-)
 
