@@ -74,9 +74,9 @@ class CThreadWorker(QtCore.QThread):
                 self.sError.emit(str(pExc) + ". Please make sure the "\
                         "classifier binaries are compiled. ")
                 self.sFinished.emit(self.mRunningJob, self.mJobs, True)
-            except Exception, pExc:
-                logging.error(str(pExc))
-                self.sError.emit(str(pExc))
+#            except Exception, pExc:
+#                logging.error(str(pExc))
+#                self.sError.emit(str(pExc))
 
         if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
             self.mRunningJob = Jobs.REASSEMBLE
