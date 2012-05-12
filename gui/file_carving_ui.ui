@@ -249,7 +249,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Block Size</string>
+             <string>Block Size [Bytes]</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -269,7 +269,7 @@
           <item row="0" column="3">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Offset</string>
+             <string>Offset [Bytes]</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -289,7 +289,7 @@
           <item row="0" column="5">
            <widget class="QLabel" name="label_14">
             <property name="text">
-             <string>Partition Offset</string>
+             <string>Partition Offset [ignored]</string>
             </property>
            </widget>
           </item>
@@ -315,14 +315,14 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Block Gap</string>
+             <string>Block Gap [Sector]</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="blockGap">
             <property name="text">
-             <string>16384</string>
+             <string>32</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -332,7 +332,7 @@
           <item row="0" column="2">
            <widget class="QLabel" name="label_10">
             <property name="text">
-             <string>Minimum Fragment Size</string>
+             <string>Minimum Fragment Size [Sector]</string>
             </property>
            </widget>
           </item>

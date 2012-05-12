@@ -123,6 +123,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             else if (strstr(lMagicResult, "video") != NULL)
             {
                 /* check for specific video headers */
+                printf("%s | ", lMagicResult);
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
                 pResult->mIsHeader = 1;
@@ -296,7 +297,9 @@ void* classify_thread(void* pData)
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
     lImage = fopen(lData->path_image, "r");
-    fseek(lImage, lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs, SEEK_SET);
+    fseek(lImage, 
+            lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs, 
+            SEEK_SET);
 
     /* classify fragments */
     while (lLen == lData->handle_fc->mFragmentSize && 
@@ -318,8 +321,11 @@ void* classify_thread(void* pData)
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
                 	/* relevant fragment */
-#if DEBUG == 1
-                    printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d) \n",lCntBlock,lResult.mType, lResult.mStrength, lResult.mIsHeader);
+#if DEBUG == 0
+                    if (lResult.mIsHeader)
+                    {
+                        printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d) \n",lCntBlock,lResult.mType, lResult.mStrength, lResult.mIsHeader);
+                    }
 #endif
                     lData->callback(lData->callback_data, lCntBlock, 
                             lResult.mType, lResult.mStrength, lResult.mIsHeader);

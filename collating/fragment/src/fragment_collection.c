@@ -30,6 +30,7 @@ fragment_collection_t* fragment_collection_new(
     lFragments->mMaxFrags = block_collection_len(pBlocks) / pFactor;
 #if DEBUG == 1
     printf("Max Frags: %lld\n", lFragments->mMaxFrags);
+    printf("Fragmentizer offset: %lld\n", pOffset);
 #endif
     lFragments->mFrags = (fragment_t* )malloc(sizeof(fragment_t) * \
             lFragments->mMaxFrags);
@@ -49,7 +50,16 @@ fragment_collection_t* fragment_collection_new(
                 /* temporary fragment is already existing */
                 if (lFlagExisting)
                 {
-                    if (fragment_collection_add(lFragments, &lFragTmp, pOffset, pMinFragSize * lBlockSize) != 0)
+#if DEBUG == 1
+                    printf("Start % 12lld, End: % 12lld, Size: % 12lld %s\n",
+                            lFragTmp.mOffset,
+                            lFragTmp.mOffset + lFragTmp.mSize,
+                            lFragTmp.mSize,
+                            lFragTmp.mIsHeader ? "| Header" : "");
+#endif
+                    if (fragment_collection_add(lFragments, &lFragTmp, 
+                                pOffset, 
+                                pMinFragSize * lBlockSize) != 0)
                     {
                         /* fragments buffer full => quit */
                         break;
@@ -59,20 +69,15 @@ fragment_collection_t* fragment_collection_new(
                 lFragTmp = (fragment_t){ lBlockSize * lCntBlock, lBlockSize, -1, 1, "", "", 0 };
                 lBlockGap = 0;
             }
-            else /* non-header fragment */
+            else /* non-header block */
             {
                 /* start new fragment or update current fragment depending on
                  * block gap being reached */
                 if (lFlagExisting)
                 {
-                    if (lBlockGap <= pBlockGap)
+                    if (lBlockGap <= pBlockGap * lBlockSize)
                     {
-                        lFragTmp.mSize = (lBlockSize + 1) * lCntBlock - lFragTmp.mOffset;
-#if DEBUG == 1
-                        printf("Fragment offset: %llu, size: %llu\n", 
-                                lFragTmp.mOffset,
-                                lFragTmp.mSize);
-#endif
+                        lFragTmp.mSize = lBlockSize * (lCntBlock + 1) - lFragTmp.mOffset;
                     }
                 }
                 else
@@ -87,9 +92,18 @@ fragment_collection_t* fragment_collection_new(
         {
             /* determine if block gap has been reached */
             /* if yes, add the fragment and set conditions to start a new one */
-            if (lBlockGap > pBlockGap)
+            if (lBlockGap > pBlockGap * lBlockSize)
             {
-                if (fragment_collection_add(lFragments, &lFragTmp, pOffset, pMinFragSize * lBlockSize) != 0)
+#if DEBUG == 1
+                printf("Start % 12lld, End: % 12lld, Size: % 12lld %s\n",
+                        lFragTmp.mOffset,
+                        lFragTmp.mOffset + lFragTmp.mSize,
+                        lFragTmp.mSize,
+                        lFragTmp.mIsHeader ? "| Header" : "");
+#endif
+                if (fragment_collection_add(lFragments, &lFragTmp, 
+                            pOffset, 
+                            pMinFragSize * lBlockSize) != 0)
                 {
                     /* fragments buffer full => quit */
                     break;
@@ -107,7 +121,9 @@ fragment_collection_t* fragment_collection_new(
     if (lFlagExisting && lFragTmp.mSize > 0)
     {
         /* TODO check if buffer full */
-        fragment_collection_add(lFragments, &lFragTmp, pOffset, pMinFragSize * lBlockSize);
+        fragment_collection_add(lFragments, &lFragTmp, 
+                pOffset, 
+                pMinFragSize * lBlockSize);
     }
 
 
@@ -140,10 +156,11 @@ static int fragment_collection_add(fragment_collection_t* pFragments,
         unsigned long long pMinFragSize)
 {
 #if DEBUG == 1
-    printf("Offset: %lld, Size: %lld%s\n",
+    printf("Start % 12lld, End: % 12lld, Size: % 12lld %s\n",
             pFragment->mOffset,
+            pFragment->mOffset + lFragTmp.mSize,
             pFragment->mSize,
-            pFragment->mIsHeader ? ", Header" : "");
+            pFragment->mIsHeader ? "| Header" : "");
 #endif
     /* buffer full condition */
     if (pFragments->mNumFrags >= pFragments->mMaxFrags)

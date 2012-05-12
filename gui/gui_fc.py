@@ -141,9 +141,9 @@ class CMain(object):
 
         self.customwidget.resultTable.setColumnCount(7)
         self.customwidget.resultTable.setHorizontalHeaderLabels((\
-                "Header", "Fragment", "Start [B]",
-                "End [B]", "Start [Sector]",
-                "End [Sector]", "Size [B]"))
+                "Header", "Fragment", "Start [Bytes]",
+                "End [Bytes]", "Start [Sector]",
+                "End [Sector]", "Size [Bytes]"))
         self.customwidget.resultTable.horizontalHeader().\
                 setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
@@ -539,6 +539,7 @@ class CMain(object):
                     self.customwidget.resultTable.horizontalHeader().\
                             resizeSection(1, 10)
 
+                    #Start Address in Bytes
                     lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
                     lItem.setTextAlignment(\
@@ -558,8 +559,8 @@ class CMain(object):
                     #Start Address in Sectors
                     lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
                     # TODO this assumes that one cluster contains four sectors
-                    lItem = QtGui.QTableWidgetItem(str(lSector) + \
-                            "/" + str(lSector / 4))
+                    lItem = QtGui.QTableWidgetItem(str(lSector))
+                            #"/" + str(lSector / 4))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
                     lItem.setTextAlignment(QtCore.Qt.AlignRight | \
                             QtCore.Qt.AlignVCenter)
@@ -570,16 +571,19 @@ class CMain(object):
                     lSector = (lFrag.mOffset + lFrag.mSize) / \
                             int(self.__mGeometry.sectorsize) - 1
                     # TODO this assumes that one cluster contains four sectors
-                    lItem = QtGui.QTableWidgetItem(str(lSector) + \
-                            "/" + str(lSector / 4))
+                    lItem = QtGui.QTableWidgetItem(str(lSector))
+                            #"/" + str(lSector / 4))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
                     lItem.setTextAlignment(QtCore.Qt.AlignRight | \
                             QtCore.Qt.AlignVCenter)
                     self.customwidget.resultTable.setItem(lNumRowsResult, \
                             5, lItem)
 
-                    #Size in Bytes
-                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
+                    #Size in Bytes and Sectors
+                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize) + \
+                            "/" + \
+                            str(lFrag.mSize / \
+                            int(self.__mGeometry.sectorsize)))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
                     lItem.setTextAlignment(QtCore.Qt.AlignRight | \
                             QtCore.Qt.AlignVCenter)
