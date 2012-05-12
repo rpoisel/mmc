@@ -296,8 +296,6 @@ class CMain(object):
             "kindly refer to their respective licenses: \
             <ul> \
             <li><a href=\"http://ffmpeg.org/legal.html\">FFmpeg</a></li> \
-            <li><a href=\"http://www.gzip.org/zlib/zlib_license.html\">"\
-            "zlib</a></li> \
             <li><a href=\"http://www.sleuthkit.org/sleuthkit/licenses.php\">"\
             "The Sleuth Kit</a></li> \
             </ul> \
