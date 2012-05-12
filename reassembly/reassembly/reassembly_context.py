@@ -86,8 +86,12 @@ class CReassemblyPUP(CReassembly):
         return -1
 
     def _reassemblePUP(self, pSortedFrags, pIdxNoHeader, pOptions, pCmp):
+        lIdxNoHeader = 0
+        for lIdx in xrange(len(pSortedFrags)):
+            if pSortedFrags[lIdx].mIsHeader == True:
+                lIdxNoHeader += 1
         lNumFrg = len(pSortedFrags) - pIdxNoHeader
-        lReassemblyPaths = self.mFiles
+
         # TODO check number of non-header frags
         lRemainingFrags = [lCnt for lCnt in xrange(pIdxNoHeader,
             lNumFrg + pIdxNoHeader)]
@@ -96,15 +100,15 @@ class CReassemblyPUP(CReassembly):
         while len(lRemainingFrags) > 0:
             lBestResult = {'idxPath': -1, 'idxFrag': -1, 'result': 0}
             #Iterate all Header Fragments
-            for lPathId in xrange(len(lReassemblyPaths)):
+            for lPathId in xrange(len(self.mFiles)):
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
                     lResult = pCmp(pSortedFrags, \
-                              lReassemblyPaths[lPathId], \
+                              self.mFiles[lPathId], \
                               lIdxFrag, \
                               pOptions)
                     logging.info("Comparing " + \
-                                 str(lReassemblyPaths[lPathId].mFragments) + \
+                                 str(self.mFiles[lPathId].mFragments) + \
                                  " <=> f(" + str(lIdxFrag) + "): " + \
                                  str(lResult))
                     if lResult > lBestResult['result']:
@@ -117,7 +121,7 @@ class CReassemblyPUP(CReassembly):
                 break
             #pSortedFrags[lBestResult['idxHdr']].mNextIdx = \
             #        lBestResult['idxFrag']
-            lReassemblyPaths[lBestResult['idxPath']].\
+            self.mFiles[lBestResult['idxPath']].\
                     addFragmentId(lBestResult['idxFrag'])
             lRemainingFrags.remove(lBestResult['idxFrag'])
 
@@ -128,6 +132,8 @@ class CReassemblyPUPVideo(CReassemblyPUP):
     FRG_BEGIN = 1
     FRG_END = 2
     FRG_SMALL = 3
+
+    PATTERN_PATH = "08d"
 
     def __init__(self, *args, **kwargs):
         super(CReassemblyPUPVideo, self).__init__(*args, **kwargs)
@@ -148,11 +154,11 @@ class CReassemblyPUPVideo(CReassemblyPUP):
             logging.info("Extracting header: " + \
                     str(pSortedFrags[lFragHeaderIdx]))
 
-            #Creating reassembly File Objects
-            lFile = CFileH264(lFragHeaderIdx)
-            lFile.mFileType = "H264"
-            lFile.mFileName = "h%d" % (lFragHeaderIdx)
-            self.mFiles.append(lFile)
+#            #Creating reassembly File Objects
+#            lFile = CFileVideo(lFragHeaderIdx)
+#            lFile.mFileType = "Video"
+#            lFile.mFileName = "h%d" % (lFragHeaderIdx)
+#            self.mFiles.append(lFile)
 
             lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
@@ -213,26 +219,35 @@ class CReassemblyPUPVideo(CReassemblyPUP):
 
         # remove those fragments which could not be decoded
         # TODO check if del() is an alternative to creating a new array
-        pSortedFrags = [lFrag for lFrag in pSortedFrags if \
-                (lFrag.mIsHeader == True and lFrag.mPicEnd != "") or \
-                (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and \
-                lFrag.mPicEnd != "")]
+        # answer: http://stackoverflow.com/questions/1207406/\
+        #             remove-items-from-a-list-while-iterating-in-python
+        lSortedFrags = []
+        lIdxNoHeader = 0
+        for lFragIdx in xrange(len(pSortedFrags)):
+            lFrag = pSortedFrags[lFragIdx]
+            if lFrag.mIsHeader == True and lFrag.mPicEnd != "":
+                #Creating reassembly File Objects
+                lFile = CFileVideo(lIdxNoHeader)
+                lFile.mFileType = "Video"
+                lFile.mFileName = "h%d" % (lFragIdx)
+                self.mFiles.append(lFile)
+                lSortedFrags.append(lFrag)
+                lIdxNoHeader += 1
+            elif (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and \
+                    lFrag.mPicEnd != ""):
+                lSortedFrags.append(lFrag)
 
-        lIdxNoHeader = -1
-        for lIdx in xrange(len(pSortedFrags)):
-            if pSortedFrags[lIdx].mIsHeader == False:
-                lIdxNoHeader = lIdx
-                break
+        if len(lSortedFrags) > 0:
+            # determine reconstruction paths
+            self._reassemblePUP(lSortedFrags,
+                    lIdxNoHeader,
+                    pOptions,
+                    self._compareVideoFrags)
 
-        # determine reconstruction paths
-        self._reassemblePUP(pSortedFrags,
-                lIdxNoHeader,
-                pOptions,
-                self._compareVideoFrags)
+            # extract determined videos
+            self._extractReassembledFragments(lSortedFrags,
+                    lIdxNoHeader, pOptions, "video")
 
-        # extract determined videos
-        self._extractReassembledFragments(pSortedFrags,
-                lIdxNoHeader, pOptions, "h264")
         pCaller.progressCallback(100)
 
     def _compareVideoFrags(self, pFragments, pPath, pFragmentId, pOptions):
@@ -266,9 +281,12 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         # determine relevant files
         lFiles = []
         for lFile in os.listdir(os.path.join(pOut, pDir)):
-            if fnmatch.fnmatch(lFile, "b%04d*.png" % pIdx) or \
-                    fnmatch.fnmatch(lFile, "[he]%04d*.png" % pIdx) or \
-                    fnmatch.fnmatch(lFile, "s%04d*.png" % pIdx):
+            if fnmatch.fnmatch(lFile, ("b%" + \
+                    CReassemblyPUPVideo.PATTERN_PATH + "*.png") % pIdx) or \
+                    fnmatch.fnmatch(lFile, ("[he]%" + \
+                    CReassemblyPUPVideo.PATTERN_PATH + "*.png") % pIdx) or \
+                    fnmatch.fnmatch(lFile, ("s%" + \
+                    CReassemblyPUPVideo.PATTERN_PATH + "*.png") % pIdx):
                 lFilename = os.path.join(pOut, pDir, lFile)
                 lFiles.append((lFilename, os.path.getsize(lFilename)))
 
@@ -276,23 +294,21 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         if len(lFiles) < 1:
             return
 
-        lSortedFiles = sorted(lFiles, key=lambda lFile: lFile[0])
+        lFiles.sort(key=lambda lFile: lFile[0])
 
-        lRefSize = max(lSortedFiles, key=lambda lFile: lFile[1])[1]
-        for lFile in reversed(lSortedFiles):
+        lRefSize = max(lFiles, key=lambda lFile: lFile[1])[1]
+        lFiles.reverse()
+        for lFile in lFiles:
             if lFile[1] > (lRefSize * pMinPicSize / 100):
                 pFrag.mPicEnd = lFile[0]
-                lSortedFiles.remove(lFile)
+                lFiles.remove(lFile)
                 break
         if pFrag.mIsHeader == False:
-            for lFile in lSortedFiles:
+            for lFile in lFiles:
                 if lFile[1] > (lRefSize * pMinPicSize / 100):
                     pFrag.mPicBegin = lFile[0]
-                    lSortedFiles.remove(lFile)
+                    lFiles.remove(lFile)
                     break
-
-        for lFile in lSortedFiles:
-            os.remove(lFile[0])
 
     def __decodeVideo(self, pOffset, pOut, pDir, pIdx, pLen,
             pHdrData, pWhence, pFH):
@@ -306,9 +322,9 @@ class CReassemblyPUPVideo(CReassemblyPUP):
             lFilename += "s"
         else:
             lFilename += "e"
-        lFilename += "%04d" % (pIdx) + "%04d.png"
-        lDecoder = decoder.CDecoder.getDecoder("h264", lFilename)
-        lDecoder.open(lFilename)
+        lFilename += ("%" + CReassemblyPUPVideo.PATTERN_PATH) % (pIdx)
+        lDecoder = decoder.CDecoder.getDecoder("video")  # , lFilename)
+        lDecoder.open(lFilename + ".png", lFilename + ".dat")
         lDecoder.write(pHdrData)
         lDecoder.write(pFH.read(pLen))
         lDecoder.close()
@@ -672,13 +688,13 @@ class CFileJpeg(CFile):
     def __str__(self):
         return "%s%s (JPEG)" % (self.mFileName,self.mFragments) 
     
-class CFileH264(CFile):
+class CFileVideo(CFile):
     
     def __init__(self,pFragmentId):
         CFile.__init__(self, pFragmentId)
-        self.mFileType = "H264"
+        self.mFileType = "Video"
         self.mPicBegin = ""
         self.mPicEnd = ""
     
     def __str__(self):
-        return "%s%s (H264)" % (self.mFileName,self.mFragments) 
+        return "%s%s (Video)" % (self.mFileName,self.mFragments) 

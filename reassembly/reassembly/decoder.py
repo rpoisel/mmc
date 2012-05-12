@@ -2,16 +2,16 @@ import subprocess
 import os
 import platform
 
-class CDecoder:
+class CDecoder(object):
     @staticmethod
-    def getDecoder(pInputFormat, pOutputFormat):
-        if pOutputFormat.find('.dd') != -1:
+    def getDecoder(pInputFormat, pOutputFormat=None):
+        if pOutputFormat != None and pOutputFormat.find('.dd') != -1:
             return CCopyDecoder()
-        elif pInputFormat.find('h264') != -1:
+        elif pInputFormat.find("video") != -1:
             return CFFMpegDecoder()
-        elif pInputFormat.find('jpg') != -1:
+        elif pInputFormat.find("jpg") != -1:
             return CJpegDecoder()
-        elif pInputFormat.find('jpeg') != -1:
+        elif pInputFormat.find("jpeg") != -1:
             return CJpegDecoder()
         else:
             return None
@@ -58,30 +58,43 @@ class CJpegDecoder(CDecoder):
         if self.__mFH != None:
             self.__mFH.close()
 
+
 class CFFMpegDecoder(CDecoder):
     def __init__(self):
+        self.__mPath = ""
         self.__mFFMpeg = None
         self.__mFH = None
+        self.__mFhDump = None
 
-    def open(self, pPath):
+    def open(self, pPath, pPathDump=None):
+        self.__mPath = pPath
         if platform.system().lower() == "linux":
             self.__mFH = open("/dev/null", "w")
             self.__mFFMpeg = subprocess.Popen(
-                    ["ffmpeg", "-y", "-i", "-", pPath], 
-                    bufsize = 512, stdin = subprocess.PIPE, stdout = self.__mFH.fileno(), 
-                    stderr = self.__mFH.fileno())
+                    ["ffmpeg", "-y", "-i", "-", pPath],
+                    bufsize=512,
+                    stdin=subprocess.PIPE,
+                    stdout=self.__mFH.fileno(),
+                    stderr=self.__mFH.fileno())
         else:
             self.__mFH = open("NUL", "w")
             self.__mFFMpeg = subprocess.Popen(
-                    ["bin" + os.sep + "ffmpeg.exe", "-y", "-i", "-", pPath], 
-                    bufsize = 512, stdin = subprocess.PIPE, stdout = self.__mFH.fileno(), 
-                    stderr = self.__mFH.fileno())
+                    ["bin" + os.sep + "ffmpeg.exe",
+                        "-y", "-i", "-", pPath],
+                    bufsize=512,
+                    stdin=subprocess.PIPE,
+                    stdout=self.__mFH.fileno(),
+                    stderr=self.__mFH.fileno())
+        if pPathDump != None:
+            self.__mFhDump = open(pPathDump, "wb")
 
     def write(self, pData):
         try:
             self.__mFFMpeg.stdin.write(pData)
         except IOError, pExc:
             pass
+        if self.__mFhDump != None:
+            self.__mFhDump.write(pData)
 
     def close(self):
         self.__mFFMpeg.communicate()
@@ -91,6 +104,8 @@ class CFFMpegDecoder(CDecoder):
             pass
         if self.__mFH != None:
             self.__mFH.close()
+        if self.__mFhDump != None:
+            self.__mFhDump.close()
 
 
 class CCopyDecoder(CDecoder):
@@ -99,9 +114,9 @@ class CCopyDecoder(CDecoder):
 
     def open(self, pPath):
         self.__mFH = open(pPath, "wb")
-    
+
     def write(self, pData):
         self.__mFH.write(pData)
-    
+
     def close(self):
         self.__mFH.close()

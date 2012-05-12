@@ -84,9 +84,9 @@ class CThreadWorker(QtCore.QThread):
                 self.mContext.runReassembly(self.mOptions, self)
             except TypeError, pExc:
                 self.sFinished.emit(self.mRunningJob, self.mJobs, True)
-            except Exception, pExc:
-                logging.error(str(pExc))
-                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
+#            except Exception, pExc:
+#                logging.error(str(pExc))
+#                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
 
 
 # Create a class for our main window
@@ -143,7 +143,7 @@ class CMain(object):
         self.customwidget.resultTable.setHorizontalHeaderLabels((\
                 "Header", "Fragment", "Start [Bytes]",
                 "End [Bytes]", "Start [Sector]",
-                "End [Sector]", "Size [Bytes]"))
+                "End [Sector]", "Size [Bytes/Sectors]"))
         self.customwidget.resultTable.horizontalHeader().\
                 setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
@@ -529,7 +529,7 @@ class CMain(object):
                             lItem)
 
                     lItem = QtGui.QTableWidgetItem("Fragment " +\
-                            str(lNumRowsResult + 1))
+                            str(lNumRowsResult))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
                     lItem.setTextAlignment(QtCore.Qt.AlignCenter)
                     self.customwidget.resultTable.setItem(lNumRowsResult, 1,
