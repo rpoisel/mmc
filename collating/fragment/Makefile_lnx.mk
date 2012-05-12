@@ -21,7 +21,7 @@ $(BIN_FRAGMENT_CLASSIFIER):
 $(BIN_BLOCK_READER): 
 	$(MAKE) -f Makefile $(BIN_BLOCK_READER)
 
-.PHONY: clean
+.PHONY: clean all $(BIN_FRAGMENT_CLASSIFIER) $(BIN_BLOCK_READER)
 
 clean:
 	$(MAKE) -f Makefile clean
