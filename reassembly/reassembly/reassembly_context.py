@@ -229,7 +229,8 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                 #Creating reassembly File Objects
                 lFile = CFileVideo(lIdxNoHeader)
                 lFile.mFileType = "Video"
-                lFile.mFileName = "h%d" % (lFragIdx)
+                lFile.mFileName = ("h%" + \
+                        CReassemblyPUPVideo.PATTERN_PATH) % (lFragIdx)
                 self.mFiles.append(lFile)
                 lSortedFrags.append(lFrag)
                 lIdxNoHeader += 1
@@ -324,10 +325,12 @@ class CReassemblyPUPVideo(CReassemblyPUP):
             lFilename += "e"
         lFilename += ("%" + CReassemblyPUPVideo.PATTERN_PATH) % (pIdx)
         lDecoder = decoder.CDecoder.getDecoder("video")  # , lFilename)
-        lDecoder.open(lFilename + ".png", lFilename + ".dat")
+        lDecoder.open(lFilename + "%04d.png", lFilename + ".dat")
         lDecoder.write(pHdrData)
         lDecoder.write(pFH.read(pLen))
         lDecoder.close()
+        # TODO determine cut right here and assign picture paths to
+        #      the fragment
 
 
 class CReassemblyPUPJpeg(CReassemblyPUP):
