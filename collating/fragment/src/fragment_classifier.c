@@ -11,7 +11,7 @@
 #include "fragment_classifier.h"
 #include "entropy/entropy.h"
 
-#define DEBUG 0
+#define DEBUG 1
 /* turn to 1 for verbose messages */
 #define VERBOSE 0
 #define MAX_FILETYPES 24
@@ -173,6 +173,9 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                     else if (pFragment[lCnt + 1] < 0xC0 || pFragment[lCnt + 1] > 0xFE)
                     {
                         lCntJpeg = 0;
+#if DEBUG == 1
+                        printf("FALSE - Wrong Marker\n");
+#endif
                         break;
                     }
                 }
@@ -182,6 +185,9 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             {
                 pResult->mType = FT_JPG;
                 pResult->mStrength = 1;
+#if DEBUG == 1
+                printf("TRUE - Marker: %d\n",lCntJpeg);
+#endif
                 return pResult->mStrength;
             }
 

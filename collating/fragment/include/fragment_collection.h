@@ -9,6 +9,7 @@ typedef struct
     unsigned long long mSize;
     long long mNextIdx;
     int mIsHeader;
+    int mIsFooter;
     char* mPicBegin;
     char* mPicEnd;
     int mIsSmall;

@@ -1,19 +1,14 @@
-import os
 import os.path
 import logging
-import itertools
-import subprocess
 import fnmatch
 import shutil
-import platform
 import Image
-
 import decoder
 
 #####################
 #TODO:
-## - readFragment everywhere
 ## - Look at all Todos
+## - Check for EOI in fragment and finish a reassembly path
 #####################
 
 
@@ -38,10 +33,8 @@ class CReassembly(object):
     def _extractReassembledFragments(self, pSortedFrags, pIdxNoHeader,
             pOptions, pInputFileType):
         # extract determined files
-        lRecoverFH = open(pOptions.imagefile, "rb")
-        logging.info("8<=============== FRAGMENT PATHs ==============")
+        logging.info("Beginning extraction of reassembled files")
         for lFile in self.mFiles:
-            #lFrag = pSortedFrags[lIdxHdr]
             lFile.mFilePath = pOptions.output + os.sep + \
                                 str(lFile.getHeaderFragmentId())
             if not os.path.exists(lFile.mFilePath):
@@ -52,15 +45,16 @@ class CReassembly(object):
                     pOptions.outputformat)
             lDecoder.open(lFile.mFilePath)
 
+            logging.debug("Extract File " + lFile.mFileName + ": " + \
+                          str(lFile.mFragments))
+
             for lFragIdx in lFile.mFragments:
                 lFrag = pSortedFrags[lFragIdx]
-                lRecoverFH.seek(lFrag.mOffset, os.SEEK_SET)
-                lDecoder.write(lRecoverFH.read(lFrag.mSize))
-                logging.info("Current Fragment: " + str(lFrag))
+                lData = self.readFragment(lFrag, pOptions)
+                lDecoder.write(lData)
+
             lDecoder.close()
-        if lRecoverFH != None:
-            lRecoverFH.close()
-        logging.info("8<=============== FRAGMENT PATHs ==============")
+        logging.info("Extraction finished")
         return
 
     def readFragment(self, pFragment, pOptions):
@@ -101,13 +95,16 @@ class CReassemblyPUP(CReassembly):
             lBestResult = {'idxPath': -1, 'idxFrag': -1, 'result': 0}
             #Iterate all Header Fragments
             for lPathId in xrange(len(self.mFiles)):
+                #Only look at remaining paths
+                if self.mFiles[lPathId].mComplete == True:
+                    continue
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
                     lResult = pCmp(pSortedFrags, \
                               self.mFiles[lPathId], \
                               lIdxFrag, \
                               pOptions)
-                    logging.info("Comparing " + \
+                    logging.debug("Comparing Path" + \
                                  str(self.mFiles[lPathId].mFragments) + \
                                  " <=> f(" + str(lIdxFrag) + "): " + \
                                  str(lResult))
@@ -119,10 +116,13 @@ class CReassemblyPUP(CReassembly):
             # check for ambiguous result
             if lBestResult['result'] == 0:
                 break
-            #pSortedFrags[lBestResult['idxHdr']].mNextIdx = \
-            #        lBestResult['idxFrag']
+
             self.mFiles[lBestResult['idxPath']].\
                     addFragmentId(lBestResult['idxFrag'])
+            if pSortedFrags[lBestResult['idxFrag']].mIsFooter == 1:
+                self.mFiles[lBestResult['idxPath']].mComplete = True
+                logging.debug("Path " + str(self.mFiles[lBestResult['idxPath']].mFragments) + \
+                              " is complete")
             lRemainingFrags.remove(lBestResult['idxFrag'])
 
 
@@ -151,7 +151,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         # extract headers frames
         lCntHdr = 0
         for lFragHeaderIdx in xrange(0, pIdxNoHeader):
-            logging.info("Extracting header: " + \
+            logging.debug("Extracting header: " + \
                     str(pSortedFrags[lFragHeaderIdx]))
 
 #            #Creating reassembly File Objects
@@ -185,7 +185,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
             # TODO check if fragment has already been decoded successfully
             lCntFrg = 0
             for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
-                logging.info("Extracting fragment: " + \
+                logging.debug("Extracting fragment: " + \
                         str(pSortedFrags[lFragIdx]))
                 # extract begin
                 lRecoverFH.seek(pSortedFrags[lFragIdx].mOffset, os.SEEK_SET)
@@ -251,6 +251,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
 
         pCaller.progressCallback(100)
 
+
     def _compareVideoFrags(self, pFragments, pPath, pFragmentId, pOptions):
         lFragment1 = pFragments[pPath.getLastFragmentId()]
         lFragment2 = pFragments[pFragmentId]
@@ -273,7 +274,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                 if abs(lHist1[lIdx] - lHist2[lIdx]) < pOptions.similarity:
                     lReturn += 1
 
-        logging.info("Value for " + lFragment1.mPicEnd + " <=> " + \
+        logging.debug("Value for " + lFragment1.mPicEnd + " <=> " + \
                 lFragment2.mPicBegin + ": " + str(lReturn))
 
         return lReturn
@@ -355,12 +356,12 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lFile.mFileType = "JPEG"
             lFile.mFileName = "h%d" % (lFragHeaderIdx)
             self.mFiles.append(lFile)
+            
 
             lFragment = pSortedFrags[lFragHeaderIdx]
             lData = self.readFragment(lFragment, pOptions)
             lPath = os.path.join(pOptions.output, "hdr") + os.sep
             self.__analyzeJpeg(lFile, lData)
-
             #Write RAW Data of t
             #lFile.mRawDataPath = lPath + lFragment.mName + ".raw"
             #lFile = open(lFile.mRawDataPath, "wb")
@@ -376,12 +377,14 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lDecoder.write("\xFF\xD9")
             lDecoder.close()
 
-        # extract non-header fragments
-        #for lFragHeaderIdx in xrange[pIdxNoHeader, len(pSortedFrags)]:
-        #    lFragment = pSortedFrags[lFragHeaderIdx]
-        #    logging.info("Extracting fragments: " + str(lFragment))
-        #    lData = self.readFragment(lFragment, pOptions)
-
+        #Identify Footer fragments
+        for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
+            lFragment = pSortedFrags[lFragIdx]
+            lData = self.readFragment(lFragment, pOptions)
+            if lData.__contains__("\xFF\xD9"):
+                lFragment.mIsFooter = 1
+            else:
+                lFragment.mIsFooter = 0
             
             
         #pCaller.progressCallback(50 * \
@@ -396,7 +399,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
                 pIdxNoHeader, pOptions, "jpg")
 
         pCaller.progressCallback(100)
-
+       
     def _compareJpegFrags(self, pFragments, pPath, pFragmentId, pOptions):
         #Terms:
         #(Reassembly)Path: All fragments up to the fragmentation point. This
@@ -421,7 +424,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         #TODO: Store combinations
         #Reassemble the Base Path with the new fragment
         lCompareImagePath = os.path.join(pOptions.output, "frg") + os.sep
-        lCompareImagePath += "f" + str(pFragmentId) + ".jpg"
+        lCompareImagePath += str(pPath.mFragments) + "f" + str(pFragmentId) + ".jpg"
         lBaseImage    = open(pPath.mBaseImagePath, "rb")
         lCompareImage = open(lCompareImagePath, "wb")
         lFragmentData = self.readFragment(pFragments[pFragmentId], pOptions)
@@ -458,36 +461,39 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         lBaseFragmentLine = [None, None]
         lCompareFragmentLine = [None, None]
 
+        #print "lCompareFragmentCut: %s, %s" % (str(lCompareFragmentCut[0]),str(lCompareFragmentCut[1]))
         #Todo: Review the calculation process
         #lCompareFragmentCut is in the same line as lBaseFragmentCut
-        if lLineDiff[Y] <= lLineHeight:
+        if lLineDiff[Y] < lLineHeight:
             #same line, only need to calculate one line
             lCompareFragmentLine[0] = [lBaseFragmentCut[0][X],
                                      lBaseFragmentCut[0][Y],
                                      lCompareFragmentCut[0][X] - 1,
                                      lCompareFragmentCut[1][Y]]
+            logging.debug("One Line, little data")
             lCompareFragmentLine[1] = None
-        elif lLineDiff[X] < 0:
-            #two lines but second line is long enough
+        elif lLineDiff[X] < 0 and lLineDiff[Y] < 2*lLineHeight:
+            #two lines but second line is not long enough
             lCompareFragmentLine[0] = [lBaseFragmentCut[0][X],
                                      lBaseFragmentCut[0][Y],
                                      lBaseFragmentImage.size[WIDTH] - 1,
-                                     lCompareFragmentCut[0][Y] - 1]
+                                     lBaseFragmentCut[1][Y]]
             lCompareFragmentLine[1] = [0,
                                      lCompareFragmentCut[0][Y],
                                      lCompareFragmentCut[0][X] - 1,
                                      lCompareFragmentCut[1][Y]]
+            logging.debug("Two lines, little data, lLineDiff="+str(lLineDiff))
         else:
             #there is enough data
             lCompareFragmentLine[0] = [lBaseFragmentCut[0][X],
                                      lBaseFragmentCut[0][Y],
                                      lBaseFragmentImage.size[WIDTH] - 1,
-                                     lCompareFragmentCut[0][Y] - 1]
+                                     lBaseFragmentCut[1][Y]]
             lCompareFragmentLine[1] = [0,
-                                     lCompareFragmentCut[0][Y],
-                                     lCompareFragmentCut[0][X] - 1,
+                                     lBaseFragmentCut[0][Y] + lLineHeight,
+                                     lBaseFragmentCut[0][X],
                                      lBaseFragmentCut[1][Y] + lLineHeight]
-
+            logging.debug("Enough data")
         #Get the lines of the Base Fragment
         lBaseFragmentLine[0] = [lCompareFragmentLine[0][0],
                               lCompareFragmentLine[0][1] - lLineHeight,
@@ -516,6 +522,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             pPath.mComplete = True
             return 0
 
+        #print "Histogram: Base1 %s Base2 %s, Compare1 %s Compare2 %s" % (str(lBaseFragmentLine[0]),str(lBaseFragmentLine[1]),str(lCompareFragmentLine[0]),str(lCompareFragmentLine[1]))
         #Histogram of the base fragments last data line
         lHist1 = lBaseFragmentImage.crop(lBaseFragmentLine[0]).histogram() + \
                     lBaseFragmentImage.crop(lBaseFragmentLine[1]).histogram()
@@ -543,9 +550,9 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         PictureEnd = [[-1, -1], [-1, -1]]
         for y in reversed(range(0, pImage.size[Y])):
             #Also look at the neighbors to prevent correct grey pixels
-            if not lImage.getpixel((lImage.size[X] - 1, y)) == 128 or \
-               not lImage.getpixel((lImage.size[X] - 3, y)) == 128 or \
-               not lImage.getpixel((lImage.size[X] - 5, y)) == 128:
+            if not 125 < lImage.getpixel((lImage.size[X] - 1, y)) < 130 or \
+               not 125 < lImage.getpixel((lImage.size[X] - 3, y)) < 130 or \
+               not 125 < lImage.getpixel((lImage.size[X] - 5, y)) < 130:
                     PictureEnd[0][Y] = y + 1
                     break
 
@@ -555,9 +562,9 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
 
         for x in reversed(range(0, lImage.size[X])):
             #Also look at the neighbors to prevent correct grey pixels
-            if not lImage.getpixel((x, PictureEnd[0][Y])) == 128 or \
-               not lImage.getpixel((x, PictureEnd[0][Y] + 2)) == 128 or \
-               not lImage.getpixel((x, PictureEnd[0][Y] + 4)) == 128:
+            if not 125 < lImage.getpixel((x, PictureEnd[0][Y])) < 130 or \
+               not 125 < lImage.getpixel((x, PictureEnd[0][Y] + 2)) < 130 or \
+               not 125 < lImage.getpixel((x, PictureEnd[0][Y] + 4)) < 130:
                 PictureEnd[0][X] = x + 1
                 break
 
@@ -662,7 +669,7 @@ class CFile(object):
     
     def addFragmentId(self,pFragmentId):
         self.mFragments.append(pFragmentId)
-    
+        
     def __str__(self):        
         return "%s%s " % (self.mFileName,self.mFragments) 
 
