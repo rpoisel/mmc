@@ -28,10 +28,15 @@ class CContext:
 
     def __init__(self):
         self.__mFragments = None
+        self.__mFiles = None
 
     @property
     def fragments(self):
         return self.__mFragments
+
+    @property
+    def files(self):
+        return self.__mFiles
 
     @staticmethod
     def getCPUs():
@@ -75,7 +80,9 @@ class CContext:
                 reassembly_context.CReassemblyFactory.getInstancePng(\
                 pOptions.assemblymethod)
         if lReassembly != None:
-            lReassembly.assemble(pOptions, self.__mFragments, pCaller)
+            self.__mFiles = lReassembly.assemble(pOptions, self.__mFragments, \
+                                                 pCaller)
+
         pCaller.finishedCallback()
 
     def cleanup(self):

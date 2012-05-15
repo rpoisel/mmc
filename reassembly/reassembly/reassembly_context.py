@@ -5,12 +5,6 @@ import shutil
 import Image
 import decoder
 
-#####################
-#TODO:
-## - Look at all Todos
-## - Check for EOI in fragment and finish a reassembly path
-#####################
-
 
 class CReassembly(object):
 
@@ -25,12 +19,13 @@ class CReassembly(object):
                 lIdxNoHeader += 1
 
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader, pCaller)
+        return self.mFiles
 
     # interface only
     def _assemble_impl(self, pOptions, pSortedFrags, lIdxNoHeader, pCaller):
         pass
 
-    def _extractReassembledFragments(self, pSortedFrags, pIdxNoHeader,
+    def _extractReassembledFragments(self, pSortedFrags,
             pOptions, pInputFileType):
         # extract determined files
         logging.info("Beginning extraction of reassembled files")
@@ -86,7 +81,6 @@ class CReassemblyPUP(CReassembly):
                 lIdxNoHeader += 1
         lNumFrg = len(pSortedFrags) - pIdxNoHeader
 
-        # TODO check number of non-header frags
         lRemainingFrags = [lCnt for lCnt in xrange(pIdxNoHeader,
             lNumFrg + pIdxNoHeader)]
 
@@ -121,8 +115,9 @@ class CReassemblyPUP(CReassembly):
                     addFragmentId(lBestResult['idxFrag'])
             if pSortedFrags[lBestResult['idxFrag']].mIsFooter == 1:
                 self.mFiles[lBestResult['idxPath']].mComplete = True
-                logging.debug("Path " + str(self.mFiles[lBestResult['idxPath']].mFragments) + \
-                              " is complete")
+                logging.debug("Path " + \
+                              str(self.mFiles[lBestResult['idxPath']]. \
+                              mFragments) + " is complete")
             lRemainingFrags.remove(lBestResult['idxFrag'])
 
 
@@ -247,7 +242,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
 
             # extract determined videos
             self._extractReassembledFragments(lSortedFrags,
-                    lIdxNoHeader, pOptions, "video")
+                    pOptions, "video")
 
         pCaller.progressCallback(100)
 
@@ -362,11 +357,6 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lData = self.readFragment(lFragment, pOptions)
             lPath = os.path.join(pOptions.output, "hdr") + os.sep
             self.__analyzeJpeg(lFile, lData)
-            #Write RAW Data of t
-            #lFile.mRawDataPath = lPath + lFragment.mName + ".raw"
-            #lFile = open(lFile.mRawDataPath, "wb")
-            #lFile.write(lData)
-            #lFile.close()
 
             #Convert to PNG: Important for the Preview
             lFilename = lPath + lFile.mFileName + ".png"
@@ -385,10 +375,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
                 lFragment.mIsFooter = 1
             else:
                 lFragment.mIsFooter = 0
-            
-            
-        #pCaller.progressCallback(50 * \
-        #        lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
+        
         pCaller.progressCallback(50)
 
         # the place to invoke _reassemblePUP
@@ -396,10 +383,10 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
                 self._compareJpegFrags)
 
         self._extractReassembledFragments(pSortedFrags,
-                pIdxNoHeader, pOptions, "jpg")
+                pOptions, "jpg")
 
         pCaller.progressCallback(100)
-       
+
     def _compareJpegFrags(self, pFragments, pPath, pFragmentId, pOptions):
         #Terms:
         #(Reassembly)Path: All fragments up to the fragmentation point. This
@@ -421,7 +408,6 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lFile.write("\xFF\xD9")
             lFile.close()   
 
-        #TODO: Store combinations
         #Reassemble the Base Path with the new fragment
         lCompareImagePath = os.path.join(pOptions.output, "frg") + os.sep
         lCompareImagePath += str(pPath.mFragments) + "f" + str(pFragmentId) + ".jpg"
@@ -507,14 +493,6 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         else:
             lCompareFragmentLine[1] = [0, 0, 0, 0]
             lBaseFragmentLine[1] = [0, 0, 0, 0]
-            # lBaseFragmentLine[0] = [lBaseFragmentCut[0][X],
-            #   lBaseFragmentCut[0][Y]-(lLineHeight-1),
-            #   lBaseFragmentImage.size[WIDTH]-1,
-            #   lBaseFragmentCut[0][Y]-1]
-            # lBaseFragmentLine[1] = [0,
-            #   lBaseFragmentCut[0][Y],
-            #   lBaseFragmentCut[0][X]-1,
-            #   lBaseFragmentCut[1][Y]]
 
         #According to the Header, enough image data is already in place
         if lBaseFragmentCut[1][X] >= lBaseFragmentImage.size[WIDTH] \
@@ -684,9 +662,6 @@ class CFileJpeg(CFile):
         self.mFileType = "JPEG"
         #All Markers have a relative Position
         self.mMarker = [-1] * 255
-        self.mCut = (-1, -1)
-        self.mRawDataPath = None
-        self.mReassemblyPathSize = 0  #TODO: What is that?
         self.mHeaderData = None
         self.mBaseImagePath = None
 

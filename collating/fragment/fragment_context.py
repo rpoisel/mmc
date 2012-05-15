@@ -58,7 +58,6 @@ CClassifyHandlerPointer = POINTER(CClassifyHandler)
 
 
 #TODO: mNextIdx is no longer needed
-#TODO: Need here a flag to indicate if its a footer
 class CFragmentStruct(Structure):
     _fields_ = [("mOffset", c_ulonglong),
             ("mSize", c_ulonglong),

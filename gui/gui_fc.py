@@ -8,6 +8,7 @@ import sys
 import platform
 import datetime
 import logging
+import webbrowser
 
 # PyQt4, PySide stuff
 from PySide import QtCore
@@ -606,33 +607,32 @@ class CMain(object):
         elif pFinishedJob == Jobs.REASSEMBLE:
             logging.info("Reassembling finished. ")
 
-#            lRowCount = 0
+            lRowCount = 0
 #
-#            for lFrag in self.mContext.fragments:
+            for lFile in self.mContext.files:
 #                if lFrag.mIsHeader == True:
-#                    self.customwidget.fileTable.insertRow(lRowCount)
-#                    #Header Number
-#                    lItem = QtGui.QTableWidgetItem("File " + str(lRowCount))
-#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-#                    self.customwidget.fileTable.setItem(lRowCount, 0, lItem)
-#                    #Filetype
-#                    lItem = QtGui.QTableWidgetItem(lFrag.mFileType)
-#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-#                    self.customwidget.fileTable.setItem(lRowCount, 1, lItem)
-#                    #Size
-#                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize))
-#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-#                    self.customwidget.fileTable.setItem(lRowCount, 2, lItem)
-#                    #Path
-#                    lItem = QtGui.QTableWidgetItem(lFrag.mFilePath)
-#                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-#                    self.customwidget.fileTable.setItem(lRowCount, 3, lItem)
-#
-#                    lRowCount += 1
+                self.customwidget.fileTable.insertRow(lRowCount)
+                lItem = QtGui.QTableWidgetItem("File " + str(lRowCount))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.fileTable.setItem(lRowCount, 0, lItem)
+                #Filetype
+                lItem = QtGui.QTableWidgetItem(lFile.mFileType)
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.fileTable.setItem(lRowCount, 1, lItem)
+                #Size
+                lItem = QtGui.QTableWidgetItem(str(0))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.fileTable.setItem(lRowCount, 2, lItem)
+                #Path
+                lItem = QtGui.QTableWidgetItem(lFile.mFilePath)
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.fileTable.setItem(lRowCount, 3, lItem)
+
+                lRowCount += 1
 
     def on_error_callback(self, pError):
         QtGui.QMessageBox.about(self.ui, "Error",\
