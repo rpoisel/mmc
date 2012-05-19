@@ -50,6 +50,11 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
 
     lHandle->mFragmentSize = pFragmentSize;
 
+    /* initialize function pointers to the following functions (windows) */
+    /* magic_open, magic_close, magic_load, magic_buffer, magic_error */
+    /* see the following URL to learn how to do that: */
+    /* http://msdn.microsoft.com/en-us/library/ms686944.aspx */
+
     /* initialize fields that are not used regularely with
      * illegal values */
     lHandle->mNumFileTypes = 0;
