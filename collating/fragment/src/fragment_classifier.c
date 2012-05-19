@@ -6,6 +6,10 @@
 
 #ifndef _MSC_VER
 #include <magic.h>
+#else
+/* for the windows port see the following URL: */
+/* http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx */
+#include "magic.h"
 #endif
 
 #include "fragment_classifier.h"
@@ -33,9 +37,7 @@ typedef struct
     unsigned long long offset_img;
     unsigned long long offset_fs;
     unsigned long long num_frags;
-#ifndef _MSC_VER
     const char* mPathMagic;
-#endif
 } thread_data;
 
 void* classify_thread(void* pData);
@@ -87,17 +89,13 @@ void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
 }
 
 int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
-#ifndef _MSC_VER
         magic_t pMagic, 
-#endif
         const unsigned char* pFragment,
         int pLen,
         ClassifyT* pResult)
 
 {
-#ifndef _MSC_VER
     const char* lMagicResult = NULL;
-#endif
     float lEntropy = 0;
     int lCnt = 0;
     int lCntJpeg = 0;
@@ -111,7 +109,6 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         return 0;
     }
 
-#ifndef _MSC_VER
     /* signature checking */
     if (pMagic != NULL)
     {
@@ -155,7 +152,6 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
 
     if (pResult->mType >= FT_UNKNOWN &&
             pResult->mIsHeader != 1)
-#endif
     /* statistical examination */
     {
         lEntropy = calc_entropy(pFragment, pLen);
@@ -207,7 +203,6 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     return pResult->mStrength;
 }
 
-#ifndef _MSC_VER
 int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         fragment_cb pCallback, 
         void* pCallbackData, 
@@ -289,7 +284,6 @@ void* classify_thread(void* pData)
     ClassifyT lResult = { 0, 0, 0 };
     int lCnt = 0;
 
-#ifndef _MSC_VER
     magic_t lMagic = magic_open(MAGIC_NONE);
     if (!lMagic)
     {
@@ -300,7 +294,6 @@ void* classify_thread(void* pData)
     {
         printf("%s\n", magic_error(lMagic));
     }
-#endif
 
 #if DEBUG == 1
     printf("Offset: %lld\n", lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
@@ -349,10 +342,7 @@ void* classify_thread(void* pData)
 
     fclose(lImage);
     free(lBuf);
-#ifndef _MSC_VER
     magic_close(lMagic);
-#endif
 
     return NULL;
 }
-#endif

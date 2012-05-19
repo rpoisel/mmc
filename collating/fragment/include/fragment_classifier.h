@@ -49,10 +49,8 @@ typedef struct _ClassifyOptions
     struct _ClassifyOptions* mSubOptions;
 } ClassifyOptions;
 
-#ifndef _MSC_VER
 typedef int (*fragment_cb)(void* pCallbackData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader);
-#endif
 
 #ifndef _MSC_VER
 #define __declspec(dllexport) 
@@ -72,9 +70,7 @@ __declspec(dllexport) FragmentClassifier* fragment_classifier_new_ct(ClassifyOpt
 __declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
 
 __declspec(dllexport) int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
-#ifndef _MSC_VER
         magic_t pMagic, 
-#endif
         const unsigned char* pFragment,
         int pLen,
         ClassifyT* pResult);
@@ -83,7 +79,6 @@ __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFrag
         const unsigned char* pFragment,
         int pLen);
 
-#ifndef _MSC_VER
 __declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
         fragment_cb pCallback, 
         void* pCallbackData, 
@@ -92,5 +87,5 @@ __declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pF
         unsigned long long pSizeReal, 
         const char* pPathMagic, 
         unsigned int pNumThreads);
-#endif
+
 #endif /* __FRAGMENT_CLASSIFIER_H__ */

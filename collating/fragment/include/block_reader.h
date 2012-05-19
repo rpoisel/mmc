@@ -5,7 +5,11 @@
 #include "block_collection.h"
 #include "fragment_collection.h"
 
-fragment_collection_t* classify(int pBlockSize, 
+#ifndef _MSC_VER
+#define __declspec(dllexport) 
+#endif
+
+__declspec(dllexport) fragment_collection_t* classify(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
         unsigned long long pOffset, 
@@ -15,6 +19,6 @@ fragment_collection_t* classify(int pBlockSize,
         unsigned long long pMinFragSize, 
         int pNumThreads); 
 
-void classify_free(fragment_collection_t* pCollection);
+__declspec(dllexport) void classify_free(fragment_collection_t* pCollection);
 
 #endif /* __BLOCK_READER_H__ */

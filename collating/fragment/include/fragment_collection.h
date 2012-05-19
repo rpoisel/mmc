@@ -3,6 +3,10 @@
 
 #include "block_collection.h"
 
+#ifndef _MSC_VER
+#define __declspec(dllexport) 
+#endif
+
 typedef struct
 {
     unsigned long long mOffset;
@@ -22,14 +26,14 @@ typedef struct
     fragment_t* mFrags;
 } fragment_collection_t;
 
-fragment_collection_t* fragment_collection_new(
+__declspec(dllexport) fragment_collection_t* fragment_collection_new(
         block_collection_t* pBlocks, 
         int pFactor,
         unsigned long long pOffset, 
         unsigned long long pBlockGap,
         unsigned long long pMinFragSize);
 
-void fragment_collection_free(
+__declspec(dllexport) void fragment_collection_free(
         fragment_collection_t* pCollection);
 
 #endif

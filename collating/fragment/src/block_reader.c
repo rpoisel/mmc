@@ -19,6 +19,7 @@ fragment_collection_t* classify(int pBlockSize,
 {
     FragmentClassifier* lHandle = NULL;
     block_collection_t* lBlocks = NULL;
+	fragment_collection_t* lFragments = NULL;
 
     lHandle = fragment_classifier_new_ct(NULL, 0, pBlockSize, pTypes, pNumTypes);
     if (!lHandle)
@@ -38,7 +39,7 @@ fragment_collection_t* classify(int pBlockSize,
 
     /* factor 1/4 is just an empirical value */
     /* TODO perform this step on several CPU cores */
-    fragment_collection_t* lFragments = fragment_collection_new(lBlocks, 4, pOffset, 
+    lFragments = fragment_collection_new(lBlocks, 4, pOffset, 
             pBlockGap, pMinFragSize);
 
     /* destruct fragment classifier */
