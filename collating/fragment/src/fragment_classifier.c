@@ -9,6 +9,7 @@
 #else
 /* for the windows port see the following URL: */
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx */
+/* http://msdn.microsoft.com/en-us/library/kdzttdcb(v=vs.71).aspx */
 #include "magic.h"
 #endif
 
