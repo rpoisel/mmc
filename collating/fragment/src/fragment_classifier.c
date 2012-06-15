@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-/* #include <math.h> */
 
 #ifndef _MSC_VER
 #include <magic.h>
