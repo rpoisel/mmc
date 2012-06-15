@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-#include <math.h>
+/* #include <math.h> */
 
 #ifndef _MSC_VER
 #include <magic.h>
@@ -219,8 +219,9 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     thread_data* lData = NULL;
     unsigned long long lSize = pSizeReal * pFragmentClassifier->mFragmentSize - pOffset;
     unsigned long long lFragsTotal = lSize / pFragmentClassifier->mFragmentSize;
-    unsigned long long lFragsPerCpu = ceill(((long double)lFragsTotal)/pNumThreads);
+    unsigned long long lFragsPerCpu = lFragsTotal/pNumThreads;
     unsigned long long lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
+    unsigned long long lOffsetImg = 0;
 
     /* TODO check return value */
     lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
@@ -239,21 +240,11 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         (lData + lCnt)->callback_data = pCallbackData; 
         (lData + lCnt)->mPathMagic = pPathMagic;
 
-        if (lCnt == pNumThreads - 1 && lFragsPerCpuR > 0)
-        {
-            (lData + lCnt)->num_frags = lFragsPerCpuR;
-        }
-        else
-        {
-            (lData + lCnt)->num_frags = lFragsPerCpu;
-        }
-#if 0
-        (lData + lCnt)->offset_img = 
-            lCnt * lFragsPerCpu * pFragmentClassifier->mFragmentSize + pOffset;
-#else
-        (lData + lCnt)->offset_img = lCnt * lFragsPerCpu;
+        (lData + lCnt)->num_frags = lFragsPerCpu + (lFragsPerCpuR > 0 ? 1 : 0);
+        (lData + lCnt)->offset_img = lOffsetImg;
         (lData + lCnt)->offset_fs = pOffset;
-#endif
+        lOffsetImg += (lData + lCnt)->num_frags;
+        lFragsPerCpuR--;
 
 #if DEBUG == 1
         printf("Starting thread %d with block range %lld to %lld.\n",
