@@ -15,7 +15,7 @@
 #include "fragment_classifier.h"
 #include "entropy/entropy.h"
 
-#define DEBUG 1
+#define DEBUG 0
 /* turn to 1 for verbose messages */
 #define VERBOSE 0
 #define MAX_FILETYPES 24
