@@ -12,7 +12,7 @@ import datetime
 # import only if necessary
 #from contexts.media import frag_mm_meta_context
 from preprocessing import preprocessing_context
-from reassembly.reassembly import reassembly_context
+from reassembly    import reassembly_context
 from lib import datatypes
 
 

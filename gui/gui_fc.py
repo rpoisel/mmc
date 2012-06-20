@@ -20,10 +20,10 @@ from PySide import QtUiTools
 import gui_resources
 import gui_options
 import gui_imgvisualizer
-from mm_context import CContext
+from mm_context    import CContext
 from preprocessing import preprocessing_context
 from preprocessing import fsstat_context
-from reassembly.reassembly import reassembly_context
+from reassembly    import reassembly_context
 
 
 class Jobs(object):
