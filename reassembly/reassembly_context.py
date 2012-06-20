@@ -45,14 +45,14 @@ class CReassembly(object):
 
             for lFragIdx in lFile.mFragments:
                 lFrag = pSortedFrags[lFragIdx]
-                lData = self.readFragment(lFrag, pOptions)
+                lData = self._readFragment(lFrag, pOptions)
                 lDecoder.write(lData)
 
             lDecoder.close()
         logging.info("Extraction finished")
         return
 
-    def readFragment(self, pFragment, pOptions):
+    def _readFragment(self, pFragment, pOptions):
         lRecoverFH = open(pOptions.imagefile, "rb")
         lRecoverFH.seek(pFragment.mOffset, os.SEEK_SET)
         lData = lRecoverFH.read(pFragment.mSize)
@@ -158,7 +158,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
             lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if pSortedFrags[lFragHeaderIdx].mSize > pOptions.extractsize:
-                self.__decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
+                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
                         pSortedFrags[lFragHeaderIdx].mSize - \
                         pOptions.extractsize, pOptions.output,
                         "hdr", lCntHdr, pSortedFrags[lFragHeaderIdx].mSize,
@@ -166,13 +166,13 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                         CReassemblyPUPVideo.FRG_HDR,
                         lRecoverFH)
             else:
-                self.__decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
+                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
                         pOptions.hdrsize,
                         pOptions.output, "hdr", lCntHdr,
                         pSortedFrags[lFragHeaderIdx].mSize,
                         lHdrData, CReassemblyPUPVideo.FRG_HDR, lRecoverFH)
                 pSortedFrags[lFragHeaderIdx].mIsSmall = True
-            self.__determineCut(pOptions.output, "hdr",
+            self._determineCut(pOptions.output, "hdr",
                     pSortedFrags[lFragHeaderIdx], lCntHdr,
                     pOptions.minpicsize)
 
@@ -185,12 +185,12 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                 # extract begin
                 lRecoverFH.seek(pSortedFrags[lFragIdx].mOffset, os.SEEK_SET)
                 if pSortedFrags[lFragIdx].mSize > pOptions.extractsize:
-                    self.__decodeVideo(pSortedFrags[lFragIdx].mOffset,
+                    self._decodeVideo(pSortedFrags[lFragIdx].mOffset,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
                             CReassemblyPUPVideo.FRG_BEGIN, lRecoverFH)
                     # extract end
-                    self.__decodeVideo(pSortedFrags[lFragIdx].mOffset + \
+                    self._decodeVideo(pSortedFrags[lFragIdx].mOffset + \
                             pSortedFrags[lFragIdx].mSize - \
                             pOptions.extractsize,
                             pOptions.output, "frg",
@@ -198,12 +198,12 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                             CReassemblyPUPVideo.FRG_END, lRecoverFH)
                 else:
                     # extract the whole fragment at once
-                    self.__decodeVideo(pSortedFrags[lFragIdx].mOffset,
+                    self._decodeVideo(pSortedFrags[lFragIdx].mOffset,
                             pOptions.output, "frg",
                             lCntFrg, pSortedFrags[lFragIdx].mSize, lHdrData,
                             CReassemblyPUPVideo.FRG_SMALL, lRecoverFH)
                     pSortedFrags[lFragIdx].mIsSmall = True
-                self.__determineCut(pOptions.output, "frg",
+                self._determineCut(pOptions.output, "frg",
                         pSortedFrags[lFragIdx], lCntFrg,
                         pOptions.minpicsize)
                 lCntFrg += 1
@@ -238,7 +238,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
             self._reassemblePUP(lSortedFrags,
                     lIdxNoHeader,
                     pOptions,
-                    self._compareVideoFrags)
+                    self._compareFrags)
 
             # extract determined videos
             self._extractReassembledFragments(lSortedFrags,
@@ -246,8 +246,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
 
         pCaller.progressCallback(100)
 
-
-    def _compareVideoFrags(self, pFragments, pPath, pFragmentId, pOptions):
+    def _compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
         lFragment1 = pFragments[pPath.getLastFragmentId()]
         lFragment2 = pFragments[pFragmentId]
         lImage1 = Image.open(lFragment1.mPicEnd, "r")
@@ -274,7 +273,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
 
         return lReturn
 
-    def __determineCut(self, pOut, pDir, pFrag, pIdx, pMinPicSize):
+    def _determineCut(self, pOut, pDir, pFrag, pIdx, pMinPicSize):
         # determine relevant files
         lFiles = []
         for lFile in os.listdir(os.path.join(pOut, pDir)):
@@ -307,7 +306,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                     lFiles.remove(lFile)
                     break
 
-    def __decodeVideo(self, pOffset, pOut, pDir, pIdx, pLen,
+    def _decodeVideo(self, pOffset, pOut, pDir, pIdx, pLen,
             pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
         lFilename = os.path.join(pOut, pDir) + os.sep
@@ -329,6 +328,12 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         #      the fragment
 
 
+#TODO: there shouldn't be file type specific classes for each algorithm, this
+#makes this architecture far too complex. (New reassembly algorithm: implement
+#derive a class for both movie and jepg. The PUP algorithm should do
+#everything except the comparisons. There should be comparison classes for each
+#filetype, implementing the method _compareFrags(...) which is somehow passed
+#to the PUP Algorithm. This reduces the programmatic effort enormously.
 class CReassemblyPUPJpeg(CReassemblyPUP):
 
     def __init__(self, *args, **kwargs):
@@ -351,12 +356,11 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lFile.mFileType = "JPEG"
             lFile.mFileName = "h%d" % (lFragHeaderIdx)
             self.mFiles.append(lFile)
-            
 
             lFragment = pSortedFrags[lFragHeaderIdx]
-            lData = self.readFragment(lFragment, pOptions)
+            lData = self._readFragment(lFragment, pOptions)
             lPath = os.path.join(pOptions.output, "hdr") + os.sep
-            self.__analyzeJpeg(lFile, lData)
+            self._analyzeJpeg(lFile, lData)
 
             #Convert to PNG: Important for the Preview
             lFilename = lPath + lFile.mFileName + ".png"
@@ -370,24 +374,24 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         #Identify Footer fragments
         for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
             lFragment = pSortedFrags[lFragIdx]
-            lData = self.readFragment(lFragment, pOptions)
+            lData = self._readFragment(lFragment, pOptions)
             if lData.__contains__("\xFF\xD9"):
                 lFragment.mIsFooter = 1
             else:
                 lFragment.mIsFooter = 0
-        
+
         pCaller.progressCallback(50)
 
         # the place to invoke _reassemblePUP
         self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
-                self._compareJpegFrags)
+                self._compareFrags)
 
         self._extractReassembledFragments(pSortedFrags,
                 pOptions, "jpg")
 
         pCaller.progressCallback(100)
 
-    def _compareJpegFrags(self, pFragments, pPath, pFragmentId, pOptions):
+    def _compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
         #Terms:
         #(Reassembly)Path: All fragments up to the fragmentation point. This
         #                  Includes the header fragment and other frags.
@@ -400,20 +404,22 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         # Write all reassembled fragments in the reassembly path to the
         # disk. This includes the header fragment and reassembled fragments
         if pPath.mBaseImagePath == None:
-            pPath.mBaseImagePath = os.path.join(pOptions.output, "path") + os.sep
+            pPath.mBaseImagePath = os.path.join(pOptions.output, "path") + \
+                                   os.sep
             pPath.mBaseImagePath += pPath.mFileName + ".jpg"
             lFile = open(pPath.mBaseImagePath, "wb")
             for lFragId in pPath.mFragments:
-                lFile.write(self.readFragment(pFragments[lFragId], pOptions))
+                lFile.write(self._readFragment(pFragments[lFragId], pOptions))
             lFile.write("\xFF\xD9")
-            lFile.close()   
+            lFile.close()
 
         #Reassemble the Base Path with the new fragment
         lCompareImagePath = os.path.join(pOptions.output, "frg") + os.sep
-        lCompareImagePath += str(pPath.mFragments) + "f" + str(pFragmentId) + ".jpg"
-        lBaseImage    = open(pPath.mBaseImagePath, "rb")
+        lCompareImagePath += str(pPath.mFragments) + "f" + str(pFragmentId) + \
+                             ".jpg"
+        lBaseImage = open(pPath.mBaseImagePath, "rb")
         lCompareImage = open(lCompareImagePath, "wb")
-        lFragmentData = self.readFragment(pFragments[pFragmentId], pOptions)
+        lFragmentData = self._readFragment(pFragments[pFragmentId], pOptions)
         #Remove the tailing EOI marker (0xFFD9)
         lCompareImage.write(lBaseImage.read()[:-2])
         lCompareImage.write(lFragmentData)
@@ -428,8 +434,8 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         lCompareFragmentImage = Image.open(lCompareImagePath)
 
         # Determine the end of the base fragment image and the compare image
-        lBaseFragmentCut = self.__determineJpegCut(lBaseFragmentImage)
-        lCompareFragmentCut = self.__determineJpegCut(lCompareFragmentImage)
+        lBaseFragmentCut = self._determineJpegCut(lBaseFragmentImage)
+        lCompareFragmentCut = self._determineJpegCut(lCompareFragmentImage)
 
         #Check the size of the new fragment. If it is less than a line
         #in the picture, we have to reduce the histogram samples
@@ -447,7 +453,6 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         lBaseFragmentLine = [None, None]
         lCompareFragmentLine = [None, None]
 
-        #print "lCompareFragmentCut: %s, %s" % (str(lCompareFragmentCut[0]),str(lCompareFragmentCut[1]))
         #Todo: Review the calculation process
         #lCompareFragmentCut is in the same line as lBaseFragmentCut
         if lLineDiff[Y] < lLineHeight:
@@ -458,7 +463,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
                                      lCompareFragmentCut[1][Y]]
             logging.debug("One Line, little data")
             lCompareFragmentLine[1] = None
-        elif lLineDiff[X] < 0 and lLineDiff[Y] < 2*lLineHeight:
+        elif lLineDiff[X] < 0 and lLineDiff[Y] < 2 * lLineHeight:
             #two lines but second line is not long enough
             lCompareFragmentLine[0] = [lBaseFragmentCut[0][X],
                                      lBaseFragmentCut[0][Y],
@@ -468,7 +473,8 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
                                      lCompareFragmentCut[0][Y],
                                      lCompareFragmentCut[0][X] - 1,
                                      lCompareFragmentCut[1][Y]]
-            logging.debug("Two lines, little data, lLineDiff="+str(lLineDiff))
+            logging.debug("Two lines, little data, lLineDiff=" + \
+                          str(lLineDiff))
         else:
             #there is enough data
             lCompareFragmentLine[0] = [lBaseFragmentCut[0][X],
@@ -500,7 +506,6 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             pPath.mComplete = True
             return 0
 
-        #print "Histogram: Base1 %s Base2 %s, Compare1 %s Compare2 %s" % (str(lBaseFragmentLine[0]),str(lBaseFragmentLine[1]),str(lCompareFragmentLine[0]),str(lCompareFragmentLine[1]))
         #Histogram of the base fragments last data line
         lHist1 = lBaseFragmentImage.crop(lBaseFragmentLine[0]).histogram() + \
                     lBaseFragmentImage.crop(lBaseFragmentLine[1]).histogram()
@@ -518,7 +523,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
 
         return lWeight
 
-    def __determineJpegCut(self, pImage):
+    def _determineJpegCut(self, pImage):
 
         X = 0
         Y = 1
@@ -552,7 +557,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         return PictureEnd
 
     #Analyzes the JPEG Fragment for Markers
-    def __analyzeJpeg(self, pFile, pData):
+    def _analyzeJpeg(self, pFile, pData):
         for i in range(len(pData)):
         #Not the last Byte
             if i < len(pData) - 1:
@@ -573,7 +578,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         pFile.mDataBegin = pFile.mMarker[CFileJpeg.MRK_SOS] + Ls + 2
         pFile.mHeaderData = pData[:pFile.mDataBegin]
 
-    def __writeJpeg(self, pOffset, pOut, pDir, pIdx, pLen,
+    def _writeJpeg(self, pOffset, pOut, pDir, pIdx, pLen,
             pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
         lFilename = os.path.join(pOut, pDir) + os.sep
@@ -607,8 +612,8 @@ class CReassemblyFactory:
         return sorted(CReassemblyFactory.sReassemblyMethodsVideo.keys())
 
     @staticmethod
-    def getInstanceVideo(pWhich):
-        return CReassemblyFactory.sReassemblyMethodsVideo[pWhich]()
+    def getInstanceVideo(pAssemblyMethod):
+        return CReassemblyFactory.sReassemblyMethodsVideo[pAssemblyMethod]()
 
     #JPEG
     @staticmethod
@@ -616,9 +621,9 @@ class CReassemblyFactory:
         return sorted(CReassemblyFactory.sReassemblyMethodsJpeg.keys())
 
     @staticmethod
-    def getInstanceJpeg(pWhich):
+    def getInstanceJpeg(pAssemblyMethod):
         return CReassemblyFactory.\
-                sReassemblyMethodsJpeg[pWhich]()
+                sReassemblyMethodsJpeg[pAssemblyMethod]()
 
     #PNG
     @staticmethod
@@ -626,38 +631,40 @@ class CReassemblyFactory:
         return sorted(CReassemblyFactory.sReassemblyMethodsPng.keys())
 
     @staticmethod
-    def getInstancePng(pWhich):
-        return CReassemblyFactory.sReassemblyMethodsPng[pWhich]()
+    def getInstancePng(pAssemblyMethod):
+        return CReassemblyFactory.sReassemblyMethodsPng[pAssemblyMethod]()
+
 
 class CFile(object):
-    
+
     def __init__(self, pFragmentId):
         self.mFileName = None
         self.mFilePath = None
         self.mDataBegin = -1
         self.mComplete = False
         self.mFragments = []
-        self.mFragments.append(pFragmentId)        
+        self.mFragments.append(pFragmentId)
 
     def getHeaderFragmentId(self):
         return self.mFragments[0]
 
     def getLastFragmentId(self):
-        return self.mFragments[len(self.mFragments)-1]
-    
-    def addFragmentId(self,pFragmentId):
+        return self.mFragments[len(self.mFragments) - 1]
+
+    def addFragmentId(self, pFragmentId):
         self.mFragments.append(pFragmentId)
-        
-    def __str__(self):        
-        return "%s%s " % (self.mFileName,self.mFragments) 
+
+    def __str__(self):
+        return "%s%s " % (self.mFileName, self.mFragments)
+
 
 class CFileJpeg(CFile):
-    
+
     MRK_SOS = 0xDA
     MRK_SOI = 0xD8
     MRK_EOI = 0xD9
-    
-    def __init__(self,pFragmentId):
+
+    def __init__(self, pFragmentId):
         CFile.__init__(self, pFragmentId)
         self.mFileType = "JPEG"
         #All Markers have a relative Position
@@ -665,21 +672,22 @@ class CFileJpeg(CFile):
         self.mHeaderData = None
         self.mBaseImagePath = None
 
-    def addFragmentId(self,pFragmentId):
-        CFile.addFragmentId(self,pFragmentId)
+    def addFragmentId(self, pFragmentId):
+        CFile.addFragmentId(self, pFragmentId)
         #The calculated Image changed with the new Fragment
         self.mBaseImagePath = None
 
     def __str__(self):
-        return "%s%s (JPEG)" % (self.mFileName,self.mFragments) 
-    
+        return "%s%s (JPEG)" % (self.mFileName, self.mFragments)
+
+
 class CFileVideo(CFile):
-    
-    def __init__(self,pFragmentId):
+
+    def __init__(self, pFragmentId):
         CFile.__init__(self, pFragmentId)
         self.mFileType = "Video"
         self.mPicBegin = ""
         self.mPicEnd = ""
-    
+
     def __str__(self):
-        return "%s%s (Video)" % (self.mFileName,self.mFragments) 
+        return "%s%s (Video)" % (self.mFileName, self.mFragments)

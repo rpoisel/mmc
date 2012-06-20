@@ -2,6 +2,7 @@ import subprocess
 import os
 import platform
 
+
 class CDecoder(object):
     @staticmethod
     def getDecoder(pInputFormat, pOutputFormat=None):
@@ -25,6 +26,7 @@ class CDecoder(object):
     def close(self):
         pass
 
+
 class CJpegDecoder(CDecoder):
     def __init__(self):
         self.__mJpeg = None
@@ -34,22 +36,22 @@ class CJpegDecoder(CDecoder):
 
     def open(self, pPath):
         self.__mPngPath = pPath
-        self.__mJpeg = open(pPath.replace(".png",".jpg"), 'w')
-        
+        self.__mJpeg = open(pPath.replace(".png", ".jpg"), 'w')
 
     def write(self, pData):
         self.__mJpeg.write(pData)
-
 
     def close(self):
         self.__mJpeg.close()
         if platform.system().lower() == "linux":
             self.__mFH = open("/dev/null", "w")
             self.__mJpegProc = subprocess.Popen(
-                    ["convert", self.__mPngPath.replace(".png",".jpg"), self.__mPngPath], 
-                    bufsize = 512, stdin = subprocess.PIPE, stdout = self.__mFH.fileno(), 
+                    ["convert", self.__mPngPath.replace(".png", ".jpg"),\
+                     self.__mPngPath],
+                    bufsize = 512, stdin = subprocess.PIPE,\
+                    stdout = self.__mFH.fileno(),
                     stderr = self.__mFH.fileno())
-            
+
         self.__mJpegProc.communicate()
         try:
             self.__mJpegProc.kill()
