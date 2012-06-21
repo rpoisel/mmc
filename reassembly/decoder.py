@@ -48,7 +48,8 @@ class CJpegDecoder(CDecoder):
             self.__mJpegProc = subprocess.Popen(
                     ["convert", self.__mPngPath.replace(".png", ".jpg"),\
                      self.__mPngPath],
-                    bufsize = 512, stdin = subprocess.PIPE,\
+                    bufsize = 512,
+                    stdin = subprocess.PIPE, \
                     stdout = self.__mFH.fileno(),
                     stderr = self.__mFH.fileno())
 

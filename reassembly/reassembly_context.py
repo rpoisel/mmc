@@ -8,9 +8,10 @@ import decoder
 
 class CReassembly(object):
 
-    def __init__(self, *args, **kwargs):
-        super(CReassembly, self).__init__(*args, **kwargs)
+    def __init__(self, pFileHandler):
         self.mFiles = []
+        self.mFileHandler = pFileHandler
+        logging.info("CReassembly constructor finished")
 
     def assemble(self, pOptions, pFragments, pCaller):
         lIdxNoHeader = 0
@@ -18,7 +19,13 @@ class CReassembly(object):
             if pFragments[lIdx].mIsHeader == True:
                 lIdxNoHeader += 1
 
+        self.mFiles = self.mFileHandler.prepareFiles(pOptions, \
+                                                      pFragments, \
+                                                      lIdxNoHeader)
+        pCaller.progressCallback(50)
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader, pCaller)
+        self._extractReassembledFragments(pFragments, pOptions, "jpg")
+        pCaller.progressCallback(100)
         return self.mFiles
 
     # interface only
@@ -45,34 +52,23 @@ class CReassembly(object):
 
             for lFragIdx in lFile.mFragments:
                 lFrag = pSortedFrags[lFragIdx]
-                lData = self._readFragment(lFrag, pOptions)
+                lData = self.mFileHandler.readFragment(lFrag, pOptions)
                 lDecoder.write(lData)
 
             lDecoder.close()
         logging.info("Extraction finished")
         return
 
-    def _readFragment(self, pFragment, pOptions):
-        lRecoverFH = open(pOptions.imagefile, "rb")
-        lRecoverFH.seek(pFragment.mOffset, os.SEEK_SET)
-        lData = lRecoverFH.read(pFragment.mSize)
-        lRecoverFH.close()
-        return lData
-
 
 class CReassemblyPUP(CReassembly):
 
-    def __init__(self, *args, **kwargs):
-        super(CReassemblyPUP, self).__init__(*args, **kwargs)
+    def __init__(self, pFileHandler):
+        super(CReassemblyPUP, self).__init__(pFileHandler)
+        logging.info("CReassemblyPUP constructor finished")
 
     def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
-        # the place to invoke _reassemblePUP
         self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
-                self._compareFrags)
-
-    def _compareFrags(self, pFrags, pPath, pFragmentId, pOptions):
-        # compares pFragment with the Fragments stored in pPath
-        return -1
+                self.mFileHandler.compareFrags)
 
     def _reassemblePUP(self, pSortedFrags, pIdxNoHeader, pOptions, pCmp):
         lIdxNoHeader = 0
@@ -121,7 +117,22 @@ class CReassemblyPUP(CReassembly):
             lRemainingFrags.remove(lBestResult['idxFrag'])
 
 
-class CReassemblyPUPVideo(CReassemblyPUP):
+class CAbstractFileHandler(object):
+    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader):
+        pass
+
+    def compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
+        pass
+
+    def readFragment(self, pFragment, pOptions):
+        lRecoverFH = open(pOptions.imagefile, "rb")
+        lRecoverFH.seek(pFragment.mOffset, os.SEEK_SET)
+        lData = lRecoverFH.read(pFragment.mSize)
+        lRecoverFH.close()
+        return lData
+
+
+class CVideoFileHandler(CAbstractFileHandler):
 
     FRG_HDR = 0
     FRG_BEGIN = 1
@@ -130,10 +141,10 @@ class CReassemblyPUPVideo(CReassemblyPUP):
 
     PATTERN_PATH = "08d"
 
-    def __init__(self, *args, **kwargs):
-        super(CReassemblyPUPVideo, self).__init__(*args, **kwargs)
+    def __init__(self):
+        logging.info("CVideoFileHandler constructor finished")
 
-    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader):
         for lDir in [os.path.join(pOptions.output, "hdr"),
                 os.path.join(pOptions.output, "frg")]:
             if os.path.exists(lDir):
@@ -163,14 +174,14 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                         pOptions.extractsize, pOptions.output,
                         "hdr", lCntHdr, pSortedFrags[lFragHeaderIdx].mSize,
                         lHdrData,
-                        CReassemblyPUPVideo.FRG_HDR,
+                        CVideoFileHandler.FRG_HDR,
                         lRecoverFH)
             else:
                 self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
                         pOptions.hdrsize,
                         pOptions.output, "hdr", lCntHdr,
                         pSortedFrags[lFragHeaderIdx].mSize,
-                        lHdrData, CReassemblyPUPVideo.FRG_HDR, lRecoverFH)
+                        lHdrData, CVideoFileHandler.FRG_HDR, lRecoverFH)
                 pSortedFrags[lFragHeaderIdx].mIsSmall = True
             self._determineCut(pOptions.output, "hdr",
                     pSortedFrags[lFragHeaderIdx], lCntHdr,
@@ -188,20 +199,20 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                     self._decodeVideo(pSortedFrags[lFragIdx].mOffset,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
-                            CReassemblyPUPVideo.FRG_BEGIN, lRecoverFH)
+                            CVideoFileHandler.FRG_BEGIN, lRecoverFH)
                     # extract end
                     self._decodeVideo(pSortedFrags[lFragIdx].mOffset + \
                             pSortedFrags[lFragIdx].mSize - \
                             pOptions.extractsize,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
-                            CReassemblyPUPVideo.FRG_END, lRecoverFH)
+                            CVideoFileHandler.FRG_END, lRecoverFH)
                 else:
                     # extract the whole fragment at once
                     self._decodeVideo(pSortedFrags[lFragIdx].mOffset,
                             pOptions.output, "frg",
                             lCntFrg, pSortedFrags[lFragIdx].mSize, lHdrData,
-                            CReassemblyPUPVideo.FRG_SMALL, lRecoverFH)
+                            CVideoFileHandler.FRG_SMALL, lRecoverFH)
                     pSortedFrags[lFragIdx].mIsSmall = True
                 self._determineCut(pOptions.output, "frg",
                         pSortedFrags[lFragIdx], lCntFrg,
@@ -209,8 +220,6 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                 lCntFrg += 1
 
             lCntHdr += 1
-            pCaller.progressCallback(50 * \
-                    lCntHdr / len(pSortedFrags[0:pIdxNoHeader]))
 
         # remove those fragments which could not be decoded
         # TODO check if del() is an alternative to creating a new array
@@ -218,6 +227,7 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         #             remove-items-from-a-list-while-iterating-in-python
         lSortedFrags = []
         lIdxNoHeader = 0
+        lFiles = []
         for lFragIdx in xrange(len(pSortedFrags)):
             lFrag = pSortedFrags[lFragIdx]
             if lFrag.mIsHeader == True and lFrag.mPicEnd != "":
@@ -225,28 +235,16 @@ class CReassemblyPUPVideo(CReassemblyPUP):
                 lFile = CFileVideo(lIdxNoHeader)
                 lFile.mFileType = "Video"
                 lFile.mFileName = ("h%" + \
-                        CReassemblyPUPVideo.PATTERN_PATH) % (lFragIdx)
-                self.mFiles.append(lFile)
+                        CVideoFileHandler.PATTERN_PATH) % (lFragIdx)
+                lFiles.append(lFile)
                 lSortedFrags.append(lFrag)
                 lIdxNoHeader += 1
             elif (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and \
                     lFrag.mPicEnd != ""):
                 lSortedFrags.append(lFrag)
+        return lFiles
 
-        if len(lSortedFrags) > 0:
-            # determine reconstruction paths
-            self._reassemblePUP(lSortedFrags,
-                    lIdxNoHeader,
-                    pOptions,
-                    self._compareFrags)
-
-            # extract determined videos
-            self._extractReassembledFragments(lSortedFrags,
-                    pOptions, "video")
-
-        pCaller.progressCallback(100)
-
-    def _compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
+    def compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
         lFragment1 = pFragments[pPath.getLastFragmentId()]
         lFragment2 = pFragments[pFragmentId]
         lImage1 = Image.open(lFragment1.mPicEnd, "r")
@@ -278,11 +276,11 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         lFiles = []
         for lFile in os.listdir(os.path.join(pOut, pDir)):
             if fnmatch.fnmatch(lFile, ("b%" + \
-                    CReassemblyPUPVideo.PATTERN_PATH + "*.png") % pIdx) or \
+                    CVideoFileHandler.PATTERN_PATH + "*.png") % pIdx) or \
                     fnmatch.fnmatch(lFile, ("[he]%" + \
-                    CReassemblyPUPVideo.PATTERN_PATH + "*.png") % pIdx) or \
+                    CVideoFileHandler.PATTERN_PATH + "*.png") % pIdx) or \
                     fnmatch.fnmatch(lFile, ("s%" + \
-                    CReassemblyPUPVideo.PATTERN_PATH + "*.png") % pIdx):
+                    CVideoFileHandler.PATTERN_PATH + "*.png") % pIdx):
                 lFilename = os.path.join(pOut, pDir, lFile)
                 lFiles.append((lFilename, os.path.getsize(lFilename)))
 
@@ -310,15 +308,15 @@ class CReassemblyPUPVideo(CReassemblyPUP):
             pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
         lFilename = os.path.join(pOut, pDir) + os.sep
-        if pWhence == CReassemblyPUPVideo.FRG_HDR:
+        if pWhence == CVideoFileHandler.FRG_HDR:
             lFilename += "h"
-        elif pWhence == CReassemblyPUPVideo.FRG_BEGIN:
+        elif pWhence == CVideoFileHandler.FRG_BEGIN:
             lFilename += "b"
-        elif pWhence == CReassemblyPUPVideo.FRG_SMALL:
+        elif pWhence == CVideoFileHandler.FRG_SMALL:
             lFilename += "s"
         else:
             lFilename += "e"
-        lFilename += ("%" + CReassemblyPUPVideo.PATTERN_PATH) % (pIdx)
+        lFilename += ("%" + CVideoFileHandler.PATTERN_PATH) % (pIdx)
         lDecoder = decoder.CDecoder.getDecoder("video")  # , lFilename)
         lDecoder.open(lFilename + "%04d.png", lFilename + ".dat")
         lDecoder.write(pHdrData)
@@ -328,26 +326,20 @@ class CReassemblyPUPVideo(CReassemblyPUP):
         #      the fragment
 
 
-#TODO: there shouldn't be file type specific classes for each algorithm, this
-#makes this architecture far too complex. (New reassembly algorithm: implement
-#derive a class for both movie and jepg. The PUP algorithm should do
-#everything except the comparisons. There should be comparison classes for each
-#filetype, implementing the method _compareFrags(...) which is somehow passed
-#to the PUP Algorithm. This reduces the programmatic effort enormously.
-class CReassemblyPUPJpeg(CReassemblyPUP):
+class CJpegFileHandler(CAbstractFileHandler):
 
-    def __init__(self, *args, **kwargs):
-        super(CReassemblyPUPJpeg, self).__init__(*args, **kwargs)
+    def __init__(self):
+        logging.info("CJpegFileHandler constructor finished")
 
-    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
+    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader):
 
+        lFiles = []
         for lDir in [pOptions.output + "/hdr", pOptions.output + "/frg",
                 pOptions.output + "/path"]:
             if os.path.exists(lDir):
                 shutil.rmtree(lDir)
             if not os.path.exists(lDir):
                 os.makedirs(lDir)
-
         # extract headers frames
         for lFragHeaderIdx in xrange(0, pIdxNoHeader):
 
@@ -355,10 +347,10 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             lFile = CFileJpeg(lFragHeaderIdx)
             lFile.mFileType = "JPEG"
             lFile.mFileName = "h%d" % (lFragHeaderIdx)
-            self.mFiles.append(lFile)
+            lFiles.append(lFile)
 
             lFragment = pSortedFrags[lFragHeaderIdx]
-            lData = self._readFragment(lFragment, pOptions)
+            lData = self.readFragment(lFragment, pOptions)
             lPath = os.path.join(pOptions.output, "hdr") + os.sep
             self._analyzeJpeg(lFile, lData)
 
@@ -374,24 +366,15 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         #Identify Footer fragments
         for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
             lFragment = pSortedFrags[lFragIdx]
-            lData = self._readFragment(lFragment, pOptions)
+            lData = self.readFragment(lFragment, pOptions)
             if lData.__contains__("\xFF\xD9"):
                 lFragment.mIsFooter = 1
             else:
                 lFragment.mIsFooter = 0
 
-        pCaller.progressCallback(50)
+        return lFiles
 
-        # the place to invoke _reassemblePUP
-        self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
-                self._compareFrags)
-
-        self._extractReassembledFragments(pSortedFrags,
-                pOptions, "jpg")
-
-        pCaller.progressCallback(100)
-
-    def _compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
+    def compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
         #Terms:
         #(Reassembly)Path: All fragments up to the fragmentation point. This
         #                  Includes the header fragment and other frags.
@@ -400,7 +383,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
         #The Header doesn't need any more fragments
         if pPath.mComplete:
             return 0
-
+        logging.info("start compare")
         # Write all reassembled fragments in the reassembly path to the
         # disk. This includes the header fragment and reassembled fragments
         if pPath.mBaseImagePath == None:
@@ -409,7 +392,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
             pPath.mBaseImagePath += pPath.mFileName + ".jpg"
             lFile = open(pPath.mBaseImagePath, "wb")
             for lFragId in pPath.mFragments:
-                lFile.write(self._readFragment(pFragments[lFragId], pOptions))
+                lFile.write(self.readFragment(pFragments[lFragId], pOptions))
             lFile.write("\xFF\xD9")
             lFile.close()
 
@@ -419,7 +402,7 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
                              ".jpg"
         lBaseImage = open(pPath.mBaseImagePath, "rb")
         lCompareImage = open(lCompareImagePath, "wb")
-        lFragmentData = self._readFragment(pFragments[pFragmentId], pOptions)
+        lFragmentData = self.readFragment(pFragments[pFragmentId], pOptions)
         #Remove the tailing EOI marker (0xFFD9)
         lCompareImage.write(lBaseImage.read()[:-2])
         lCompareImage.write(lFragmentData)
@@ -577,62 +560,6 @@ class CReassemblyPUPJpeg(CReassemblyPUP):
                 ord(pData[(pFile.mMarker[CFileJpeg.MRK_SOS] + 3)])
         pFile.mDataBegin = pFile.mMarker[CFileJpeg.MRK_SOS] + Ls + 2
         pFile.mHeaderData = pData[:pFile.mDataBegin]
-
-    def _writeJpeg(self, pOffset, pOut, pDir, pIdx, pLen,
-            pHdrData, pWhence, pFH):
-        pFH.seek(pOffset, os.SEEK_SET)
-        lFilename = os.path.join(pOut, pDir) + os.sep
-        if pWhence == CReassemblyPUPVideo.FRG_HDR:
-            lFilename += "h"
-        elif pWhence == CReassemblyPUPVideo.FRG_BEGIN:
-            lFilename += "b"
-        elif pWhence == CReassemblyPUPVideo.FRG_SMALL:
-            lFilename += "s"
-        else:
-            lFilename += "e"
-        lFilename += "%04d" % (pIdx) + "%04d.png"
-        lDecoder = decoder.CDecoder.getDecoder(lFilename)
-        lDecoder.open(lFilename)
-        lDecoder.write(pHdrData)
-        lDecoder.write(pFH.read(pLen))
-        lDecoder.close()
-
-
-class CReassemblyFactory:
-
-    sReassemblyMethodsVideo = {'Parallel Unique Path': CReassemblyPUPVideo}
-
-    sReassemblyMethodsJpeg = {'Parallel Unique Path': CReassemblyPUPJpeg}
-
-    sReassemblyMethodsPng = {}
-
-    #Video
-    @staticmethod
-    def getAssemblyMethodsVideo():
-        return sorted(CReassemblyFactory.sReassemblyMethodsVideo.keys())
-
-    @staticmethod
-    def getInstanceVideo(pAssemblyMethod):
-        return CReassemblyFactory.sReassemblyMethodsVideo[pAssemblyMethod]()
-
-    #JPEG
-    @staticmethod
-    def getAssemblyMethodsJpeg():
-        return sorted(CReassemblyFactory.sReassemblyMethodsJpeg.keys())
-
-    @staticmethod
-    def getInstanceJpeg(pAssemblyMethod):
-        return CReassemblyFactory.\
-                sReassemblyMethodsJpeg[pAssemblyMethod]()
-
-    #PNG
-    @staticmethod
-    def getAssemblyMethodsPng():
-        return sorted(CReassemblyFactory.sReassemblyMethodsPng.keys())
-
-    @staticmethod
-    def getInstancePng(pAssemblyMethod):
-        return CReassemblyFactory.sReassemblyMethodsPng[pAssemblyMethod]()
 
 
 class CFile(object):

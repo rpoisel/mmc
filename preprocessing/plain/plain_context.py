@@ -3,7 +3,6 @@ import logging
 import math
 import platform
 
-#from collating.fragment import fragment_context
 
 class CGeneratorContext:
     def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset, \
@@ -15,13 +14,13 @@ class CGeneratorContext:
         self._mFragmentOffset = pFragmentOffset
         self._mFragmentSize = pFragmentSize
         self._mIncrementSize = pIncrementSize
-        logging.info("Offset = " + str(self._mFragmentOffset) + ", NumFrags = " + \
-                str(self._mNumFrags))
+        logging.info("Offset = " + str(self._mFragmentOffset) + \
+                     ", NumFrags = " + str(self._mNumFrags))
         self._mCntFrag = 0
 
     def __getstate__(self):
         return self.__dict__
-        
+
     def __setstate__(self, pDict):
         # TODO workaround for windows
         if platform.system().lower() == "windows":
@@ -32,7 +31,7 @@ class CGeneratorContext:
         self._mFragmentSize = pDict['_mFragmentSize']
         self._mIncrementSize = pDict['_mIncrementSize']
         self._mCntFrag = pDict['_mCntFrag']
- 
+
     def __del__(self):
         if hasattr(self, '_mImage') and self._mImage != None and \
             self._mImage.closed is False:
@@ -52,20 +51,21 @@ class CGeneratorContext:
             lBuffer = self._mImage.read(self._mFragmentSize)
             if lBuffer == "":
                 break
-            
+
             yield (lOffset, lBuffer)
 
             lOffset += self._mIncrementSize
             self._mImage.seek(lOffset, os.SEEK_SET)
 
-    def getFragsRead(self): 
+    def getFragsRead(self):
         return self._mCntFrag
 
     def getFragsTotal(self):
         return self._mNumFrags
 
-    def getGenerator(self): 
+    def getGenerator(self):
         return self._createGenerator()
+
 
 class CPlainImgProcessor:
     def __init__(self, pOptions):
@@ -76,7 +76,8 @@ class CPlainImgProcessor:
         self.__mFragsTotal = lSize / pOptions.fragmentsize
         if lSize % pOptions.fragmentsize != 0:
             self.__mFragsTotal += 1
-        lFragsPerCpu = int(math.ceil(float(self.__mFragsTotal)/self.__mNumParallel))
+        lFragsPerCpu = int(math.ceil(float(self.__mFragsTotal) / \
+                                     self.__mNumParallel))
         lFragsPerCpuR = self.__mFragsTotal % lFragsPerCpu
         for lPid in range(self.__mNumParallel):
             self.__mGenerators.append(CGeneratorContext(
@@ -85,7 +86,7 @@ class CPlainImgProcessor:
                 lFragsPerCpuR if lPid is \
                     (self.__mNumParallel - 1) and lFragsPerCpuR > 0 \
                     else lFragsPerCpu, \
-                lFragsPerCpu * lPid, 
+                lFragsPerCpu * lPid,
                 pOptions.fragmentsize, \
                 pOptions.incrementsize))
 

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Wed May  2 16:40:20 2012
-#      by: pyside-uic 0.2.13 running on PySide 1.1.0
+# Created: Thu Jun 21 11:00:41 2012
+#      by: pyside-uic 0.2.11 running on PySide 1.0.6
 #
 # WARNING! All changes made in this file will be lost!
 

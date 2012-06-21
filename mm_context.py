@@ -58,24 +58,20 @@ class CContext:
         pCaller.beginCallback(os.path.getsize(pOptions.imagefile),
                 pOptions.offset,
                 "")
-
-        lReassembly = None
+        #The file handler know file type specific operations for
+        #the reassembly algorithm
         if pOptions.recoverfiletype == "video":
-            lReassembly = \
-                reassembly_context.CReassemblyFactory.getInstanceVideo(\
-                pOptions.assemblymethod)
+            lFileHandler = reassembly_context.CVideoFileHandler()
         elif pOptions.recoverfiletype == "jpeg":
-            lReassembly = \
-                reassembly_context.CReassemblyFactory.getInstanceJpeg(\
-                pOptions.assemblymethod)
+            lFileHandler = reassembly_context.CJpegFileHandler()
         elif pOptions.recoverfiletype == "png":
-            lReassembly = \
-                reassembly_context.CReassemblyFactory.getInstancePng(\
-                pOptions.assemblymethod)
-        if lReassembly != None:
-            self.__mFiles = lReassembly.assemble(pOptions, self.__mFragments, \
-                                                 pCaller)
-
+            pass
+        if lFileHandler != None:
+            lReassembly = reassembly_context.CReassemblyPUP(lFileHandler)
+            if lReassembly != None:
+                self.__mFiles = lReassembly.assemble(pOptions, \
+                                                     self.__mFragments, \
+                                                     pCaller)
         pCaller.finishedCallback()
 
     def cleanup(self):

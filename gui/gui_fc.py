@@ -23,7 +23,6 @@ import gui_imgvisualizer
 from mm_context    import CContext
 from preprocessing import preprocessing_context
 from preprocessing import fsstat_context
-from reassembly    import reassembly_context
 
 
 class Jobs(object):
@@ -225,18 +224,7 @@ class CMain(object):
                         lTabCnt, False)
 
         #Some Filetype specific value customizations
-        lAssemblyMethods = None
-        if pSelectedValue == "Video":
-            self.customwidget.minimumFragmentSize.setText("4")
-            lAssemblyMethods = reassembly_context.CReassemblyFactory.\
-                    getAssemblyMethodsVideo()
-        elif pSelectedValue == "JPEG":
-            self.customwidget.minimumFragmentSize.setText("0")
-            lAssemblyMethods = reassembly_context.CReassemblyFactory.\
-                    getAssemblyMethodsJpeg()
-        elif pSelectedValue == "PNG":
-            lAssemblyMethods = reassembly_context.CReassemblyFactory.\
-                    getAssemblyMethodsPng()
+        lAssemblyMethods = ["Parallel Unique Path (PUP)"]
 
         #Get the Filetype specific Reassembly Algorithms
         self.customwidget.assemblyMethod.clear()
@@ -345,7 +333,6 @@ class CMain(object):
         lMsgBox.setInformativeText("Do you want to create it?")
         lCreateButton = lMsgBox.addButton(self.ui.tr("Create directory"),\
                 QtGui.QMessageBox.ActionRole)
-        lCancelButton = lMsgBox.addButton(QtGui.QMessageBox.Abort)
         lMsgBox.exec_()
         if lMsgBox.clickedButton() == lCreateButton:
             try:
