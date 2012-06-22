@@ -382,6 +382,7 @@ class CJpegFileHandler(CAbstractFileHandler):
         #ReassemblyImage:  ReassemblyPath + CompareFragment
         #The Header doesn't need any more fragments
         if pPath.mComplete:
+            logging.info("Fragment already complete")
             return 0
         logging.info("start compare")
         # Write all reassembled fragments in the reassembly path to the
@@ -402,6 +403,7 @@ class CJpegFileHandler(CAbstractFileHandler):
                              ".jpg"
         lBaseImage = open(pPath.mBaseImagePath, "rb")
         lCompareImage = open(lCompareImagePath, "wb")
+        
         lFragmentData = self.readFragment(pFragments[pFragmentId], pOptions)
         #Remove the tailing EOI marker (0xFFD9)
         lCompareImage.write(lBaseImage.read()[:-2])
@@ -413,13 +415,32 @@ class CJpegFileHandler(CAbstractFileHandler):
         ###### Analysis of the Image #####
 
         # Open the base fragment image and the full image (base + compare)
-        lBaseFragmentImage = Image.open(pPath.mBaseImagePath)
-        lCompareFragmentImage = Image.open(lCompareImagePath)
-
+        logging.info(pPath.mBaseImagePath)
+        try:
+            lCompareFragmentImage = Image.open(lCompareImagePath)
+        except IOError:
+            logging.error("Can't decode" + lCompareImagePath)
+            return 0
+        try:
+            lBaseFragmentImage = Image.open(pPath.mBaseImagePath)
+        except IOError:
+            #TODO: This can be used as object validator
+            logging.error("!!! Can't decode" + pPath.mBaseImagePath + ". Assembled image could be decoded, It is very probably the best match!")
+            return 250
+        
+        
         # Determine the end of the base fragment image and the compare image
-        lBaseFragmentCut = self._determineJpegCut(lBaseFragmentImage)
-        lCompareFragmentCut = self._determineJpegCut(lCompareFragmentImage)
+        if pPath.mVerticalSamplingSize == None:
+            lBaseFragmentCut = self._determineJpegCut(lBaseFragmentImage)
+            pPath.mVerticalSamplingSize = lBaseFragmentCut[1][1] - \
+                                               lBaseFragmentCut[0][1] + 1
+        else:
+            lBaseFragmentCut = self._determineJpegCut(lBaseFragmentImage, \
+                                                      pPath.mVerticalSamplingSize)
+        lCompareFragmentCut = self._determineJpegCut(lCompareFragmentImage, \
+                                                     pPath.mVerticalSamplingSize)
 
+        print str(lBaseFragmentCut)
         #Check the size of the new fragment. If it is less than a line
         #in the picture, we have to reduce the histogram samples
 
@@ -429,7 +450,7 @@ class CJpegFileHandler(CAbstractFileHandler):
         X = 0
         Y = 1
         #height of a line sampled by jpeg, usually 16px
-        lLineHeight = (lBaseFragmentCut[1][Y] - lBaseFragmentCut[0][Y]) + 1
+        lLineHeight = pPath.mVerticalSamplingSize
         #Difference between the both image cuts
         lLineDiff = [lCompareFragmentCut[0][X] - lBaseFragmentCut[0][X],
                      lCompareFragmentCut[0][Y] - lBaseFragmentCut[0][Y]]
@@ -487,32 +508,71 @@ class CJpegFileHandler(CAbstractFileHandler):
         if lBaseFragmentCut[1][X] >= lBaseFragmentImage.size[WIDTH] \
                 and lBaseFragmentCut[1][Y] >= lBaseFragmentImage.size[HEIGHT]:
             pPath.mComplete = True
-            return 0
+            return 250
 
+        #====== Histogram Intersection =======
         #Histogram of the base fragments last data line
-        lHist1 = lBaseFragmentImage.crop(lBaseFragmentLine[0]).histogram() + \
-                    lBaseFragmentImage.crop(lBaseFragmentLine[1]).histogram()
+        #lHist1 = lBaseFragmentImage.crop(lBaseFragmentLine[0]).histogram() + \
+        #            lBaseFragmentImage.crop(lBaseFragmentLine[1]).histogram()
 
         #Histogram of the compare fragments last data line
-        lHist2 = lCompareFragmentImage.crop(lCompareFragmentLine[0]).\
-                histogram() + \
-                lCompareFragmentImage.crop(lCompareFragmentLine[1]).histogram()
+        #lHist2 = lCompareFragmentImage.crop(lCompareFragmentLine[0]).\
+        #        histogram() + \
+        #        lCompareFragmentImage.crop(lCompareFragmentLine[1]).histogram()
 
         #Do the Histogram intersection
-        lWeight = 0
-        for lIdx in xrange(len(lHist1)):
-            if abs(lHist1[lIdx] - lHist2[lIdx]) < pOptions.similarity:
-                lWeight += 1
+        #lWeight = 0
+        #for lIdx in xrange(len(lHist1)):
+        #    if abs(lHist1[lIdx] - lHist2[lIdx]) < pOptions.similarity:
+        #        lWeight += 1
 
-        return lWeight
+        #======= Partial Image Matching (PIM) ======
+        lPIMScore = 0
+        lPixels = 0
+        X1 = 0
+        Y1 = 1
+        X2 = 2
+        Y2 = 3
+        #Iterate through the first line
+        #TODO: more elegance ;)
+        logging.debug("Base Fragment: "+str(lBaseFragmentLine[0])+"/"+str(lBaseFragmentLine[1]))
+        logging.debug("Comp Fragment: "+str(lCompareFragmentLine[0])+"/"+str(lCompareFragmentLine[1]))
+        lBaseFragmentImage = lBaseFragmentImage.convert("RGB")
+        lCompareFragmentImage = lCompareFragmentImage.convert("RGB")
+        
+        for lIdx in xrange(lBaseFragmentLine[0][X1], lBaseFragmentLine[0][X2]):
+            lPx1 = lBaseFragmentImage.getpixel((lIdx,lBaseFragmentLine[0][Y2]))
+            lPx2 = lCompareFragmentImage.getpixel((lIdx,lCompareFragmentLine[0][Y1]))
+            #logging.debug("cmp "+str(lPx1)+" with "+str(lPx2))
+            lPIMScore += (abs(lPx1[0] - lPx2[0])+abs(lPx1[1] - lPx2[1])+abs(lPx1[2] - lPx2[2]))/3
+            lPixels += 1
+        for lIdx in xrange(lBaseFragmentLine[1][X1], lBaseFragmentLine[1][X2]):
+            lPx1 = lBaseFragmentImage.getpixel((lIdx,lBaseFragmentLine[1][Y2]))
+            lPx2 = lCompareFragmentImage.getpixel((lIdx,lCompareFragmentLine[1][Y1]))
+            lPIMScore += (abs(lPx1[0] - lPx2[0])+abs(lPx1[1] - lPx2[1])+abs(lPx1[2] - lPx2[2]))/3
+            lPixels += 1
+        
+        if lPixels != 0:
+            lPIMScore = lPIMScore / lPixels
+            return 256-lPIMScore
+        else:
+            logging.info("No Pixels: lBaseFragmentLine="+str(lBaseFragmentLine[0]))
+            logging.info("No Pixels: lCompareFragmentLine="+str(lCompareFragmentLine[0]))
+        return 0
 
-    def _determineJpegCut(self, pImage):
+    def _determineJpegCut(self, pImage, pVerticalSamplingSize=None):
 
         X = 0
         Y = 1
-
+        
         #Convert to Grey Values to determine the border better
-        lImage = pImage.convert("L")
+        try:
+            lImage = pImage.convert("L")
+        except IOError:
+            #In some rare cases, the first convert throws an error but
+            #works afterwards
+            lImage = pImage.convert("L")
+            
         PictureEnd = [[-1, -1], [-1, -1]]
         for y in reversed(range(0, pImage.size[Y])):
             #Also look at the neighbors to prevent correct grey pixels
@@ -522,6 +582,18 @@ class CJpegFileHandler(CAbstractFileHandler):
                     PictureEnd[0][Y] = y + 1
                     break
 
+        if pVerticalSamplingSize == None:
+            pVerticalSamplingSize = 0
+            for y in reversed(range(0, pImage.size[Y])):
+                #Also look at the neighbors to prevent correct grey pixels
+                if not 125 < lImage.getpixel((0, y)) < 130 or \
+                   not 125 < lImage.getpixel((3, y)) < 130 or \
+                   not 125 < lImage.getpixel((5, y)) < 130:
+                        pVerticalSamplingSize = y + 1
+                        break
+            #Gives the sampling size (height of an encoded JPEG line)
+            pVerticalSamplingSize -= PictureEnd[0][Y]
+            
         #There is no cut in the Image
         if(PictureEnd[0][Y] == lImage.size[Y]):
             return [[lImage.size[X], lImage.size[Y] - 15], lImage.size]
@@ -533,9 +605,11 @@ class CJpegFileHandler(CAbstractFileHandler):
                not 125 < lImage.getpixel((x, PictureEnd[0][Y] + 4)) < 130:
                 PictureEnd[0][X] = x + 1
                 break
+        if PictureEnd[0][X] == -1:
+            PictureEnd[0][X] = lImage.size[X]
 
         PictureEnd[1][X] = PictureEnd[0][X]
-        PictureEnd[1][Y] = PictureEnd[0][Y] + 15  # 2*8-1
+        PictureEnd[1][Y] = PictureEnd[0][Y] + pVerticalSamplingSize - 1  # 2*8-1
 
         return PictureEnd
 
@@ -598,6 +672,8 @@ class CFileJpeg(CFile):
         self.mMarker = [-1] * 255
         self.mHeaderData = None
         self.mBaseImagePath = None
+        #Vertical pixels used in block for DCT (e.g. 8,8 or 16,16)
+        self.mVerticalSamplingSize = None
 
     def addFragmentId(self, pFragmentId):
         CFile.addFragmentId(self, pFragmentId)
