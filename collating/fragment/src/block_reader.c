@@ -5,7 +5,7 @@
 #include "block_reader.h"
 
 int callback_collect(void* pData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader);
+        FileType pType, int pStrength, int pIsHeader, char* pInfo);
 
 fragment_collection_t* classify(int pBlockSize, 
         int pNumBlocks, 
@@ -55,7 +55,7 @@ void classify_free(fragment_collection_t* pCollection)
 }
 
 int callback_collect(void* pData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader)
+        FileType pType, int pStrength, int pIsHeader, char* pInfo)
 {
     block_collection_t* pBlocks = (block_collection_t* )pData;
     /* store classified block */

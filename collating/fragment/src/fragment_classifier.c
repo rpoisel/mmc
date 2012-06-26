@@ -104,6 +104,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     pResult->mType = FT_UNKNOWN;
     pResult->mStrength = 0;
     pResult->mIsHeader = 0;
+    pResult->mInfo[0] = '\0';
     if (pLen == 0)
     {
         return 0;
@@ -120,6 +121,8 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             {
                 pResult->mType = FT_TXT;
                 pResult->mStrength = 1;
+                snprintf(pResult->mInfo, MAX_STR_LEN, "%s", 
+                        lMagicResult);
             }
             /* further distinguish between different text formats */
             else if (strstr(lMagicResult, "video") != NULL)
@@ -138,12 +141,16 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                     pResult->mType = FT_JPG;
                     pResult->mStrength = 1;
                     pResult->mIsHeader = 1;
+                    snprintf(pResult->mInfo, MAX_STR_LEN, "%s", 
+                            lMagicResult);
                 }
                 else
                 {
                     pResult->mType = FT_IMAGE;
                     pResult->mStrength = 1;
                     pResult->mIsHeader = 1;
+                    snprintf(pResult->mInfo, MAX_STR_LEN, "%s", 
+                            lMagicResult);
                 }
                 return pResult->mStrength;
             }
@@ -185,6 +192,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             if (lCntJpeg > 0)
             {
                 pResult->mType = FT_JPG;
+                snprintf(pResult->mInfo, MAX_STR_LEN, "no header");
                 pResult->mStrength = 1;
 #if DEBUG == 1
                 printf("TRUE - Marker: %d\n",lCntJpeg);
@@ -307,7 +315,7 @@ void* classify_thread(void* pData)
         if (lData->handle_fc->mNumFileTypes == 0)
         {
             lData->callback(lData->callback_data, lCntBlock, 
-                    lResult.mType, lResult.mStrength, lResult.mIsHeader);
+                    lResult.mType, lResult.mStrength, lResult.mIsHeader, lResult.mInfo);
         }
         else
         {
@@ -323,7 +331,7 @@ void* classify_thread(void* pData)
                     }
 #endif
                     lData->callback(lData->callback_data, lCntBlock, 
-                            lResult.mType, lResult.mStrength, lResult.mIsHeader);
+                            lResult.mType, lResult.mStrength, lResult.mIsHeader, lResult.mInfo);
                     break;
                 }
             }

@@ -23,12 +23,17 @@ class FileType:
 
 
 class ClassifyT(Structure):
-    _fields_ = [ \
-            ("mType", c_uint), \
-            ("mStrength", c_int), \
-            ("mIsHeader", c_int), \
+    _fields_ = [
+            ("mType", c_uint),
+            ("mStrength", c_int),
+            ("mIsHeader", c_int),
+            # 256 corresponds to MAX_STR_LENGTH in fragment_classifier.h
+            ("mInfo", c_char * 256),
             ]
 
+# 24 corresponds to the number of filetypes to be searched for
+# this number is estimated to be enough (no more than 24 file types
+# searched for at the same time)
 ClassifyTArray = ClassifyT * 24
 
 
@@ -37,13 +42,13 @@ class CBlockOptions(Structure):
 
 
 class CBlockOptions(Structure):
-    _fields_ = [ \
-            ("mOption1", c_char_p), \
-            ("mOption2", c_char_p), \
-            ("mOption3", c_char_p), \
-            ("mOption4", c_char_p), \
-            ("mOption5", c_char_p), \
-            ("mSubOptions", POINTER(CBlockOptions)), \
+    _fields_ = [
+            ("mOption1", c_char_p),
+            ("mOption2", c_char_p),
+            ("mOption3", c_char_p),
+            ("mOption4", c_char_p),
+            ("mOption5", c_char_p),
+            ("mSubOptions", POINTER(CBlockOptions)),
             ]
 
 
@@ -109,7 +114,7 @@ class CFragments(object):
             yield self.__mCollection.contents.mFrags[lCnt]
 
     def __del__(self):
-        if self.__mCollection != None:
+        if self.__mCollection is not None:
             self.__mDestructor(self.__mCollection)
         self.__mCollection = None
 
@@ -168,7 +173,7 @@ class CFragmentClassifier(object):
         self._mClassify = self._mLH.classify
         self._mClassify.restype = CFragmentCollectionPointer
         self._mClassify.argtypes = \
-            [c_int, c_int, c_char_p, c_ulonglong, \
+            [c_int, c_int, c_char_p, c_ulonglong,
             ClassifyTArray, c_int, c_ulonglong, c_ulonglong, c_int]
 
         self._mClassifyFree = self._mLH.classify_free

@@ -35,6 +35,7 @@ typedef struct _ClassifyT
     FileType mType;
     int mStrength;
     int mIsHeader;
+    char mInfo[MAX_STR_LEN];
 } ClassifyT;
 
 typedef struct _FragmentClassifier FragmentClassifier;
@@ -50,7 +51,7 @@ typedef struct _ClassifyOptions
 } ClassifyOptions;
 
 typedef int (*fragment_cb)(void* pCallbackData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader);
+        FileType pType, int pStrength, int pIsHeader, char* pInfo);
 
 #ifndef _MSC_VER
 #define __declspec(dllexport) 

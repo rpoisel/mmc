@@ -10,7 +10,7 @@
 #define NUM_OPTIONS 0
 
 int callback_print(void* pData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader);
+        FileType pType, int pStrength, int pIsHeader, char* pInfo);
 
 typedef struct
 {
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 }
 
 int callback_print(void* pData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader)
+        FileType pType, int pStrength, int pIsHeader, char* pInfo)
 {
     thread_data* lData = (thread_data* )pData;
     pthread_mutex_lock(&lData->mMutex);
@@ -111,12 +111,17 @@ int callback_print(void* pData, unsigned long long pOffset,
             break;
         case FT_H264:
             printf("H264");
+            printf("H264");
             break;
         case FT_TXT:
             printf("TEXT");
             break;
         default:
             printf("Unknown");
+    }
+    if (strlen(pInfo) > 0)
+    {
+        printf(", Info: %s", pInfo);
     }
     printf("\n");
 #endif
