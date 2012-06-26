@@ -23,13 +23,13 @@ class CReassembly(object):
                                                       pFragments, \
                                                       lIdxNoHeader)
         pCaller.progressCallback(50)
-        self._assemble_impl(pOptions, pFragments, lIdxNoHeader, pCaller)
+        self._assemble_impl(pOptions, pFragments, lIdxNoHeader)
         self._extractReassembledFragments(pFragments, pOptions, "jpg")
         pCaller.progressCallback(100)
         return self.mFiles
 
     # interface only
-    def _assemble_impl(self, pOptions, pSortedFrags, lIdxNoHeader, pCaller):
+    def _assemble_impl(self, pOptions, pSortedFrags, lIdxNoHeader):
         pass
 
     def _extractReassembledFragments(self, pSortedFrags,
@@ -66,11 +66,7 @@ class CReassemblyPUP(CReassembly):
         super(CReassemblyPUP, self).__init__(pFileHandler)
         logging.info("CReassemblyPUP constructor finished")
 
-    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader, pCaller):
-        self._reassemblePUP(pSortedFrags, pIdxNoHeader, pOptions,
-                self.mFileHandler.compareFrags)
-
-    def _reassemblePUP(self, pSortedFrags, pIdxNoHeader, pOptions, pCmp):
+    def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader):
         lIdxNoHeader = 0
         for lIdx in xrange(len(pSortedFrags)):
             if pSortedFrags[lIdx].mIsHeader == True:
@@ -90,7 +86,7 @@ class CReassemblyPUP(CReassembly):
                     continue
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
-                    lResult = pCmp(pSortedFrags, \
+                    lResult = self.mFileHandler.compareFrags(pSortedFrags, \
                               self.mFiles[lPathId], \
                               lIdxFrag, \
                               pOptions)
@@ -117,7 +113,7 @@ class CReassemblyPUP(CReassembly):
             lRemainingFrags.remove(lBestResult['idxFrag'])
 
 
-class CAbstractFileHandler(object):
+class CAbstractFileTypeHandler(object):
     def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader):
         pass
 
@@ -132,7 +128,7 @@ class CAbstractFileHandler(object):
         return lData
 
 
-class CVideoFileHandler(CAbstractFileHandler):
+class CVideoHandler(CAbstractFileTypeHandler):
 
     FRG_HDR = 0
     FRG_BEGIN = 1
@@ -174,14 +170,14 @@ class CVideoFileHandler(CAbstractFileHandler):
                         pOptions.extractsize, pOptions.output,
                         "hdr", lCntHdr, pSortedFrags[lFragHeaderIdx].mSize,
                         lHdrData,
-                        CVideoFileHandler.FRG_HDR,
+                        CVideoHandler.FRG_HDR,
                         lRecoverFH)
             else:
                 self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
                         pOptions.hdrsize,
                         pOptions.output, "hdr", lCntHdr,
                         pSortedFrags[lFragHeaderIdx].mSize,
-                        lHdrData, CVideoFileHandler.FRG_HDR, lRecoverFH)
+                        lHdrData, CVideoHandler.FRG_HDR, lRecoverFH)
                 pSortedFrags[lFragHeaderIdx].mIsSmall = True
             self._determineCut(pOptions.output, "hdr",
                     pSortedFrags[lFragHeaderIdx], lCntHdr,
@@ -199,20 +195,20 @@ class CVideoFileHandler(CAbstractFileHandler):
                     self._decodeVideo(pSortedFrags[lFragIdx].mOffset,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
-                            CVideoFileHandler.FRG_BEGIN, lRecoverFH)
+                            CVideoHandler.FRG_BEGIN, lRecoverFH)
                     # extract end
                     self._decodeVideo(pSortedFrags[lFragIdx].mOffset + \
                             pSortedFrags[lFragIdx].mSize - \
                             pOptions.extractsize,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
-                            CVideoFileHandler.FRG_END, lRecoverFH)
+                            CVideoHandler.FRG_END, lRecoverFH)
                 else:
                     # extract the whole fragment at once
                     self._decodeVideo(pSortedFrags[lFragIdx].mOffset,
                             pOptions.output, "frg",
                             lCntFrg, pSortedFrags[lFragIdx].mSize, lHdrData,
-                            CVideoFileHandler.FRG_SMALL, lRecoverFH)
+                            CVideoHandler.FRG_SMALL, lRecoverFH)
                     pSortedFrags[lFragIdx].mIsSmall = True
                 self._determineCut(pOptions.output, "frg",
                         pSortedFrags[lFragIdx], lCntFrg,
@@ -235,7 +231,7 @@ class CVideoFileHandler(CAbstractFileHandler):
                 lFile = CFileVideo(lIdxNoHeader)
                 lFile.mFileType = "Video"
                 lFile.mFileName = ("h%" + \
-                        CVideoFileHandler.PATTERN_PATH) % (lFragIdx)
+                        CVideoHandler.PATTERN_PATH) % (lFragIdx)
                 lFiles.append(lFile)
                 lSortedFrags.append(lFrag)
                 lIdxNoHeader += 1
@@ -276,11 +272,11 @@ class CVideoFileHandler(CAbstractFileHandler):
         lFiles = []
         for lFile in os.listdir(os.path.join(pOut, pDir)):
             if fnmatch.fnmatch(lFile, ("b%" + \
-                    CVideoFileHandler.PATTERN_PATH + "*.png") % pIdx) or \
+                    CVideoHandler.PATTERN_PATH + "*.png") % pIdx) or \
                     fnmatch.fnmatch(lFile, ("[he]%" + \
-                    CVideoFileHandler.PATTERN_PATH + "*.png") % pIdx) or \
+                    CVideoHandler.PATTERN_PATH + "*.png") % pIdx) or \
                     fnmatch.fnmatch(lFile, ("s%" + \
-                    CVideoFileHandler.PATTERN_PATH + "*.png") % pIdx):
+                    CVideoHandler.PATTERN_PATH + "*.png") % pIdx):
                 lFilename = os.path.join(pOut, pDir, lFile)
                 lFiles.append((lFilename, os.path.getsize(lFilename)))
 
@@ -308,15 +304,15 @@ class CVideoFileHandler(CAbstractFileHandler):
             pHdrData, pWhence, pFH):
         pFH.seek(pOffset, os.SEEK_SET)
         lFilename = os.path.join(pOut, pDir) + os.sep
-        if pWhence == CVideoFileHandler.FRG_HDR:
+        if pWhence == CVideoHandler.FRG_HDR:
             lFilename += "h"
-        elif pWhence == CVideoFileHandler.FRG_BEGIN:
+        elif pWhence == CVideoHandler.FRG_BEGIN:
             lFilename += "b"
-        elif pWhence == CVideoFileHandler.FRG_SMALL:
+        elif pWhence == CVideoHandler.FRG_SMALL:
             lFilename += "s"
         else:
             lFilename += "e"
-        lFilename += ("%" + CVideoFileHandler.PATTERN_PATH) % (pIdx)
+        lFilename += ("%" + CVideoHandler.PATTERN_PATH) % (pIdx)
         lDecoder = decoder.CDecoder.getDecoder("video")  # , lFilename)
         lDecoder.open(lFilename + "%04d.png", lFilename + ".dat")
         lDecoder.write(pHdrData)
@@ -326,7 +322,7 @@ class CVideoFileHandler(CAbstractFileHandler):
         #      the fragment
 
 
-class CJpegFileHandler(CAbstractFileHandler):
+class CJpegHandler(CAbstractFileTypeHandler):
 
     def __init__(self):
         logging.info("CJpegFileHandler constructor finished")

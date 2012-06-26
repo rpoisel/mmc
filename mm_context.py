@@ -61,9 +61,9 @@ class CContext:
         #The file handler know file type specific operations for
         #the reassembly algorithm
         if pOptions.recoverfiletype == "video":
-            lFileHandler = reassembly_context.CVideoFileHandler()
+            lFileHandler = reassembly_context.CVideoHandler()
         elif pOptions.recoverfiletype == "jpeg":
-            lFileHandler = reassembly_context.CJpegFileHandler()
+            lFileHandler = reassembly_context.CJpegHandler()
         elif pOptions.recoverfiletype == "png":
             pass
         if lFileHandler != None:
