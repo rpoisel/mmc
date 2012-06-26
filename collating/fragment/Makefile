@@ -8,7 +8,6 @@ PYTHON=python
 CFLAGS=-g -Wall -O0 -Iinclude
 CXXFLAGS=-g -Wall -O0 -Iinclude
 LDFLAGS=-ldl
-LDFLAGS_CYTHON=-L.
 MKDIR=mkdir
 RM=rm
 RMFLAGS=-rf
