@@ -28,12 +28,8 @@ int main(int argc, char* argv[])
     long int lNumThreads = NUM_THREADS_DEFAULT;
     long int lBlockSize = -1;
     struct stat lStat;
-#if 0
     off_t lImageSize;
     off_t lImageBlockSize = 0;
-#endif
-    int lImageSize;
-    long int lImageBlockSize = 0;
 
     if (argc != 3 && argc != 4)
     {
@@ -47,7 +43,7 @@ int main(int argc, char* argv[])
         lNumThreads = strtol(argv[3], NULL, 10);
         if (errno == ERANGE || lNumThreads > 2048)
         {
-            fprintf(stderr, "Illegal number of threads.\n");
+            fprintf(stderr, "Illegal number of threads. Needs to be between 1 and 2048 (inclusive). \n");
             return EXIT_FAILURE;
         }
     }
@@ -63,7 +59,7 @@ int main(int argc, char* argv[])
     lBlockSize = strtol(argv[2], NULL, 10);
     if (errno == ERANGE || lBlockSize > 131072)
     {
-        fprintf(stderr, "Illegal block size given.");
+        fprintf(stderr, "Illegal block size given. Needs to be between 1 and 131072 (inclusive). \n");
         return EXIT_FAILURE;
     }
     lImageBlockSize = lImageSize / lBlockSize;
