@@ -16,7 +16,7 @@ except ImportError, pExc:
     logging.error("Problem with importing a library: " + str(pExc))
     logging.error("Try making it with 'make' first.")
     sys.exit(-1)
-from collating.magic import magic_context
+#from collating.magic import magic_context
 
 
 class CResultThread(threading.Thread):
@@ -32,8 +32,8 @@ class CResultThread(threading.Thread):
             lResults = 0
             for lResult in self.__mResultArray:
                 lResults += lResult
-            self.__mCaller.progressCallback( \
-                    lResults / len(self.__mResultArray) \
+            self.__mCaller.progressCallback(
+                    lResults / len(self.__mResultArray)
                     )
             time.sleep(.1)
             lStop = False
@@ -41,7 +41,7 @@ class CResultThread(threading.Thread):
                 lStop = self.__mQueue.get_nowait()
             except Queue.Empty:
                 pass
-            if lStop == True:
+            if lStop is True:
                 break
 
 
@@ -92,7 +92,7 @@ class CPreprocessing:
             lFragments = lClassifier.classify(pOptions.fragmentsize,
                     lFragsTotal, pOptions.imagefile, pOptions.offset,
                             lTypes,
-                    pOptions.blockgap, pOptions.minfragsize,\
+                    pOptions.blockgap, pOptions.minfragsize,
                             pOptions.maxcpus)
         except OSError, pExc:
             lQueue.put(True)
@@ -100,7 +100,7 @@ class CPreprocessing:
             raise pExc
 
         lNow = datetime.datetime.now()
-        logging.info("Finished classifying. Duration: " + \
+        logging.info("Finished classifying. Duration: " +
                 str(lNow - lLast))
 
         lQueue.put(True)
