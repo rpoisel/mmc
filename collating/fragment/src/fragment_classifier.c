@@ -312,6 +312,12 @@ void* classify_thread(void* pData)
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
     lImage = fopen(lData->path_image, "r");
+    if (lImage == NULL)
+    {
+        /* TODO return error back to GUI */
+        perror("Could not open image file");
+        return NULL;
+    }
     fseek(lImage, 
             lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs, 
             SEEK_SET);
