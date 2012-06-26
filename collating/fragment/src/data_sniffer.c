@@ -82,11 +82,12 @@ int callback_print(void* pData, unsigned long long pOffset,
         FileType pType, int pStrength, int pIsHeader, char* pInfo)
 {
     thread_data* lData = (thread_data* )pData;
-    pthread_mutex_lock(&lData->mMutex);
+    /* pthread_mutex_lock(&lData->mMutex); */
 #if 0
     block_collection_set(lData->mStorage, pOffset, pIsHeader);
 #else
-    pIsHeader ? printf("Header, ") : printf("        ");
+    
+    pIsHeader ?  printf("Header, ") : printf("        ");
     printf("Offset: % 10lld, Strength: %d, Type: ", 
             pOffset, pStrength);
     switch (pType)
@@ -111,7 +112,6 @@ int callback_print(void* pData, unsigned long long pOffset,
             break;
         case FT_H264:
             printf("H264");
-            printf("H264");
             break;
         case FT_TXT:
             printf("TEXT");
@@ -125,6 +125,6 @@ int callback_print(void* pData, unsigned long long pOffset,
     }
     printf("\n");
 #endif
-    pthread_mutex_unlock(&lData->mMutex);
+    /* pthread_mutex_unlock(&lData->mMutex); */
     return 0;
 }

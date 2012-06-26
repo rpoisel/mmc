@@ -116,23 +116,34 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         lMagicResult = magic_buffer(pMagic, pFragment, pLen);
         if (strcmp(lMagicResult, "data") != 0)
         {
-            /* printf("Magic Result: %s\n",lMagicResult); */
             if (strstr(lMagicResult, "text") != NULL)
             {
                 pResult->mType = FT_TXT;
                 pResult->mStrength = 1;
-                snprintf(pResult->mInfo, MAX_STR_LEN, "%s", 
-                        lMagicResult);
             }
             /* further distinguish between different text formats */
+            /* check for specific video headers */
+            else if (strstr(lMagicResult, "H.264") != NULL)
+            {
+                pResult->mType = FT_H264;
+                pResult->mStrength = 1;
+                pResult->mIsHeader = 1;
+            }
+            else if (strstr(lMagicResult, "MPEG") != NULL)
+            {
+                pResult->mType = FT_VIDEO;
+                pResult->mStrength = 1;
+                if (strstr(lMagicResult, "sequence") == NULL)
+                {
+                    pResult->mIsHeader = 1;
+                }
+            }
             else if (strstr(lMagicResult, "video") != NULL)
             {
                 /* check for specific video headers */
-                printf("%s | ", lMagicResult);
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
                 pResult->mIsHeader = 1;
-                return pResult->mStrength;
             }
             else if (strstr(lMagicResult, "image") != NULL)
             {
@@ -141,19 +152,20 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                     pResult->mType = FT_JPG;
                     pResult->mStrength = 1;
                     pResult->mIsHeader = 1;
-                    snprintf(pResult->mInfo, MAX_STR_LEN, "%s", 
-                            lMagicResult);
                 }
                 else
                 {
                     pResult->mType = FT_IMAGE;
                     pResult->mStrength = 1;
                     pResult->mIsHeader = 1;
-                    snprintf(pResult->mInfo, MAX_STR_LEN, "%s", 
-                            lMagicResult);
                 }
-                return pResult->mStrength;
             }
+            snprintf(pResult->mInfo, MAX_STR_LEN, "%s",
+                    lMagicResult);
+#if DEBUG == 1
+            printf("%s | ", lMagicResult);
+#endif
+            return pResult->mStrength;
         }
     }
 

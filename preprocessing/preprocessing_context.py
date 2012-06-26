@@ -66,6 +66,8 @@ class CPreprocessing:
                 'mStrength': pOptions.strength})
             lTypes.append({'mType': fragment_context.FileType.FT_VIDEO,
                 'mStrength': pOptions.strength})
+            lTypes.append({'mType': fragment_context.FileType.FT_H264,
+                'mStrength': pOptions.strength})
         elif pOptions.recoverfiletype == "jpeg":
             #lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
             #    'mStrength': pOptions.strength})
