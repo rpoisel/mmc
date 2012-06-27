@@ -86,6 +86,10 @@ class CReassemblyPUP(CReassembly):
                     continue
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
+                    #Fragment has an error
+                    if pSortedFrags[lIdxFrag].mSize == 0:
+                        continue
+
                     lResult = self.mFileHandler.compareFrags(pSortedFrags, \
                               self.mFiles[lPathId], \
                               lIdxFrag, \
@@ -156,12 +160,6 @@ class CVideoHandler(CAbstractFileTypeHandler):
             logging.debug("Extracting header: " + \
                     str(pSortedFrags[lFragHeaderIdx]))
 
-#            #Creating reassembly File Objects
-#            lFile = CFileVideo(lFragHeaderIdx)
-#            lFile.mFileType = "Video"
-#            lFile.mFileName = "h%d" % (lFragHeaderIdx)
-#            self.mFiles.append(lFile)
-
             lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if pSortedFrags[lFragHeaderIdx].mSize > pOptions.extractsize:
@@ -185,6 +183,7 @@ class CVideoHandler(CAbstractFileTypeHandler):
 
             # extract fragments frames
             # TODO check if fragment has already been decoded successfully
+
             lCntFrg = 0
             for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
                 logging.debug("Extracting fragment: " + \
@@ -217,27 +216,31 @@ class CVideoHandler(CAbstractFileTypeHandler):
 
             lCntHdr += 1
 
+        #Debugging purposes
+        for lIdx in xrange(len(pSortedFrags)):
+            logging.debug("Fragment " + str(lIdx) + ": mPicBegin: " + \
+                          pSortedFrags[lIdx].mPicBegin + " mPicEnd: " + \
+                          pSortedFrags[lIdx].mPicEnd)
+            
         # remove those fragments which could not be decoded
         # TODO check if del() is an alternative to creating a new array
         # answer: http://stackoverflow.com/questions/1207406/\
         #             remove-items-from-a-list-while-iterating-in-python
-        lSortedFrags = []
-        lIdxNoHeader = 0
         lFiles = []
         for lFragIdx in xrange(len(pSortedFrags)):
             lFrag = pSortedFrags[lFragIdx]
             if lFrag.mIsHeader == True and lFrag.mPicEnd != "":
                 #Creating reassembly File Objects
-                lFile = CFileVideo(lIdxNoHeader)
+                lFile = CFileVideo(lFragIdx)
                 lFile.mFileType = "Video"
                 lFile.mFileName = ("h%" + \
                         CVideoHandler.PATTERN_PATH) % (lFragIdx)
                 lFiles.append(lFile)
-                lSortedFrags.append(lFrag)
-                lIdxNoHeader += 1
-            elif (lFrag.mIsHeader == False and lFrag.mPicBegin != "" and \
-                    lFrag.mPicEnd != ""):
-                lSortedFrags.append(lFrag)
+            elif (lFrag.mIsHeader == False and \
+                  (lFrag.mPicBegin == "" or lFrag.mPicEnd == "")):
+                lFrag.mSize = 0
+                logging.debug("Fragment " + str(lFragIdx) + " has an error")
+
         return lFiles
 
     def compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
