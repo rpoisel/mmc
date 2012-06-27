@@ -101,10 +101,7 @@ int callback_print(void* pData, unsigned long long pOffset,
 {
     thread_data* lData = (thread_data* )pData;
     pthread_mutex_lock(&lData->mMutex);
-#if 0
-    block_collection_set(lData->mStorage, pOffset, pIsHeader);
-#else
-    
+
     pIsHeader ?  printf("Header, ") : printf("        ");
     printf("Offset: % 10lld, Strength: %d, Type: ", 
             pOffset, pStrength);
@@ -142,7 +139,7 @@ int callback_print(void* pData, unsigned long long pOffset,
         printf(", Info: %s", pInfo);
     }
     printf("\n");
-#endif
+
     pthread_mutex_unlock(&lData->mMutex);
     return 0;
 }
