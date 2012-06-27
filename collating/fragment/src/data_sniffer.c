@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     if (argc == 4)
     {
         lNumThreads = strtol(argv[3], NULL, 10);
-        if (errno == ERANGE || lNumThreads > 2048)
+        if (errno == ERANGE || lNumThreads < 1 || lNumThreads > 2048)
         {
             fprintf(stderr, "Illegal number of threads. Needs to be between 1 and 2048 (inclusive). \n");
             return EXIT_FAILURE;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     lImageSize = lStat.st_size;
 
     lBlockSize = strtol(argv[2], NULL, 10);
-    if (errno == ERANGE || lBlockSize > 131072)
+    if (errno == ERANGE || lBlockSize < 1 || lBlockSize > 131072)
     {
         fprintf(stderr, "Illegal block size given. Needs to be between 1 and 131072 (inclusive). \n");
         return EXIT_FAILURE;
