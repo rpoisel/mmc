@@ -2,20 +2,23 @@ SRC_DIR=src
 BUILD_DIR=build
 OUT_DIR=.
 
-LBITS := $(shell getconf LONG_BIT)
+#LBITS := $(shell getconf LONG_BIT)
 
 # ================ START FRAGMENT CLASSIFIER =================
 BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so
 OBJ_FRAGMENT_CLASSIFIER= $(BUILD_DIR)/fragment_classifier.o \
 			 $(BUILD_DIR)/entropy/entropy.o
 CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC -Iinclude/entropy
-ifeq ($(LBITS),64)
-    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
-	-lpthread -Llib/magic/linux-x86_64 -lmagic #-lsvm
-else
-    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
-	-lpthread -Llib/magic/linux-i686 -lmagic #-lsvm
-endif
+
+#ifeq ($(LBITS),64)
+#    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
+#	-lpthread -Llib/magic/linux-x86_64 -lmagic #-lsvm
+#else
+#    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
+#	-lpthread -Llib/magic/linux-i686 -lmagic #-lsvm
+#endif
+
+
 # ================= END FRAGMENT CLASSIFIER ==================
 
 # ================ START BLOCK READER =================

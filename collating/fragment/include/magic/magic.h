@@ -80,23 +80,32 @@ extern "C" {
 #endif
 
 typedef struct magic_set *magic_t;
-magic_t magic_open(int);
-void magic_close(magic_t);
 
-const char *magic_getpath(const char *, int);
-const char *magic_file(magic_t, const char *);
-const char *magic_descriptor(magic_t, int);
-const char *magic_buffer(magic_t, const void *, size_t);
-
-const char *magic_error(magic_t);
-int magic_setflags(magic_t, int);
-
-int magic_load(magic_t, const char *);
-int magic_compile(magic_t, const char *);
-int magic_check(magic_t, const char *);
-int magic_list(magic_t, const char *);
-int magic_errno(magic_t);
-
+#ifdef __linux__
+  magic_t magic_open(int);
+  void magic_close(magic_t);
+  
+  const char *magic_getpath(const char *, int);
+  const char *magic_file(magic_t, const char *);
+  const char *magic_descriptor(magic_t, int);
+  const char *magic_buffer(magic_t, const void *, size_t);
+  
+  const char *magic_error(magic_t);
+  int magic_setflags(magic_t, int);
+  
+  int magic_load(magic_t, const char *);
+  int magic_compile(magic_t, const char *);
+  int magic_check(magic_t, const char *);
+  int magic_list(magic_t, const char *);
+  int magic_errno(magic_t);
+#else
+  typedef char* (*magic_buffer_ptr)(magic_t, const void *, size_t);
+  typedef void (*magic_close_ptr)(magic_t );
+  typedef void* (*magic_error_ptr)(magic_t );
+  typedef magic_t (*magic_open_ptr)(int);  
+  typedef int (*magic_load_ptr)(magic_t, const char *);
+#endif  
+  
 #ifdef __cplusplus
 };
 #endif

@@ -10,8 +10,8 @@ FRAGMENT_CLASSIFIER=libfragment_classifier
 $(FRAGMENT_CLASSIFIER).dll: 
     cl /c src\fragment_classifier.c /Iinclude /Iinclude\pthreads /Iinclude\magic
     cl /c src\entropy\entropy.c /Iinclude\entropy /Iinclude
-    link lib\pthreads\dll64\libpthread.a fragment_classifier.obj entropy.obj /DLL /out:$(FRAGMENT_CLASSIFIER).dll
-
+    link fragment_classifier.obj entropy.obj /DLL /out:$(FRAGMENT_CLASSIFIER).dll
+              
 # ================ START =================
 BLOCK_COLLECTION=libblock_collection
 #CFLAGS_BLOCK_COLLECTION=$(CFLAGS) -fPIC
