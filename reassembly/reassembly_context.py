@@ -221,7 +221,7 @@ class CVideoHandler(CAbstractFileTypeHandler):
             logging.debug("Fragment " + str(lIdx) + ": mPicBegin: " + \
                           pSortedFrags[lIdx].mPicBegin + " mPicEnd: " + \
                           pSortedFrags[lIdx].mPicEnd)
-            
+
         # remove those fragments which could not be decoded
         # TODO check if del() is an alternative to creating a new array
         # answer: http://stackoverflow.com/questions/1207406/\
@@ -437,9 +437,8 @@ class CJpegHandler(CAbstractFileTypeHandler):
             lBaseFragmentCut = self._determineJpegCut(lBaseFragmentImage, \
                                                       pPath.mVerticalSamplingSize)
         lCompareFragmentCut = self._determineJpegCut(lCompareFragmentImage, \
-                                                     pPath.mVerticalSamplingSize)
-
-        print str(lBaseFragmentCut)
+                                                     pPath.mVerticalSamplingSize)  
+        
         #Check the size of the new fragment. If it is less than a line
         #in the picture, we have to reduce the histogram samples
 
@@ -507,7 +506,7 @@ class CJpegHandler(CAbstractFileTypeHandler):
         if lBaseFragmentCut[1][X] >= lBaseFragmentImage.size[WIDTH] \
                 and lBaseFragmentCut[1][Y] >= lBaseFragmentImage.size[HEIGHT]:
             pPath.mComplete = True
-            return 250
+            return 90
 
         #====== Histogram Intersection =======
         #Histogram of the base fragments last data line
@@ -534,26 +533,29 @@ class CJpegHandler(CAbstractFileTypeHandler):
         Y2 = 3
         #Iterate through the first line
         #TODO: more elegance ;)
-        logging.debug("Base Fragment: "+str(lBaseFragmentLine[0])+"/"+str(lBaseFragmentLine[1]))
-        logging.debug("Comp Fragment: "+str(lCompareFragmentLine[0])+"/"+str(lCompareFragmentLine[1]))
+        #logging.debug("Base Fragment: "+str(lBaseFragmentLine[0])+"/"+str(lBaseFragmentLine[1]))
+        #logging.debug("Comp Fragment: "+str(lCompareFragmentLine[0])+"/"+str(lCompareFragmentLine[1]))
+        lBits = lBaseFragmentImage.bits
         lBaseFragmentImage = lBaseFragmentImage.convert("RGB")
         lCompareFragmentImage = lCompareFragmentImage.convert("RGB")
         
-        for lIdx in xrange(lBaseFragmentLine[0][X1], lBaseFragmentLine[0][X2]):
-            lPx1 = lBaseFragmentImage.getpixel((lIdx,lBaseFragmentLine[0][Y2]))
-            lPx2 = lCompareFragmentImage.getpixel((lIdx,lCompareFragmentLine[0][Y1]))
-            #logging.debug("cmp "+str(lPx1)+" with "+str(lPx2))
-            lPIMScore += (abs(lPx1[0] - lPx2[0])+abs(lPx1[1] - lPx2[1])+abs(lPx1[2] - lPx2[2]))/3
-            lPixels += 1
-        for lIdx in xrange(lBaseFragmentLine[1][X1], lBaseFragmentLine[1][X2]):
-            lPx1 = lBaseFragmentImage.getpixel((lIdx,lBaseFragmentLine[1][Y2]))
-            lPx2 = lCompareFragmentImage.getpixel((lIdx,lCompareFragmentLine[1][Y1]))
-            lPIMScore += (abs(lPx1[0] - lPx2[0])+abs(lPx1[1] - lPx2[1])+abs(lPx1[2] - lPx2[2]))/3
-            lPixels += 1
-        
+        #iterate through both comparison lines
+        for lLineIdx in xrange(2):
+            for lX in xrange(lBaseFragmentLine[lLineIdx][X1], \
+                               lBaseFragmentLine[lLineIdx][X2]):
+                lPx1 = lBaseFragmentImage.getpixel((lX , \
+                                        lBaseFragmentLine[lLineIdx][Y2]))
+                lPx2 = lCompareFragmentImage.getpixel((lX ,\
+                                        lCompareFragmentLine[lLineIdx][Y1]))
+                lPIMScore += (abs(lPx1[0] - lPx2[0]) + \
+                              abs(lPx1[1] - lPx2[1]) + \
+                              abs(lPx1[2] - lPx2[2])) / 3
+                lPixels += 1
         if lPixels != 0:
             lPIMScore = lPIMScore / lPixels
-            return 256-lPIMScore
+            #percentage of the possible score
+            return (2 ** lBits - lPIMScore) * 100 / \
+                (2 ** lBits)
         else:
             logging.info("No Pixels: lBaseFragmentLine="+str(lBaseFragmentLine[0]))
             logging.info("No Pixels: lCompareFragmentLine="+str(lCompareFragmentLine[0]))
@@ -673,6 +675,8 @@ class CFileJpeg(CFile):
         self.mBaseImagePath = None
         #Vertical pixels used in block for DCT (e.g. 8,8 or 16,16)
         self.mVerticalSamplingSize = None
+        self.mSize = None
+        self.mBits = None
 
     def addFragmentId(self, pFragmentId):
         CFile.addFragmentId(self, pFragmentId)
