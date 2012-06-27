@@ -16,11 +16,11 @@ class CReassembly(object):
     def assemble(self, pOptions, pFragments, pCaller):
         lIdxNoHeader = 0
         for lIdx in xrange(len(pFragments)):
-            if pFragments[lIdx].mIsHeader == True:
+            if pFragments[lIdx].mIsHeader == 1:
                 lIdxNoHeader += 1
 
-        self.mFiles = self.mFileHandler.prepareFiles(pOptions, \
-                                                      pFragments, \
+        self.mFiles = self.mFileHandler.prepareFiles(pOptions,
+                                                      pFragments,
                                                       lIdxNoHeader)
         pCaller.progressCallback(50)
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader)
@@ -47,7 +47,7 @@ class CReassembly(object):
                     pOptions.outputformat)
             lDecoder.open(lFile.mFilePath)
 
-            logging.debug("Extract File " + lFile.mFileName + ": " + \
+            logging.debug("Extract File " + lFile.mFileName + ": " +
                           str(lFile.mFragments))
 
             for lFragIdx in lFile.mFragments:
@@ -69,7 +69,7 @@ class CReassemblyPUP(CReassembly):
     def _assemble_impl(self, pOptions, pSortedFrags, pIdxNoHeader):
         lIdxNoHeader = 0
         for lIdx in xrange(len(pSortedFrags)):
-            if pSortedFrags[lIdx].mIsHeader == True:
+            if pSortedFrags[lIdx].mIsHeader == 1:
                 lIdxNoHeader += 1
         lNumFrg = len(pSortedFrags) - pIdxNoHeader
 
@@ -82,7 +82,7 @@ class CReassemblyPUP(CReassembly):
             #Iterate all Header Fragments
             for lPathId in xrange(len(self.mFiles)):
                 #Only look at remaining paths
-                if self.mFiles[lPathId].mComplete == True:
+                if self.mFiles[lPathId].mComplete is True:
                     continue
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
@@ -90,17 +90,17 @@ class CReassemblyPUP(CReassembly):
                     if pSortedFrags[lIdxFrag].mSize == 0:
                         continue
 
-                    lResult = self.mFileHandler.compareFrags(pSortedFrags, \
-                              self.mFiles[lPathId], \
-                              lIdxFrag, \
+                    lResult = self.mFileHandler.compareFrags(pSortedFrags,
+                              self.mFiles[lPathId],
+                              lIdxFrag,
                               pOptions)
-                    logging.debug("Comparing Path" + \
-                                 str(self.mFiles[lPathId].mFragments) + \
-                                 " <=> f(" + str(lIdxFrag) + "): " + \
+                    logging.debug("Comparing Path" +
+                                 str(self.mFiles[lPathId].mFragments) +
+                                 " <=> f(" + str(lIdxFrag) + "): " +
                                  str(lResult))
                     if lResult > lBestResult['result']:
-                        lBestResult = {'idxPath': lPathId, \
-                                    'idxFrag': lIdxFrag, \
+                        lBestResult = {'idxPath': lPathId,
+                                    'idxFrag': lIdxFrag,
                                     'result': lResult}
 
             # check for ambiguous result
@@ -111,8 +111,8 @@ class CReassemblyPUP(CReassembly):
                     addFragmentId(lBestResult['idxFrag'])
             if pSortedFrags[lBestResult['idxFrag']].mIsFooter == 1:
                 self.mFiles[lBestResult['idxPath']].mComplete = True
-                logging.debug("Path " + \
-                              str(self.mFiles[lBestResult['idxPath']]. \
+                logging.debug("Path " +
+                              str(self.mFiles[lBestResult['idxPath']].
                               mFragments) + " is complete")
             lRemainingFrags.remove(lBestResult['idxFrag'])
 
@@ -157,21 +157,21 @@ class CVideoHandler(CAbstractFileTypeHandler):
         # extract headers frames
         lCntHdr = 0
         for lFragHeaderIdx in xrange(0, pIdxNoHeader):
-            logging.debug("Extracting header: " + \
+            logging.debug("Extracting header: " +
                     str(pSortedFrags[lFragHeaderIdx]))
 
             lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if pSortedFrags[lFragHeaderIdx].mSize > pOptions.extractsize:
-                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
-                        pSortedFrags[lFragHeaderIdx].mSize - \
+                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset +
+                        pSortedFrags[lFragHeaderIdx].mSize -
                         pOptions.extractsize, pOptions.output,
                         "hdr", lCntHdr, pSortedFrags[lFragHeaderIdx].mSize,
                         lHdrData,
                         CVideoHandler.FRG_HDR,
                         lRecoverFH)
             else:
-                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset + \
+                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset +
                         pOptions.hdrsize,
                         pOptions.output, "hdr", lCntHdr,
                         pSortedFrags[lFragHeaderIdx].mSize,
@@ -186,7 +186,7 @@ class CVideoHandler(CAbstractFileTypeHandler):
 
             lCntFrg = 0
             for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
-                logging.debug("Extracting fragment: " + \
+                logging.debug("Extracting fragment: " +
                         str(pSortedFrags[lFragIdx]))
                 # extract begin
                 lRecoverFH.seek(pSortedFrags[lFragIdx].mOffset, os.SEEK_SET)
@@ -196,8 +196,8 @@ class CVideoHandler(CAbstractFileTypeHandler):
                             lCntFrg, pOptions.extractsize, lHdrData,
                             CVideoHandler.FRG_BEGIN, lRecoverFH)
                     # extract end
-                    self._decodeVideo(pSortedFrags[lFragIdx].mOffset + \
-                            pSortedFrags[lFragIdx].mSize - \
+                    self._decodeVideo(pSortedFrags[lFragIdx].mOffset +
+                            pSortedFrags[lFragIdx].mSize -
                             pOptions.extractsize,
                             pOptions.output, "frg",
                             lCntFrg, pOptions.extractsize, lHdrData,
@@ -218,8 +218,8 @@ class CVideoHandler(CAbstractFileTypeHandler):
 
         #Debugging purposes
         for lIdx in xrange(len(pSortedFrags)):
-            logging.debug("Fragment " + str(lIdx) + ": mPicBegin: " + \
-                          pSortedFrags[lIdx].mPicBegin + " mPicEnd: " + \
+            logging.debug("Fragment " + str(lIdx) + ": mPicBegin: " +
+                          pSortedFrags[lIdx].mPicBegin + " mPicEnd: " +
                           pSortedFrags[lIdx].mPicEnd)
 
         # remove those fragments which could not be decoded
@@ -229,14 +229,14 @@ class CVideoHandler(CAbstractFileTypeHandler):
         lFiles = []
         for lFragIdx in xrange(len(pSortedFrags)):
             lFrag = pSortedFrags[lFragIdx]
-            if lFrag.mIsHeader == True and lFrag.mPicEnd != "":
+            if lFrag.mIsHeader == 1 and lFrag.mPicEnd != "":
                 #Creating reassembly File Objects
                 lFile = CFileVideo(lFragIdx)
                 lFile.mFileType = "Video"
-                lFile.mFileName = ("h%" + \
+                lFile.mFileName = ("h%" +
                         CVideoHandler.PATTERN_PATH) % (lFragIdx)
                 lFiles.append(lFile)
-            elif (lFrag.mIsHeader == False and \
+            elif (lFrag.mIsHeader == 0 and
                   (lFrag.mPicBegin == "" or lFrag.mPicEnd == "")):
                 lFrag.mSize = 0
                 logging.debug("Fragment " + str(lFragIdx) + " has an error")
@@ -265,7 +265,7 @@ class CVideoHandler(CAbstractFileTypeHandler):
                 if abs(lHist1[lIdx] - lHist2[lIdx]) < pOptions.similarity:
                     lReturn += 1
 
-        logging.debug("Value for " + lFragment1.mPicEnd + " <=> " + \
+        logging.debug("Value for " + lFragment1.mPicEnd + " <=> " +
                 lFragment2.mPicBegin + ": " + str(lReturn))
 
         return lReturn
@@ -274,11 +274,11 @@ class CVideoHandler(CAbstractFileTypeHandler):
         # determine relevant files
         lFiles = []
         for lFile in os.listdir(os.path.join(pOut, pDir)):
-            if fnmatch.fnmatch(lFile, ("b%" + \
+            if fnmatch.fnmatch(lFile, ("b%" +
                     CVideoHandler.PATTERN_PATH + "*.png") % pIdx) or \
-                    fnmatch.fnmatch(lFile, ("[he]%" + \
+                    fnmatch.fnmatch(lFile, ("[he]%" +
                     CVideoHandler.PATTERN_PATH + "*.png") % pIdx) or \
-                    fnmatch.fnmatch(lFile, ("s%" + \
+                    fnmatch.fnmatch(lFile, ("s%" +
                     CVideoHandler.PATTERN_PATH + "*.png") % pIdx):
                 lFilename = os.path.join(pOut, pDir, lFile)
                 lFiles.append((lFilename, os.path.getsize(lFilename)))
@@ -296,7 +296,7 @@ class CVideoHandler(CAbstractFileTypeHandler):
                 pFrag.mPicEnd = lFile[0]
                 lFiles.remove(lFile)
                 break
-        if pFrag.mIsHeader == False:
+        if pFrag.mIsHeader == 0:
             for lFile in lFiles:
                 if lFile[1] > (lRefSize * pMinPicSize / 100):
                     pFrag.mPicBegin = lFile[0]
