@@ -239,7 +239,8 @@ class CVideoHandler(CAbstractFileTypeHandler):
             elif (lFrag.mIsHeader == 0 and
                   (lFrag.mPicBegin == "" or lFrag.mPicEnd == "")):
                 lFrag.mSize = 0
-                logging.debug("Fragment " + str(lFragIdx) + " has an error")
+                logging.debug("Fragment " + str(lFragIdx) +
+                        " does not contain beginning or ending frame")
 
         return lFiles
 
