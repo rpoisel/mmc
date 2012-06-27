@@ -29,7 +29,7 @@ BLOCK_READER=libblock_reader
 # ================= END ==================
 
 $(BLOCK_READER).dll: $(BLOCK_COLLECTION).dll $(FRAGMENT_CLASSIFIER).dll
-	cl /c src\block_reader.c /Iinclude
+	cl /c src\block_reader.c /Iinclude /Iinclude\magic
 	cl /c src\fragment_collection.c /Iinclude
 	link $(BLOCK_COLLECTION).lib $(FRAGMENT_CLASSIFIER).lib block_reader.obj fragment_collection.obj /DLL /out:$(BLOCK_READER).dll
 

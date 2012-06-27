@@ -115,6 +115,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
         #endif
 
 {
+        
     const char* lMagicResult = NULL;
     float lEntropy = 0;
     int lCnt = 0;
@@ -122,6 +123,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     /* non-relevant fragment <= 0 > relevant fragment */
     #if defined _WIN32 || defined _WIN64
       magic_buffer_ptr magic_buffer;
+      HINSTANCE hInstLibrary2;
     #endif
 
     pResult->mType = FT_UNKNOWN;
@@ -137,10 +139,18 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     if (pMagic != NULL)
     {
         #if defined _WIN32 || defined _WIN64
+
+          hInstLibrary2 = LoadLibrary("magic.dll");
+      
+          if (!hInstLibrary2)
+            printf("Library not found!\n");
+          magic_buffer = NULL;
           magic_buffer = (magic_buffer_ptr)GetProcAddress(hInstLibrary,"magic_bufer");
+          printf("\n\n Address: %x \n\n", magic_buffer);
         #endif
+        return pResult->mStrength;
         lMagicResult = magic_buffer(pMagic, pFragment, pLen);
-        
+
         if (strcmp(lMagicResult, "data") != 0)
         {
             if (strstr(lMagicResult, "text") != NULL)
@@ -257,6 +267,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             pResult->mStrength = 1;
         }
     }
+
     return pResult->mStrength;
 }
 
@@ -270,12 +281,16 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         unsigned int pNumThreads
         )
 {
+
+    
+    
     #ifdef __linux__
       pthread_t* lThreads = NULL;
     #else
       HANDLE* lThreads = NULL;
     #endif
     
+            
     int lCnt = 0;
     thread_data* lData = NULL;
     unsigned long long lSize = pSizeReal * pFragmentClassifier->mFragmentSize - pOffset;
@@ -283,20 +298,28 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     unsigned long long lFragsPerCpu = lFragsTotal/pNumThreads;
     unsigned long long lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
     unsigned long long lOffsetImg = 0;
-
+       
     /* TODO check return value */
     #ifdef __linux__
       lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
     #else
-      HINSTANCE hInstLibrary = LoadLibrary("DLL_Tutorial.dll");
+      HINSTANCE hInstLibrary = LoadLibrary("magic.dll");
+      
+      if (!hInstLibrary)
+        printf("Library not found!\n");
       lThreads = (HANDLE* )malloc(sizeof(HANDLE) * pNumThreads);
     #endif
+
+    
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
 
 #if DEBUG == 1
     printf("Fragments range: %lld\n", lFragsTotal);
     printf("Filesystem offset: %lld\n", pOffset);
 #endif
+    
+    
+
     
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
@@ -320,7 +343,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
                 lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
 #endif
         
-                
+       
         #ifdef __linux__
           pthread_create((lThreads + lCnt), NULL, 
                 classify_thread, (void*)(lData + lCnt));
@@ -328,8 +351,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
           *(lThreads + lCnt) = CreateThread(NULL,0,classify_thread,(void*)(lData + lCnt),0,NULL);
         #else
           #error "unknown platform"
-        #endif
-                
+        #endif           
                 
     }
 
@@ -347,7 +369,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
 
     free(lData);
     free(lThreads);
-
+    
     return EXIT_SUCCESS;
 }
 
@@ -357,6 +379,10 @@ void* classify_thread(void* pData)
 DWORD classify_thread(LPVOID pData)
 #endif
 {
+
+ 
+    
+    
     thread_data* lData = (thread_data*)pData; 
     int lLen = lData->handle_fc->mFragmentSize;
     unsigned long long lCntBlock = lData->offset_img;
@@ -376,7 +402,7 @@ DWORD classify_thread(LPVOID pData)
       magic_error = (magic_error_ptr)GetProcAddress(lData->hInstLibrary,"magic_error");
       magic_close = (magic_close_ptr)GetProcAddress(lData->hInstLibrary,"magic_close");
     #endif
-    
+   
     lMagic = magic_open(MAGIC_NONE);
     if (!lMagic)
     {
@@ -411,7 +437,11 @@ DWORD classify_thread(LPVOID pData)
     fseek(lImage, 
             lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs, 
             SEEK_SET);
+            
+            
 
+    
+    
     /* classify fragments */
     while (lLen == lData->handle_fc->mFragmentSize && 
             (lCntBlock - lData->offset_img) < lData->num_frags)
@@ -425,6 +455,7 @@ DWORD classify_thread(LPVOID pData)
         fragment_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult, lData->hInstLibrary);
         #endif
+
         /* do something with the classification result */
         if (lData->handle_fc->mNumFileTypes == 0)
         {
@@ -452,7 +483,9 @@ DWORD classify_thread(LPVOID pData)
         }
         lCntBlock++;
     }
+    
 
+    
     fclose(lImage);
     free(lBuf);
     
@@ -464,4 +497,5 @@ DWORD classify_thread(LPVOID pData)
     #else
     return 0;
     #endif
+    
 }

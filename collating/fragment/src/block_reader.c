@@ -2,6 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef _MSC_VER
+#include <magic.h>
+#else
+/* for the windows port see the following URL: */
+/* http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx */
+/* http://msdn.microsoft.com/en-us/library/kdzttdcb(v=vs.71).aspx */
+#include "magic.h"
+#endif
+
+#if defined _WIN32 || defined _WIN64
+  #include <Windows.h>
+#endif
+
 #include "block_reader.h"
 
 int callback_collect(void* pData, unsigned long long pOffset, 
