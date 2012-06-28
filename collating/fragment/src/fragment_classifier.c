@@ -46,9 +46,9 @@ typedef struct
     unsigned long long offset_fs;
     unsigned long long num_frags;
     const char* mPathMagic;
-    #if defined _WIN32 || defined _WIN64
+#if defined _WIN32 || defined _WIN64
       HINSTANCE hInstLibrary;  
-    #endif
+#endif
 } thread_data;
 
 #ifdef __linux__
@@ -385,7 +385,7 @@ DWORD classify_thread(LPVOID pData)
     int lCnt = 0;
     magic_t lMagic;
 
-    #if defined _WIN32 || defined _WIN64
+#if defined _WIN32 || defined _WIN64
       magic_open_ptr magic_open;
       magic_load_ptr magic_load;
       magic_error_ptr magic_error;
@@ -394,7 +394,7 @@ DWORD classify_thread(LPVOID pData)
       magic_load = (magic_load_ptr)GetProcAddress(lData->hInstLibrary,"magic_load");
       magic_error = (magic_error_ptr)GetProcAddress(lData->hInstLibrary,"magic_error");
       magic_close = (magic_close_ptr)GetProcAddress(lData->hInstLibrary,"magic_close");
-    #endif
+#endif
    
     lMagic = magic_open(MAGIC_NONE);
     if (!lMagic)
