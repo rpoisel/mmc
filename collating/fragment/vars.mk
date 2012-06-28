@@ -2,7 +2,7 @@ SRC_DIR=src
 BUILD_DIR=build
 OUT_DIR=.
 
-LBITS := $(shell getconf LONG_BIT)
+#LBITS := $(shell getconf LONG_BIT)
 
 # ================ START FRAGMENT CLASSIFIER =================
 BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so
@@ -19,14 +19,6 @@ else
 endif
 
 
-# ================= END FRAGMENT CLASSIFIER ==================
-ifeq ($(LBITS),64)
-    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
-	-lpthread -Llib/magic/linux-x86_64 -lmagic #-lsvm
-else
-    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
-	-lpthread -Llib/magic/linux-i686 -lmagic #-lsvm
-endif
 # ================= END FRAGMENT CLASSIFIER ==================
 
 # ================ START BLOCK READER =================
