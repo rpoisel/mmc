@@ -42,6 +42,6 @@ LDFLAGS_BLOCK_COLLECTION=-shared -Wl,-soname,
 LDFLAGS_DATA_SNIFFER=-L. -lfragment_classifier
 OBJ_DATA_SNIFFER=$(BUILD_DIR)/data_sniffer.o \
 		 $(BUILD_DIR)/block_collection.o
-BIN_DATA_SNIFFER=$(OUT_DIR)/data_sniffer
+BIN_DATA_SNIFFER=$(OUT_DIR)/data_sniffer.bin
 # ================= END DATA SNIFFER ==================
 

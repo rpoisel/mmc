@@ -165,13 +165,18 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             {
                 pResult->mType = FT_H264;
                 pResult->mStrength = 1;
-                pResult->mIsHeader = 1;
+                if (strstr(lMagicResult, "MPEG") == NULL ||
+                        strstr(lMagicResult, "sequence") == NULL)
+                {
+                    pResult->mIsHeader = 1;
+                }
             }
             else if (strstr(lMagicResult, "MPEG") != NULL)
             {
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
-                if (strstr(lMagicResult, "sequence") == NULL)
+                if (strstr(lMagicResult, "sequence") == NULL &&
+                        strstr(lMagicResult, "LOAS") == NULL)
                 {
                     pResult->mIsHeader = 1;
                 }
