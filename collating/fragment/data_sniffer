@@ -1,6 +1,7 @@
 #!/bin/sh
 
-export LD_LIBRARY_PATH=.
+ARCH=`uname -m`
+export LD_LIBRARY_PATH=".:lib/magic/linux-${ARCH}"
 
 ./data_sniffer.bin $*
 
