@@ -9,6 +9,7 @@ CFLAGS=-g -Wall -O0 -Iinclude
 CXXFLAGS=-g -Wall -O0 -Iinclude
 LDFLAGS=-ldl
 MKDIR=mkdir
+CP=cp
 RM=rm
 RMFLAGS=-rf
 

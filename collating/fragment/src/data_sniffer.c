@@ -81,9 +81,9 @@ int main(int argc, char* argv[])
             (void *)&lData, argv[1], 
             0 /* filesystem offset */, 
             lImageBlockSize,
-            "../../data/magic/animation.mgc:" \
-                "../../data/magic/jpeg.mgc:" \
-                "../../data/magic/png.mgc", 
+            "data/magic/animation.mgc:" \
+                "data/magic/jpeg.mgc:" \
+                "data/magic/png.mgc", 
             lNumThreads);
 
     pthread_mutex_destroy(&lData.mMutex);

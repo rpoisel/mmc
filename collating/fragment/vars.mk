@@ -2,7 +2,7 @@ SRC_DIR=src
 BUILD_DIR=build
 OUT_DIR=.
 
-#LBITS := $(shell getconf LONG_BIT)
+LBITS := $(shell getconf LONG_BIT)
 
 # ================ START FRAGMENT CLASSIFIER =================
 BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so

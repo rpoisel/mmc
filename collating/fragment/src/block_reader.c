@@ -45,9 +45,9 @@ fragment_collection_t* classify(int pBlockSize,
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_collect, 
             lBlocks /* callback data */, pImage, pOffset, pNumBlocks, 
-            "data/magic/animation.mgc:" \
-                "data/magic/jpeg.mgc:" \
-                "data/magic/png.mgc", 
+            "collating/fragment/data/magic/animation.mgc:" \
+                "collating/fragment/data/magic/jpeg.mgc:" \
+                "collating/fragment/data/magic/png.mgc", 
             pNumThreads);
 
     /* factor 1/4 is just an empirical value */
