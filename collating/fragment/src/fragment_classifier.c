@@ -10,15 +10,10 @@
 #error "unknown platform"
 #endif
 
-
-#ifndef _MSC_VER
-#include <magic.h>
-#else
 /* for the windows port see the following URL: */
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx */
 /* http://msdn.microsoft.com/en-us/library/kdzttdcb(v=vs.71).aspx */
 #include "magic.h"
-#endif
 
 #include "fragment_classifier.h"
 #include "entropy/entropy.h"

@@ -109,35 +109,35 @@ int callback_print(void* pData, unsigned long long pOffset,
     switch (pType)
     {
         case FT_HIGH_ENTROPY:
-            printf("High Entropy");
+            printf("high");
             break;
         case FT_LOW_ENTROPY:
-            printf("Low Entropy");
+            printf("low");
             break;
         case FT_JPG:
-            printf("JPEG");
+            printf("jpeg");
             break;
         case FT_PNG:
-            printf("PNG");
+            printf("png");
             break;
         case FT_VIDEO:
-            printf("VIDEO");
+            printf("video");
             break;
         case FT_IMAGE:
-            printf("IMAGE");
+            printf("image");
             break;
         case FT_H264:
-            printf("H264");
+            printf("h264");
             break;
         case FT_TXT:
-            printf("TEXT");
+            printf("text");
             break;
         default:
-            printf("Unknown");
+            printf("unknown");
     }
     if (strlen(pInfo) > 0)
     {
-        printf(", %s%s", pInfo,
+        printf(" %s%s", pInfo,
                 pIsHeader ?  " (Header)" : "");
     }
     printf("\n");

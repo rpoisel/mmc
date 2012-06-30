@@ -8,7 +8,9 @@ LBITS := $(shell getconf LONG_BIT)
 BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so
 OBJ_FRAGMENT_CLASSIFIER= $(BUILD_DIR)/fragment_classifier.o \
 			 $(BUILD_DIR)/entropy/entropy.o
-CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC -Iinclude/entropy
+CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC \
+			   -Iinclude/entropy \
+			   -Iinclude/magic
 
 ifeq ($(LBITS),64)
     LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
@@ -17,8 +19,6 @@ else
     LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
 	-lpthread -Llib/magic/linux-i686 -lmagic #-lsvm
 endif
-
-
 # ================= END FRAGMENT CLASSIFIER ==================
 
 # ================ START BLOCK READER =================
