@@ -1,0 +1,12 @@
+==== Build Instructions ====
+
+Linux:
+  * Invoke "make"
+
+Windows:
+  * Invoke "nmake -f Makefile_win.mk"
+
+==== How to Use ====
+
+  * ./data_sniffer <path-to-image> <block-size <= 131072> [num-threads <= 2048]
+
