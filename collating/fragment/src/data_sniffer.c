@@ -18,6 +18,7 @@ typedef struct
 {
     pthread_mutex_t mMutex;
     block_collection_t* mStorage;
+    long int mBlockSize;
 } thread_data;
 
 int main(int argc, char* argv[])
@@ -62,6 +63,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Illegal block size given. Needs to be between 1 and 131072 (inclusive). \n");
         return EXIT_FAILURE;
     }
+    lData.mBlockSize = lBlockSize;
     lImageBlockSize = lImageSize / lBlockSize;
     if (lImageSize % lBlockSize != 0)
     {
@@ -102,9 +104,8 @@ int callback_print(void* pData, unsigned long long pOffset,
     thread_data* lData = (thread_data* )pData;
     pthread_mutex_lock(&lData->mMutex);
 
-    pIsHeader ?  printf("Header, ") : printf("        ");
-    printf("Offset: % 10lld, Strength: %d, Type: ", 
-            pOffset, pStrength);
+    printf("%lld ", 
+            pOffset * lData->mBlockSize);
     switch (pType)
     {
         case FT_HIGH_ENTROPY:
@@ -136,7 +137,8 @@ int callback_print(void* pData, unsigned long long pOffset,
     }
     if (strlen(pInfo) > 0)
     {
-        printf(", Info: %s", pInfo);
+        printf(", %s%s", pInfo,
+                pIsHeader ?  " (Header)" : "");
     }
     printf("\n");
 
