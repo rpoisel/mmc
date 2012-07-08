@@ -100,7 +100,10 @@ class CFFMpegDecoder(CDecoder):
             self.__mFhDump.write(pData)
 
     def close(self):
-        self.__mFFMpeg.communicate()
+        try:
+            self.__mFFMpeg.communicate()
+        except IOError:
+            pass
         try:
             self.__mFFMpeg.kill()
         except OSError:
