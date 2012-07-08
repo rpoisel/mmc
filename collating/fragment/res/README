@@ -1,0 +1,31 @@
+====== LibSVM supported filetype classification ======
+
+This document describes how to use these libraries. It is recommended to use
+libsvm classification only in case "cheap" methods (e. g. signature checking)
+do not work. 
+
+===== Installation procedure =====
+
+  - Install libsvm from project directory
+http://forensics.nwt.fhstp.ac.at/repos/libsvm-3.12-openmp.tar.gz
+
+  - Extract and then build the library
+$ cd libsvm-3.12-openmp/python
+$ make
+
+===== How to use these tools =====
+
+  - Set PYTHONPATH environment variable to let Python find libsvm python bindings (compiled in previous step)
+$ export PYTHONPATH=/usr/local/src/libsvm/python
+
+  - Extract features from training files set (results in /tmp/training.txt.model and /tmp/training.txt.range)
+$ ./svm-extract.py /tmp/training 4096 > /tmp/training.txt
+
+  - Extract features from test files set
+$ ./svm-extract.py /tmp/test 4096 > /tmp/test.txt
+
+  - In libsvm/tools directory start generation and testing of SVM model:
+$ ./easy.py /tmp/training.txt /tmp/test.txt
+
+  - Back in this directory, test the results of your training run
+$ ./svm-test.py /tmp/training.txt.model /tmp/training.txt.range /tmp/test/03-aloe_blacc-hey_brother-loutcho.mp3 4096
