@@ -13,6 +13,12 @@ http://forensics.nwt.fhstp.ac.at/repos/libsvm-3.12-openmp.tar.gz
 $ cd libsvm-3.12-openmp/python
 $ make
 
+  - More information about multi-core CPU support can be found here
+http://www.csie.ntu.edu.tw/~cjlin/libsvm/faq.html#f432
+
+  - Especially the OMP_NUM_THREADS variable is worth a view (example: quad-core CPU)
+$ export OMP_NUM_THREADS=4
+
 ===== How to use these tools =====
 
   - Set PYTHONPATH environment variable to let Python find libsvm python bindings (compiled in previous step)
