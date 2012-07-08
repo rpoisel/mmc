@@ -21,6 +21,15 @@ $ export OMP_NUM_THREADS=4
 
 ===== How to use these tools =====
 
+  - Create two directories: one contains training files and one contains the test files
+$ mkdir /tmp/training
+$ cp some.mp3 /tmp/training
+$ cp some.jpg /tmp/training
+
+$ mkdir /tmp/test
+$ cp someother.mp3 /tmp/test
+$ cp someother.jpg /tmp/test
+
   - Set PYTHONPATH environment variable to let Python find libsvm python bindings (compiled in previous step)
 $ export PYTHONPATH=/usr/local/src/libsvm/python
 
