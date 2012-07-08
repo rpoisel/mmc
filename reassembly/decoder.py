@@ -6,7 +6,7 @@ import platform
 class CDecoder(object):
     @staticmethod
     def getDecoder(pInputFormat, pOutputFormat=None):
-        if pOutputFormat != None and pOutputFormat.find('.dd') != -1:
+        if pOutputFormat is not None and pOutputFormat.find('.dd') != -1:
             return CCopyDecoder()
         elif pInputFormat.find("video") != -1:
             return CFFMpegDecoder()
@@ -46,19 +46,19 @@ class CJpegDecoder(CDecoder):
         if platform.system().lower() == "linux":
             self.__mFH = open("/dev/null", "w")
             self.__mJpegProc = subprocess.Popen(
-                    ["convert", self.__mPngPath.replace(".png", ".jpg"),\
+                    ["convert", self.__mPngPath.replace(".png", ".jpg"),
                      self.__mPngPath],
-                    bufsize = 512,
-                    stdin = subprocess.PIPE, \
-                    stdout = self.__mFH.fileno(),
-                    stderr = self.__mFH.fileno())
+                    bufsize=512,
+                    stdin=subprocess.PIPE,
+                    stdout=self.__mFH.fileno(),
+                    stderr=self.__mFH.fileno())
 
         self.__mJpegProc.communicate()
         try:
             self.__mJpegProc.kill()
         except OSError:
             pass
-        if self.__mFH != None:
+        if self.__mFH is not None:
             self.__mFH.close()
 
 
@@ -88,7 +88,7 @@ class CFFMpegDecoder(CDecoder):
                     stdin=subprocess.PIPE,
                     stdout=self.__mFH.fileno(),
                     stderr=self.__mFH.fileno())
-        if pPathDump != None:
+        if pPathDump is not None:
             self.__mFhDump = open(pPathDump, "wb")
 
     def write(self, pData):
@@ -96,7 +96,7 @@ class CFFMpegDecoder(CDecoder):
             self.__mFFMpeg.stdin.write(pData)
         except IOError, pExc:
             pass
-        if self.__mFhDump != None:
+        if self.__mFhDump is not None:
             self.__mFhDump.write(pData)
 
     def close(self):
@@ -105,9 +105,9 @@ class CFFMpegDecoder(CDecoder):
             self.__mFFMpeg.kill()
         except OSError:
             pass
-        if self.__mFH != None:
+        if self.__mFH is not None:
             self.__mFH.close()
-        if self.__mFhDump != None:
+        if self.__mFhDump is not None:
             self.__mFhDump.close()
 
 
