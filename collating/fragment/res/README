@@ -10,6 +10,8 @@ do not work.
 http://forensics.nwt.fhstp.ac.at/repos/libsvm-3.12-openmp.tar.gz
 
   - Extract and then build the library
+$ cd libsvm-3.12-openmp
+$ make
 $ cd libsvm-3.12-openmp/python
 $ make
 
