@@ -171,7 +171,16 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
                 if (strstr(lMagicResult, "sequence") == NULL &&
-                        strstr(lMagicResult, "LOAS") == NULL)
+                        strstr(lMagicResult, "LOAS") == NULL && 
+#if 1
+                        (strstr(lMagicResult, "ADTS") != NULL && 
+                         strstr(lMagicResult, "layer II,") == NULL && 
+                         strstr(lMagicResult, "AAC") == NULL &&
+                         strstr(lMagicResult, "v1") == NULL &&
+                         strstr(lMagicResult, "v2,") == NULL))
+#else
+                        strstr(lMagicResult, "ADTS") == NULL)
+#endif
                 {
                     pResult->mIsHeader = 1;
                 }
@@ -459,7 +468,12 @@ DWORD classify_thread(LPVOID pData)
 #if DEBUG == 0
                     if (lResult.mIsHeader)
                     {
-                        printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d) \n",lCntBlock,lResult.mType, lResult.mStrength, lResult.mIsHeader);
+                        printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
+                                lCntBlock,
+                                lResult.mType,
+                                lResult.mStrength,
+                                lResult.mIsHeader,
+                                lResult.mInfo);
                     }
 #endif
                     lData->callback(lData->callback_data, lCntBlock, 
