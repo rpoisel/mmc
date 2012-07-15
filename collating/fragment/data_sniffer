@@ -3,6 +3,6 @@
 ARCH=`uname -m`
 export LD_LIBRARY_PATH=".:lib/magic/linux-${ARCH}"
 
-./data_sniffer.bin $*
+./data_sniffer.bin "$@"
 
 exit $?

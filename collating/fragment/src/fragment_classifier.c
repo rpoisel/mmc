@@ -226,7 +226,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     /* statistical examination */
     {
         lEntropy = calc_entropy(pFragment, pLen);
-        if (lEntropy > 0.625) /* empiric value ;-) */
+        if (lEntropy > 0.9)
         {
             pResult->mType = FT_HIGH_ENTROPY;
             pResult->mStrength = 1;
