@@ -226,6 +226,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     /* statistical examination */
     {
         lEntropy = calc_entropy(pFragment, pLen);
+
         if (lEntropy > 0.9)
         {
             pResult->mType = FT_HIGH_ENTROPY;
@@ -301,9 +302,13 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     thread_data* lData = NULL;
     unsigned long long lSize = pSizeReal * pFragmentClassifier->mFragmentSize - pOffset;
     unsigned long long lFragsTotal = lSize / pFragmentClassifier->mFragmentSize;
-    unsigned long long lFragsPerCpu = lFragsTotal/pNumThreads;
-    unsigned long long lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
+    unsigned long long lFragsPerCpu = lFragsTotal / pNumThreads;
+    unsigned long long lFragsPerCpuR = 0;
     unsigned long long lOffsetImg = 0;
+    if (lFragsPerCpu > 0)
+    {
+        lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
+    }
        
     /* TODO check return value */
 #ifdef __linux__
