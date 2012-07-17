@@ -129,7 +129,7 @@ int callback_print(void* pData, unsigned long long pOffset,
         FileType pType, int pStrength, int pIsHeader, char* pInfo)
 {
     thread_data* lData = (thread_data* )pData;
-#if 0
+
     pthread_mutex_lock(&lData->mMutex);
 
     printf("%lld ", 
@@ -169,7 +169,6 @@ int callback_print(void* pData, unsigned long long pOffset,
                 pIsHeader ?  " (Header)" : "");
     }
     printf("\n");
-#endif
 
     pthread_mutex_unlock(&lData->mMutex);
     return 0;
