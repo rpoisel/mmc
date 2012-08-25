@@ -131,13 +131,12 @@ class CImgVisualizer(QGraphicsScene):
             elif lY + lTmpHeight > lSceneHeight+lSceneY:
                 lY = lSceneY + lSceneHeight - lTmpHeight
 
-
-            if not lImgBegin is None:
+            if lImgBegin is not None and lImgEnd is not None:
                 # adjust x position
                 if lBeginX > (lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()):
                     lBeginX = lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()
                 pPainter.drawImage(lBeginX, lY, lImgBegin)
-            if not lImgEnd is None:
+            if lImgEnd is not None:
                 # adjust x position
                 if lEndX > (lSceneX + lSceneWidth - lImgEnd.width()):
                     lEndX = lSceneX + lSceneWidth - lImgEnd.width()
