@@ -60,8 +60,9 @@ class CImgVisualizer(QGraphicsScene):
         """
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
         #calculate the fragment under cursor
-        # w of 1 fragment
+        # w of 1 byte in pixels
         lWidth = lSceneWidth / float(self.__mSize)
+        # current position in bytes
         lX = (pPos.x() - lSceneX) / lWidth
         if self.__mCtx.fragments is not None:
             for lFrag in self.__mCtx.fragments:
