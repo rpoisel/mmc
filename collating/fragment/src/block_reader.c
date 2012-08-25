@@ -32,7 +32,7 @@ fragment_collection_t* classify(int pBlockSize,
 {
     FragmentClassifier* lHandle = NULL;
     block_collection_t* lBlocks = NULL;
-	fragment_collection_t* lFragments = NULL;
+    fragment_collection_t* lFragments = NULL;
 
     lHandle = fragment_classifier_new_ct(NULL, 0, pBlockSize, pTypes, pNumTypes);
     if (!lHandle)

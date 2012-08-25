@@ -84,7 +84,6 @@ class CPreprocessing:
         lFragments = None
         try:
             lClassifier = fragment.CFragmentClassifier()
-            #lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
             lSize = os.path.getsize(pOptions.imagefile)
             lFragsTotal = lSize / pOptions.fragmentsize
             lFragments = lClassifier.classify(pOptions.fragmentsize,
