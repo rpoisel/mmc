@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Thu Jun 21 11:00:41 2012
-#      by: pyside-uic 0.2.11 running on PySide 1.0.6
+# Created: Sat Aug 25 16:46:14 2012
+#      by: pyside-uic 0.2.13 running on PySide 1.1.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -58,7 +58,7 @@ class Ui_MainWindow(object):
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "E&xit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpenImage.setText(QtGui.QApplication.translate("MainWindow", "Open image", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOpenImage.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+I", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpenImage.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
         self.actionChooseOutputDir.setText(QtGui.QApplication.translate("MainWindow", "Choose Output Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionChooseOutputDir.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionChooseOutputDir.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+D", None, QtGui.QApplication.UnicodeUTF8))
 

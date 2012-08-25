@@ -67,7 +67,7 @@
     <string>Open image</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+I</string>
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionChooseOutputDir">
@@ -75,7 +75,7 @@
     <string>Choose Output Directory</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+O</string>
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>

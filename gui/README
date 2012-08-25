@@ -1,0 +1,7 @@
+#### HowTo Work with Resources 
+
+First, compile the .ui-files into Python-Scripts
+pyside-uic mainwindow.ui > mainwindow.py
+
+Then, compile the .qrc resource-files into Python-Scripts
+pyside-rcc gui_resources.qrc > gui_resources.py
