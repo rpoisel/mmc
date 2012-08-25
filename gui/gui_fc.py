@@ -20,9 +20,9 @@ from PySide import QtUiTools
 import gui_resources
 import gui_options
 import gui_imgvisualizer
-from mm_context    import CContext
-from preprocessing import preprocessing_context
-from preprocessing import fsstat_context
+from mm import CContext
+from preprocessing import preprocessing
+from preprocessing import fsstat
 
 
 class Jobs(object):
@@ -120,7 +120,7 @@ class CMain(object):
         self.customwidget.imageView.setMouseTracking(True)
 
         for lPreprocessor in \
-                preprocessing_context.CPreprocessing.getPreprocessors():
+                preprocessing.CPreprocessing.getPreprocessors():
             self.customwidget.preprocessing.addItem(lPreprocessor['name'])
 
         self.mRecoverFiletypes = {"Video": ["MKV", "Copy", "JPEG", "PNG"],
@@ -242,7 +242,7 @@ class CMain(object):
         if os.path.exists(pPath):
             lOptions = self.__getOptions()
             self.__mGeometry = \
-                    fsstat_context.CFsStatContext.getFsGeometry(lOptions)
+                    fsstat.CFsStatContext.getFsGeometry(lOptions)
             logging.info("FS Info: " + str(self.__mGeometry))
             self.customwidget.offset.setText(str(self.__mGeometry.offset))
             self.customwidget.fragmentSize.setText(\

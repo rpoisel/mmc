@@ -6,7 +6,7 @@ import zlib
 
 sys.path.append("..")
 
-from fragment_context import FileType
+from fragment import FileType
 
 
 def main():

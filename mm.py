@@ -4,9 +4,8 @@ import multiprocessing
 import logging
 
 # import only if necessary
-#from contexts.media import frag_mm_meta_context
-from preprocessing import preprocessing_context
-from reassembly    import reassembly_context
+from preprocessing import preprocessing
+from reassembly import reassembly
 
 
 class CContext:
@@ -40,7 +39,7 @@ class CContext:
                 pOptions.offset,
                 "")
         # initialize preprocessor
-        lProcessor = preprocessing_context.CPreprocessing(pOptions)
+        lProcessor = preprocessing.CPreprocessing(pOptions)
         self.__mFragments = lProcessor.classify(pOptions, pCaller)
         logging.info("Back to the main context.")
 
@@ -61,13 +60,13 @@ class CContext:
         #The file handler know file type specific operations for
         #the reassembly algorithm
         if pOptions.recoverfiletype == "video":
-            lFileHandler = reassembly_context.CVideoHandler()
+            lFileHandler = reassembly.CVideoHandler()
         elif pOptions.recoverfiletype == "jpeg":
-            lFileHandler = reassembly_context.CJpegHandler()
+            lFileHandler = reassembly.CJpegHandler()
         elif pOptions.recoverfiletype == "png":
             pass
         if lFileHandler != None:
-            lReassembly = reassembly_context.CReassemblyPUP(lFileHandler)
+            lReassembly = reassembly.CReassemblyPUP(lFileHandler)
             if lReassembly != None:
                 self.__mFiles = lReassembly.assemble(pOptions, \
                                                      self.__mFragments, \

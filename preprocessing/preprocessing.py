@@ -7,16 +7,14 @@ import time
 import Queue
 from ctypes import *
 
-from preprocessing.tsk import tsk_context
-from preprocessing.plain import plain_context
+from tsk import tsk
+from plain import plain
 try:
-    #from collating.fragment import fragment_context
-    from collating.fragment import fragment_context
+    from collating.fragment import fragment
 except ImportError, pExc:
     logging.error("Problem with importing a library: " + str(pExc))
     logging.error("Try making it with 'make' first.")
     sys.exit(-1)
-#from collating.magic import magic_context
 
 
 class CResultThread(threading.Thread):
@@ -62,21 +60,19 @@ class CPreprocessing:
 
         lTypes = []
         if pOptions.recoverfiletype == "video":
-            lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
+            lTypes.append({'mType': fragment.FileType.FT_HIGH_ENTROPY,
                 'mStrength': pOptions.strength})
-            lTypes.append({'mType': fragment_context.FileType.FT_VIDEO,
+            lTypes.append({'mType': fragment.FileType.FT_VIDEO,
                 'mStrength': pOptions.strength})
-            lTypes.append({'mType': fragment_context.FileType.FT_H264,
+            lTypes.append({'mType': fragment.FileType.FT_H264,
                 'mStrength': pOptions.strength})
         elif pOptions.recoverfiletype == "jpeg":
-            #lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
-            #    'mStrength': pOptions.strength})
-            lTypes.append({'mType': fragment_context.FileType.FT_JPG,
+            lTypes.append({'mType': fragment.FileType.FT_JPG,
                 'mStrength': pOptions.strength})
         elif pOptions.recoverfiletype == "png":
-            lTypes.append({'mType': fragment_context.FileType.FT_HIGH_ENTROPY,
+            lTypes.append({'mType': fragment.FileType.FT_HIGH_ENTROPY,
                 'mStrength': pOptions.strength})
-            lTypes.append({'mType': fragment_context.FileType.FT_PNG,
+            lTypes.append({'mType': fragment.FileType.FT_PNG,
                 'mStrength': pOptions.strength})
 
         lResultArray = [0]
@@ -87,7 +83,7 @@ class CPreprocessing:
 
         lFragments = None
         try:
-            lClassifier = fragment_context.CFragmentClassifier()
+            lClassifier = fragment.CFragmentClassifier()
             #lSize = os.path.getsize(pOptions.imagefile) - pOptions.offset
             lSize = os.path.getsize(pOptions.imagefile)
             lFragsTotal = lSize / pOptions.fragmentsize

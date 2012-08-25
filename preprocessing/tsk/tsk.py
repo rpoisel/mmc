@@ -1,79 +1,144 @@
+import os
+import logging
+import subprocess
+from tsk_cmd import CTSKblkls
+import gui.gui_options
 
 
-class CTSKblkls(object):
-    def __init__(self):
-        self.imageoffset = 0
-        self.filename = ''
-        self.fstype = ''
-        self.imagetype = ''
-        self.sectorsize = -1
-        self.list = True
-        self.start = -1
-        self.stop = -1
+class CGeneratorContext:
+    def __init__(self, start, stop):
 
-    def getAll(self):
-        pass
+        self.__pOptions = gui.gui_options.CGuiOptions()
+        self.__mImage = open(self.__pOptions.imagefile, "rb")
+        self.__start = start
+        self.__stop = stop
 
-    def getUnallocated(self):
-        command = []
-        # Name of the blkls command
-        command.append('blkls')
-        command.append('-A')
+        self.__clusterarea = 0
+        self.__rootdir = 0
 
-#        if self.fstype:
-#            command.append('-f')
-#            command.append(str(self.fstype))
+        for key in self.__pOptions.tskProperties.iterkeys():
+            if key.lower().find("cluster area") >= 0:
+                self.__clusterarea = self.__pOptions.tskProperties[key]\
+                                [:self.__pOptions.tskProperties[key].find(" ")]
+            if key.lower().find("root directory") >= 0:
+                self.__rootdir = self.__pOptions.tskProperties[key]\
+                               [:self.__pOptions.tskProperties[key].find(" ")]
 
-        if self.imagetype:
-            command.append('-i')
-            command.append(str(self.imagetype))
+    def __del__(self):
+        self.__mImage.close()
 
-        if self.imageoffset > 0:
-            command.append('-o')
-            command.append(str(self.imageoffset))
+    def __createGenerator(self):
 
-        if self.sectorsize > 0:
-            command.append('-b')
-            command.append(str(self.sectorsize))
+        lBlkLs = CTSKblkls()
+        lBlkLs.filename = self.__pOptions.imagefile
+        lBlkLs.imageoffset = self.__pOptions.imageoffset
+        lBlkLs.fstype = self.__pOptions.fstype
+        lBlkLs.sectorsize = self.__pOptions.fragmentsize
+        lBlkLs.list = True
+        lBlkLs.start = self.__start
+        lBlkLs.stop = self.__stop
 
-        if self.list:
-            command.append('-l')
+        if self.__pOptions.blockstatus == "allocated":
+            command = lBlkLs.getAllocated()
+        elif self.__pOptions.blockstatus == "unallocated":
+            command = lBlkLs.getUnallocated()
+        else:
+            raise Exception, "Wrong value for blockstatus!"
 
-        command.append(self.filename)
+        logging.info("Executing command: " + str(command))
 
-        if self.start > 0 and self.stop > 0:
-            command.append(str(self.start) + "-" + str(self.stop))
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE)
 
-        return command
+        for i in range(3):
+                line = proc.stdout.readline()
 
-    def getAllocated(self):
-        command = []
-        # Name of the blkls command
-        command.append('blkls')
-        command.append('-a')
+        self.__mFragsChecked = 0
 
-#        if self.fstype:
-#            command.append('-f')
-#            command.append(str(self.fstype))
+        while True:
+            line = proc.stdout.readline()
+            if not line:
+                break
+            else:
+                lOffset = self.__getOffset(line, '')
+                logging.info("Seeking to offset " + str(lOffset))
+                self.__mImage.seek(lOffset, os.SEEK_SET)
+                lBuffer = self.__mImage.read(self.__pOptions.fragmentsize)
 
-        if self.imagetype:
-            command.append('-i')
-            command.append(str(self.imagetype))
+                self.__mFragsChecked += 1
 
-        if self.imageoffset >= 0:
-            command.append('-o')
-            command.append(str(self.imageoffset))
+                if not lBuffer:
+                    break
 
-        if self.sectorsize >= 0:
-            command.append('-b')
-            command.append(str(self.sectorsize))
+                yield (lOffset, lBuffer)
 
-        if self.list:
-            command.append('-l')
+    def __getOffsetFat(self, line):
+        return (int(line[:line.find('|')]) - 2) * \
+            self.__pOptions.fragmentsize + int(self.__clusterarea) * 512
 
-        command.append(self.filename)
+    def __getOffsetNtfs(self, line):
+        return (int(line[:line.find('|')])) * self.__pOptions.fragmentsize
 
-        if self.start >= 0 and self.stop >= 0:
-            command.append(str(self.start) + '-' + str(self.stop))
+    def __getOffset(self, line, filesystem):
+        if self.__pOptions.fstype.lower().find("ntfs") >= 0:
+            return self.__getOffsetNtfs(line)
+        elif self.__pOptions.fstype.lower().find("fat") >= 0:
+            return self.__getOffsetFat(line)
+        else:
+            raise Exception, "Filesystem not implemented!"
 
-        return command
+    def getFragsRead(self):
+        return 1
+
+    def getFragsTotal(self):
+        return 1
+
+    def getGenerator(self):
+        return self.__createGenerator()
+
+
+class CTskImgProcessor:
+    def __init__(self, pOptions):
+        self.__mGenerators = []
+        self.__mNumParallel = pOptions.maxcpus
+        self.__mFsType = pOptions.fstype
+
+        if self.__mFsType.lower().find("ntfs") >= 0:
+            clusterrange = pOptions.tskProperties["Total Cluster Range"]
+            lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
+        elif self.__mFsType.lower().find("fat") >= 0:
+            clusterrange = pOptions.tskProperties["* Data Area"]
+            lsize = int(clusterrange[clusterrange.find("-") + 1:].strip())
+        else:
+            start = 0
+            stop = 1
+            self.__mGenerators.append(CGeneratorContext(start, stop))
+            return
+
+        lBlockRange = lsize // self.__mNumParallel
+
+        ranges = []
+        for i in range(self.__mNumParallel):
+            ranges.append(lBlockRange * (i + 1))
+
+        rest = lsize % self.__mNumParallel
+        if rest > 0:
+            ranges[len(ranges) - 1] += rest
+
+        rangestart = 0
+        for lPid in range(self.__mNumParallel):
+            start = rangestart
+            stop = ranges[lPid] - 1
+            rangestart = ranges[lPid]
+            self.__mGenerators.append(CGeneratorContext(start, stop))
+
+    def getNumParallel(self, pNumParallel):
+        return pNumParallel
+
+    def getFragsRead(self, pPid):
+        return self.__mGenerators[pPid].getFragsRead()
+
+    def getFragsTotal(self, pPid):
+        return self.__mGenerators[pPid].getFragsTotal()
+
+    def getGenerator(self, pPid):
+        return self.__mGenerators[pPid].getGenerator()

@@ -7,7 +7,7 @@ import svmutil
 
 sys.path.append("..")
 
-from fragment_context import FileType
+from fragment import FileType
 
 
 def read_ranges(pPathRange):
