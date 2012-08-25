@@ -10,23 +10,25 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 # import logging
 import logging
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+        level=logging.DEBUG)
 
 
 class CImgVisualizer(QGraphicsScene):
-    """ 
+    """
     This class takes care of rendering the fragments retrieved from CFileCarver
     in a nice way
     """
 
     def __init__(self, ctx, pSize, pOffset, pFsType, parent=None):
-        """ 
+        """
         @param ctx - CFileCarver containing fragment informations
         @param parent - Parent Widget container
         """
         super(CImgVisualizer, self).__init__(parent)
         #self.setSceneRect(0,0,500,500)
-        self.setSceneRect(0, 0, self.parent().size().width(), self.parent().size().height())
+        self.setSceneRect(0, 0, self.parent().size().width(),
+                self.parent().size().height())
         self.__mCtx = ctx
         self.__mScale = 1.0
         self.__mHeaderBrush = QBrush(Qt.red)
@@ -37,37 +39,40 @@ class CImgVisualizer(QGraphicsScene):
         self.__mSize = pSize
         self.__mOffset = pOffset
         self.__mFsType = pFsType
-        self.__mHoverFragment = None #fragment under cursor, to draw
-        self.__mHoverPosition = None #position to draw the tooltip at
-        #self.__mHoverEndPic = False #true if you want the end pic to show, else begin pic
+        # fragment under cursor, to draw
+        self.__mHoverFragment = None
+        # position to draw the tooltip at
+        self.__mHoverPosition = None
         logging.info('Created CImgVisualizer')
-      
+
     def mouseMoveEvent(self, pMouseEvent):
         """
         Overridden mouseMoveEvent
         @param pMouseEvent QMouseEvent
         """
         lPos = pMouseEvent.scenePos()
-        self.updateHover(lPos)        
+        self.updateHover(lPos)
 
     def updateHover(self, pPos):
         """
-        @param pPos - position (mouse position) where to check if a fragment is underneath
+        @param pPos - position (mouse position) where to check
+                      if a fragment is underneath
         """
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
         #calculate the fragment under cursor
-        lWidth = lSceneWidth / float(self.__mSize) #w of 1 fragment
-        lX = (pPos.x()-lSceneX) / lWidth
-        if self.__mCtx.fragments != None:
+        # w of 1 fragment
+        lWidth = lSceneWidth / float(self.__mSize)
+        lX = (pPos.x() - lSceneX) / lWidth
+        if self.__mCtx.fragments is not None:
             for lFrag in self.__mCtx.fragments:
-                if lX >= lFrag.mOffset and lX <= lFrag.mOffset+lFrag.mSize:
+                if lX >= lFrag.mOffset and lX <= lFrag.mOffset + lFrag.mSize:
                     #logging.info('Paint tooltip')
                     self.__mHoverFragment = lFrag
                     self.__mHoverPosition = pPos
                     break
                 else:
                     self.__mHoverFragment = None
-                    self.__mHoverPosition = None 
+                    self.__mHoverPosition = None
         self.update()
 
     def paintTooltip(self, pPainter, pRect):
@@ -86,11 +91,11 @@ class CImgVisualizer(QGraphicsScene):
             if hasattr(self.__mHoverFragment, "mPicEnd"):
                 lImgEnd = self.__mHoverFragment.mPicEnd
             else:
-                lImgEnd =None
+                lImgEnd = None
             lBeginX = self.__mHoverPosition.x()
             lEndX = self.__mHoverPosition.x()
             lY = self.__mHoverPosition.y()
-        
+
             if not lImgBegin is None and len(lImgBegin) > 0:
                 lImgBegin = QImage(lImgBegin)
             else:
@@ -100,7 +105,8 @@ class CImgVisualizer(QGraphicsScene):
             else:
                 lImgEnd = None
             # adjust the pictures to center them around the mouse cursor
-            #TODO: adjust to the right boundaries if the picture would be drawn outside of lSceneX+lSceneWidth
+            # TODO: adjust to the right boundaries if the picture would
+            # be drawn outside of lSceneX+lSceneWidth
             lTmpHeight = 0
             if not lImgBegin is None and lImgEnd is None:
                 #logging.info("Adjust only begin pic")
@@ -125,16 +131,18 @@ class CImgVisualizer(QGraphicsScene):
                     lTmpHeight = lImgBegin.height()
             # adjust y position
             if lTmpHeight > lSceneHeight:
-                lY = lSceneY+1
+                lY = lSceneY + 1
             elif lY < lSceneY:
-                lY = lSceneY+1
-            elif lY + lTmpHeight > lSceneHeight+lSceneY:
+                lY = lSceneY + 1
+            elif lY + lTmpHeight > lSceneHeight + lSceneY:
                 lY = lSceneY + lSceneHeight - lTmpHeight
 
             if lImgBegin is not None and lImgEnd is not None:
                 # adjust x position
-                if lBeginX > (lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()):
-                    lBeginX = lSceneX + lSceneWidth - lImgEnd.width() - lImgBegin.width()
+                if lBeginX > (lSceneX + lSceneWidth -
+                        lImgEnd.width() - lImgBegin.width()):
+                    lBeginX = lSceneX + lSceneWidth -
+                    lImgEnd.width() - lImgBegin.width()
                 pPainter.drawImage(lBeginX, lY, lImgBegin)
             if lImgEnd is not None:
                 # adjust x position
@@ -157,8 +165,10 @@ class CImgVisualizer(QGraphicsScene):
         lEndX = self.parent().size().width() - lStartX
         lEndY = self.parent().size().height() - lStartY
 
-        lWidth = lSceneWidth / float(self.__mSize)#self.parent().size().width() / float(self.__mSize)
-        lHeight = lSceneHeight #self.parent().size().height()
+        # self.parent().size().width() / float(self.__mSize)
+        lWidth = lSceneWidth / float(self.__mSize)
+        # self.parent().size().height()
+        lHeight = lSceneHeight
 
         try:
             for lFrag in self.__mCtx.fragments:
@@ -168,16 +178,18 @@ class CImgVisualizer(QGraphicsScene):
                 else:
                     lColor = QColor(127, 127, 255)
                 lFrameWidth = lWidth * lFrag.mSize
-                pPainter.fillRect(lSceneX + (lFrag.mOffset * lWidth)+1, lSceneY+1, lFrameWidth, lHeight-1, lColor)
+                pPainter.fillRect(lSceneX + (lFrag.mOffset * lWidth) + 1,
+                        lSceneY + 1, lFrameWidth, lHeight - 1, lColor)
         except TypeError, pExc:
             # sometimes this callback is invoked when this object is not ready
             pass
-        
+
     def drawForeground(self, pPainter, pRect):
         """
         This method draws the scale and the tooltips
         @param pPainter QPainter used to draw
-        @param pRect QRect passed to CImgVisualizer#paintTooltip(object, object)
+        @param pRect QRect passed to
+               CImgVisualizer#paintTooltip(object, object)
         """
         self.paintScale(pPainter)
         self.paintTooltip(pPainter, pRect)
@@ -188,14 +200,19 @@ class CImgVisualizer(QGraphicsScene):
         @param pPainter QPainter used to draw the scale
         """
         lSceneX, lSceneY, lSceneWidth, lSceneHeight = self.getOffsets()
-        pPainter.drawText(lSceneX-12, lSceneY+lSceneHeight+12, str(0))
+        pPainter.drawText(lSceneX - 12, lSceneY + lSceneHeight + 12, str(0))
         lStrWidth = pPainter.fontMetrics().width(str(self.__mSize)) / 2.0
-        pPainter.drawText(lSceneX + lSceneWidth - lStrWidth, lSceneY + lSceneHeight + 12, str(self.__mSize))
+        pPainter.drawText(lSceneX + lSceneWidth - lStrWidth,
+                lSceneY + lSceneHeight + 12, str(self.__mSize))
         if self.__mOffset > 0:
-            pPainter.drawText(lSceneX+((lSceneWidth / float(self.__mSize))*self.__mOffset), lSceneY+lSceneHeight+12, str(self.__mOffset))
-            pPainter.drawLine(lSceneX+((lSceneWidth / float(self.__mSize))*self.__mOffset), lSceneY+lSceneHeight-10, \
-            lSceneX+((lSceneWidth / float(self.__mSize))*self.__mOffset), lSceneY+lSceneHeight)
-
+            pPainter.drawText(lSceneX + ((
+                lSceneWidth / float(self.__mSize)) * self.__mOffset),
+                lSceneY + lSceneHeight + 12, str(self.__mOffset))
+            pPainter.drawLine(lSceneX + ((
+                lSceneWidth / float(self.__mSize)) * self.__mOffset),
+                lSceneY + lSceneHeight - 10,
+            lSceneX + ((lSceneWidth / float(self.__mSize)) * self.__mOffset),
+            lSceneY + lSceneHeight)
 
     def getOffsets(self):
         """
@@ -204,7 +221,8 @@ class CImgVisualizer(QGraphicsScene):
         #TODO: change fontsize to varying if something looks awkward
         lFontSize = 32
         lSceneX = self.parent().size().width() * float(0.1)
-        lSceneY = lFontSize #self.parent().size().height() + lFontSize
+        #self.parent().size().height() + lFontSize
+        lSceneY = lFontSize
         lSceneWidth = self.parent().size().width() - lSceneX
         lSceneHeight = self.parent().size().height() - lSceneY
         return (lSceneX, lSceneY, lSceneWidth, lSceneHeight)
@@ -218,10 +236,9 @@ if __name__ == '__main__':
             super(MainWindow, self).__init__()
             self.resize(800, 600)
             self.__mImageView = QGraphicsView(self)
-            self.__mImageView.setSceneRect(0,0,800,600)
+            self.__mImageView.setSceneRect(0, 0, 800, 600)
             self.__mImgVisualizer = CImgVisualizer(self)
             self.__mImageView.setScene(self.__mImgVisualizer)
-
 
     app = QApplication(sys.argv)
     frame = MainWindow()
