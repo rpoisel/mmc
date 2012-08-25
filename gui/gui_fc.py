@@ -20,7 +20,7 @@ from PySide import QtUiTools
 import gui_resources
 import gui_options
 import gui_imgvisualizer
-from mm import CFileCarver
+from filecarver import CFileCarver
 from preprocessing import preprocessing
 from preprocessing import fsstat
 
