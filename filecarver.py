@@ -65,11 +65,11 @@ class CFileCarver:
             lFileHandler = reassembly.CJpegHandler()
         elif pOptions.recoverfiletype == "png":
             pass
-        if lFileHandler != None:
+        if lFileHandler is not None:
             lReassembly = reassembly.CReassemblyPUP(lFileHandler)
-            if lReassembly != None:
-                self.__mFiles = lReassembly.assemble(pOptions, \
-                                                     self.__mFragments, \
+            if lReassembly is not None:
+                self.__mFiles = lReassembly.assemble(pOptions,
+                                                     self.__mFragments,
                                                      pCaller)
         pCaller.finishedCallback()
 

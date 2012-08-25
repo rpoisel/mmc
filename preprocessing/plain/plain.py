@@ -5,7 +5,7 @@ import platform
 
 
 class CGeneratorBlocks:
-    def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset, \
+    def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset,
             pFragmentSize, pIncrementSize):
         self._mPathImage = pPathImage
         self._mImage = open(self._mPathImage, "rb")
@@ -14,7 +14,7 @@ class CGeneratorBlocks:
         self._mFragmentOffset = pFragmentOffset
         self._mFragmentSize = pFragmentSize
         self._mIncrementSize = pIncrementSize
-        logging.info("Offset = " + str(self._mFragmentOffset) + \
+        logging.info("Offset = " + str(self._mFragmentOffset) +
                      ", NumFrags = " + str(self._mNumFrags))
         self._mCntFrag = 0
 
@@ -33,8 +33,8 @@ class CGeneratorBlocks:
         self._mCntFrag = pDict['_mCntFrag']
 
     def __del__(self):
-        if hasattr(self, '_mImage') and self._mImage != None and \
-            self._mImage.closed is False:
+        if hasattr(self, '_mImage') and self._mImage is not None and \
+                self._mImage.closed is False:
                 logging.info("Closing file object: " + str(self._mImage))
                 self._mImage.close()
 
@@ -76,18 +76,18 @@ class CPlainImgProcessor:
         self.__mFragsTotal = lSize / pOptions.fragmentsize
         if lSize % pOptions.fragmentsize != 0:
             self.__mFragsTotal += 1
-        lFragsPerCpu = int(math.ceil(float(self.__mFragsTotal) / \
+        lFragsPerCpu = int(math.ceil(float(self.__mFragsTotal) /
                                      self.__mNumParallel))
         lFragsPerCpuR = self.__mFragsTotal % lFragsPerCpu
         for lPid in range(self.__mNumParallel):
             self.__mGenerators.append(CGeneratorBlocks(
-                pOptions.imagefile, \
-                pOptions.offset, \
-                lFragsPerCpuR if lPid is \
-                    (self.__mNumParallel - 1) and lFragsPerCpuR > 0 \
-                    else lFragsPerCpu, \
+                pOptions.imagefile,
+                pOptions.offset,
+                lFragsPerCpuR if lPid is
+                    (self.__mNumParallel - 1) and lFragsPerCpuR > 0
+                    else lFragsPerCpu,
                 lFragsPerCpu * lPid,
-                pOptions.fragmentsize, \
+                pOptions.fragmentsize,
                 pOptions.incrementsize))
 
     def getNumParallel(self, pNumParallel):

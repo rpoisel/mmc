@@ -39,7 +39,7 @@ class CFsStat:
                     bufsize=512, stdout=subprocess.PIPE)
         lTskOutput = lTsk.communicate()
         lTskProperties = {}
-        for lPair in [lElem for lElem in [lLine.split(': ') \
+        for lPair in [lElem for lElem in [lLine.split(': ')
                 for lLine in lTskOutput[0].split('\n')] if len(lElem) == 2]:
             lTskProperties[lPair[0].strip()] = lPair[1].strip()
 
@@ -58,6 +58,6 @@ class CFsStat:
                 pOffset=lOffset,
                 pBlockSize=lBlockSize,
                 pIncrement=lBlockSize,
-                pFsType=lTskProperties["File System Type"] if \
+                pFsType=lTskProperties["File System Type"] if
                         "File System Type" in lTskProperties else '',
                 pTskProperties=lTskProperties)
