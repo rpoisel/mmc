@@ -141,8 +141,8 @@ class CImgVisualizer(QGraphicsScene):
                 # adjust x position
                 if lBeginX > (lSceneX + lSceneWidth -
                         lImgEnd.width() - lImgBegin.width()):
-                    lBeginX = lSceneX + lSceneWidth -
-                    lImgEnd.width() - lImgBegin.width()
+                    lBeginX = lSceneX + lSceneWidth - \
+                            lImgEnd.width() - lImgBegin.width()
                 pPainter.drawImage(lBeginX, lY, lImgBegin)
             if lImgEnd is not None:
                 # adjust x position
