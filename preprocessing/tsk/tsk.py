@@ -5,7 +5,7 @@ from tsk_cmd import CTSKblkls
 import gui.gui_options
 
 
-class CGeneratorContext:
+class CGeneratorBlocks:
     def __init__(self, start, stop):
 
         self.__pOptions = gui.gui_options.CGuiOptions()
@@ -111,7 +111,7 @@ class CTskImgProcessor:
         else:
             start = 0
             stop = 1
-            self.__mGenerators.append(CGeneratorContext(start, stop))
+            self.__mGenerators.append(CGeneratorBlocks(start, stop))
             return
 
         lBlockRange = lsize // self.__mNumParallel
@@ -129,7 +129,7 @@ class CTskImgProcessor:
             start = rangestart
             stop = ranges[lPid] - 1
             rangestart = ranges[lPid]
-            self.__mGenerators.append(CGeneratorContext(start, stop))
+            self.__mGenerators.append(CGeneratorBlocks(start, stop))
 
     def getNumParallel(self, pNumParallel):
         return pNumParallel

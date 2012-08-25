@@ -4,7 +4,7 @@ import math
 import platform
 
 
-class CGeneratorContext:
+class CGeneratorBlocks:
     def __init__(self, pPathImage, pOffset, pNumFrags, pFragmentOffset, \
             pFragmentSize, pIncrementSize):
         self._mPathImage = pPathImage
@@ -80,7 +80,7 @@ class CPlainImgProcessor:
                                      self.__mNumParallel))
         lFragsPerCpuR = self.__mFragsTotal % lFragsPerCpu
         for lPid in range(self.__mNumParallel):
-            self.__mGenerators.append(CGeneratorContext(
+            self.__mGenerators.append(CGeneratorBlocks(
                 pOptions.imagefile, \
                 pOptions.offset, \
                 lFragsPerCpuR if lPid is \

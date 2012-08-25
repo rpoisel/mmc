@@ -8,7 +8,7 @@ from preprocessing import preprocessing
 from reassembly import reassembly
 
 
-class CContext:
+class CFileCarver:
     sDefaultImagefile = 'image.img'
     sDefaultFragmentsize = 512
     sDefaultIncrementsize = 512
@@ -41,7 +41,7 @@ class CContext:
         # initialize preprocessor
         lProcessor = preprocessing.CPreprocessing(pOptions)
         self.__mFragments = lProcessor.classify(pOptions, pCaller)
-        logging.info("Back to the main context.")
+        logging.info("Classification finished.")
 
         logging.info("8<=============== FRAGMENTs ==============")
         lCnt = 0

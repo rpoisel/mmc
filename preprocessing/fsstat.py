@@ -25,7 +25,7 @@ class CFsOptions:
         return lString
 
 
-class CFsStatContext:
+class CFsStat:
     @staticmethod
     def getFsGeometry(pOptions):
         lSize = os.path.getsize(pOptions.imagefile)

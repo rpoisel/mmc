@@ -20,7 +20,7 @@ from PySide import QtUiTools
 import gui_resources
 import gui_options
 import gui_imgvisualizer
-from mm import CContext
+from mm import CFileCarver
 from preprocessing import preprocessing
 from preprocessing import fsstat
 
@@ -38,10 +38,10 @@ class CThreadWorker(QtCore.QThread):
     sFinished = QtCore.Signal(int, int, int)
     sError = QtCore.Signal(str)
 
-    def __init__(self, pOptions, pContext, pJobs):
+    def __init__(self, pOptions, pFileCarver, pJobs):
         super(CThreadWorker, self).__init__()
         self.mOptions = pOptions
-        self.mContext = pContext
+        self.mFileCarver = pFileCarver
         self.mJobs = pJobs
         self.mRunningJob = Jobs.NONE
         self.mLastTs = datetime.datetime.now()
@@ -67,7 +67,7 @@ class CThreadWorker(QtCore.QThread):
         if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
             self.mRunningJob = Jobs.CLASSIFY
             try:
-                self.mContext.runClassify(self.mOptions, self)
+                self.mFileCarver.runClassify(self.mOptions, self)
             except OSError, pExc:
                 logging.error(str(pExc) + ". Please make sure the "\
                         "classifier binaries are compiled. ")
@@ -81,7 +81,7 @@ class CThreadWorker(QtCore.QThread):
         if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
             self.mRunningJob = Jobs.REASSEMBLE
             try:
-                self.mContext.runReassembly(self.mOptions, self)
+                self.mFileCarver.runReassembly(self.mOptions, self)
             except TypeError, pExc:
                 self.sFinished.emit(self.mRunningJob, self.mJobs, True)
 #            except Exception, pExc:
@@ -114,7 +114,7 @@ class CMain(object):
         self.mLoadMovie.jumpToNextFrame()
 
         self.__mGeometry = None
-        self.mContext = None
+        self.mFileCarver = None
 
         # adjust widget elements
         self.customwidget.imageView.setMouseTracking(True)
@@ -133,7 +133,7 @@ class CMain(object):
         self.on_recoverFT_changed(\
                 self.customwidget.recoverfiletypes.itemText(2))
 
-        for lCPU in reversed(range(CContext.getCPUs())):
+        for lCPU in reversed(range(CFileCarver.getCPUs())):
             self.customwidget.maxCPUs.addItem(str(lCPU + 1))
 
         self.customwidget.blockStatus.addItem("allocated")
@@ -242,7 +242,7 @@ class CMain(object):
         if os.path.exists(pPath):
             lOptions = self.__getOptions()
             self.__mGeometry = \
-                    fsstat.CFsStatContext.getFsGeometry(lOptions)
+                    fsstat.CFsStat.getFsGeometry(lOptions)
             logging.info("FS Info: " + str(self.__mGeometry))
             self.customwidget.offset.setText(str(self.__mGeometry.offset))
             self.customwidget.fragmentSize.setText(\
@@ -319,9 +319,9 @@ class CMain(object):
                 return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
-            if self.mContext != None:
-                self.mContext.cleanup()
-            self.mContext = CContext()
+            if self.mFileCarver != None:
+                self.mFileCarver.cleanup()
+            self.mFileCarver = CFileCarver()
             self.__clearFragments()
             self.__clearFiles()
             self.customwidget.progressBar.setValue(0)
@@ -346,7 +346,7 @@ class CMain(object):
         return False
 
     def on_reassembleButton_clicked(self, pChecked=None):
-        if len(self.mContext.fragments) is 0:
+        if len(self.mFileCarver.fragments) is 0:
             QtGui.QMessageBox.about(self.ui, "Error",
                 "What would you like to reassemble? "\
                         "No fragments have been classified yet!")
@@ -367,9 +367,9 @@ class CMain(object):
             return
         if self.__mLock.tryLock() == True:
             self.mLastTs = datetime.datetime.now()
-            if self.mContext != None:
-                self.mContext.cleanup()
-            self.mContext = CContext()
+            if self.mFileCarver != None:
+                self.mFileCarver.cleanup()
+            self.mFileCarver = CFileCarver()
             self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.CLASSIFY)
@@ -402,7 +402,7 @@ class CMain(object):
 
     def __startWorker(self, pJobs):
         lOptions = self.__getOptions()
-        self.__mWorker = CThreadWorker(lOptions, self.mContext, pJobs)
+        self.__mWorker = CThreadWorker(lOptions, self.mFileCarver, pJobs)
         self.__mWorker.sBegin.connect(self.on_begin_callback, \
                 QtCore.Qt.QueuedConnection)
         self.__mWorker.sProgress.connect(self.on_progress_callback, \
@@ -486,7 +486,7 @@ class CMain(object):
             logging.info("Beginning classifying. Imagesize is " +\
                     str(pSize) + " bytes.")
             self.__mImgVisualizer = gui_imgvisualizer.CImgVisualizer(\
-                    self.mContext, pSize, pOffset, pFsType,\
+                    self.mFileCarver, pSize, pOffset, pFsType,\
                     self.customwidget.imageView)
             self.customwidget.imageView.setScene(self.__mImgVisualizer)
         elif pJob == Jobs.REASSEMBLE:
@@ -504,8 +504,8 @@ class CMain(object):
         self.customwidget.duration.setText(str(lDelta))
         if pFinishedJob == Jobs.CLASSIFY:
             lNumRowsResult = 0
-            if self.mContext.fragments != None:
-                for lFrag in self.mContext.fragments:
+            if self.mFileCarver.fragments != None:
+                for lFrag in self.mFileCarver.fragments:
                     self.customwidget.resultTable.insertRow(lNumRowsResult)
                     if lFrag.mIsHeader == True:
                         lItem = QtGui.QTableWidgetItem("H")
@@ -595,8 +595,8 @@ class CMain(object):
             logging.info("Reassembling finished. ")
 
             lRowCount = 0
-            if self.mContext.files is not None:
-                for lFile in self.mContext.files:
+            if self.mFileCarver.files is not None:
+                for lFile in self.mFileCarver.files:
                     self.customwidget.fileTable.insertRow(lRowCount)
                     lItem = QtGui.QTableWidgetItem("File " + str(lRowCount))
                     lItem.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -625,7 +625,6 @@ class CMain(object):
                 "An error occured: " + pError)
 
     def run(self):
-        #self.__mWindow.show()
         self.ui.show()
         lReturn = self.__mApp.exec_()
         sys.exit(lReturn)

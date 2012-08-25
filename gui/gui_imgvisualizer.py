@@ -15,13 +15,13 @@ logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=loggin
 
 class CImgVisualizer(QGraphicsScene):
     """ 
-    This class takes care of rendering the fragments retrieved from CContext
+    This class takes care of rendering the fragments retrieved from CFileCarver
     in a nice way
     """
 
     def __init__(self, ctx, pSize, pOffset, pFsType, parent=None):
         """ 
-        @param ctx - CContext containing fragment informations
+        @param ctx - CFileCarver containing fragment informations
         @param parent - Parent Widget container
         """
         super(CImgVisualizer, self).__init__(parent)

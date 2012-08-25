@@ -2,7 +2,7 @@
 
 import unittest
 
-from mm_context import CContext
+from mm_context import CFileCarver
 
 
 class CTestFloppyImage(unittest.TestCase):
@@ -16,7 +16,7 @@ class CTestFloppyImage(unittest.TestCase):
         self.output = '/tmp/clever-output'
 
     def test_floppy_image(self):
-        lContext = CContext()
+        lContext = CFileCarver()
         lContext.run(self)
 
 class CTestFeasibilityImage4096(unittest.TestCase):
@@ -30,7 +30,7 @@ class CTestFeasibilityImage4096(unittest.TestCase):
         self.output = '/tmp/clever-output'
 
     def test_feasibility_image(self):
-        lContext = CContext()
+        lContext = CFileCarver()
         lContext.run(self) 
 
 class CTestFeasibilityImage512(unittest.TestCase):
@@ -44,7 +44,7 @@ class CTestFeasibilityImage512(unittest.TestCase):
         self.output = '/tmp/clever-output'
 
     def test_feasibility_image(self):
-        lContext = CContext()
+        lContext = CFileCarver()
         lContext.run(self) 
 
 if __name__ == "__main__":
