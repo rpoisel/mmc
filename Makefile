@@ -61,7 +61,7 @@ static_all: fragment_context
 	# copy files required for filetype classification
 	$(MKDIR) $(MKDIR_FLAGS) $(DIR_DIST_STATIC)/dist/collating/fragment
 	$(CP) $(CP_FLAGS) collating/fragment/data $(DIR_DIST_STATIC)/dist/collating/fragment/data
-	-(for i in animation jpeg png; do $(RM) $(RM_FLAGS) $(DIR_DIST_STATIC)/dist/collating/fragment/data/magic/$$i ; done)
+	-(for i in Makefile animation jpeg png; do $(RM) $(RM_FLAGS) $(DIR_DIST_STATIC)/dist/collating/fragment/data/magic/$$i ; done)
 
 	# prepare directory and create tar archive
 	$(MV) $(DIR_DIST_STATIC)/dist $(DIR_DIST_STATIC)/$(PROG_NAME)-$(VERSION)$(SUB_VER)
