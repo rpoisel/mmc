@@ -36,34 +36,40 @@ class CJpegDecoder(CDecoder):
 
     def open(self, pPath):
         self.__mPngPath = pPath
-        self.__mJpeg = open(pPath.replace(".png", ".jpg"), 'w')
+        self.__mJpegPath = pPath.replace(".png", ".jpg")
+        #self.__mJpeg = open(self.__mJpegPath, 'w')
+
+        if platform.system().lower() == "linux":
+            lConvertPath = "convert"
+            self.__mFH = open("/dev/null", "w")
+        else:
+            lConvertPath = os.path.join("bin", "convert")
+            self.__mFH = open("NUL", "w")
+
+        self.__mJpegProc = subprocess.Popen(
+                [lConvertPath,
+                    #self.__mJpegPath,
+                    "-",
+                    self.__mPngPath],
+                bufsize=512,
+                stdin=subprocess.PIPE,
+                stdout=self.__mFH.fileno(),
+                stderr=self.__mFH.fileno())
 
     def write(self, pData):
-        self.__mJpeg.write(pData)
+        try:
+            self.__mJpegProc.stdin.write(pData)
+        except IOError, pExc:
+            pass
+        #self.__mJpeg.write(pData)
 
     def close(self):
-        self.__mJpeg.close()
-        if platform.system().lower() == "linux":
-            self.__mFH = open("/dev/null", "w")
-            self.__mJpegProc = subprocess.Popen(
-                    ["convert", self.__mPngPath.replace(".png", ".jpg"),
-                     self.__mPngPath],
-                    bufsize=512,
-                    stdin=subprocess.PIPE,
-                    stdout=self.__mFH.fileno(),
-                    stderr=self.__mFH.fileno())
-        else:
-            self.__mFH = open("NUL", "w")
-            self.__mJpegProc = subprocess.Popen(
-                    [os.path.join("bin", "convert"), 
-                        self.__mPngPath.replace(".png", ".jpg"),
-                        self.__mPngPath],
-                    bufsize=512,
-                    stdin=subprocess.PIPE,
-                    stdout=self.__mFH.fileno(),
-                    stderr=self.__mFH.fileno())
-                    
-        self.__mJpegProc.communicate()
+        #self.__mJpeg.close()
+
+        try:
+            self.__mJpegProc.communicate()
+        except IOError:
+            pass
         try:
             self.__mJpegProc.kill()
         except OSError:
