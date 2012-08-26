@@ -162,20 +162,27 @@ class CVideoHandler(CAbstractFileTypeHandler):
             lRecoverFH.seek(pSortedFrags[lFragHeaderIdx].mOffset, os.SEEK_SET)
             lHdrData = lRecoverFH.read(pOptions.hdrsize)
             if pSortedFrags[lFragHeaderIdx].mSize > pOptions.extractsize:
-                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset +
-                        pSortedFrags[lFragHeaderIdx].mSize -
-                        pOptions.extractsize, pOptions.output,
-                        "hdr", lCntHdr,
+                self._decodeVideo(
+                        pSortedFrags[lFragHeaderIdx].mOffset +
+                            pSortedFrags[lFragHeaderIdx].mSize -
+                            pOptions.extractsize,
+                        pOptions.output,
+                        "hdr",
+                        lCntHdr,
                         pOptions.extractsize,
                         lHdrData,
                         CVideoHandler.FRG_HDR,
                         lRecoverFH)
             else:
-                self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset +
-                        pOptions.hdrsize,
-                        pOptions.output, "hdr", lCntHdr,
-                        pSortedFrags[lFragHeaderIdx].mSize,
-                        lHdrData, CVideoHandler.FRG_HDR, lRecoverFH)
+                self._decodeVideo(pSortedFrags[
+                    lFragHeaderIdx].mOffset + pOptions.hdrsize,
+                    pOptions.output,
+                    "hdr",
+                    lCntHdr,
+                    pSortedFrags[lFragHeaderIdx].mSize,
+                    lHdrData,
+                    CVideoHandler.FRG_HDR,
+                    lRecoverFH)
                 pSortedFrags[lFragHeaderIdx].mIsSmall = True
             self._determineCut(pOptions.output, "hdr",
                     pSortedFrags[lFragHeaderIdx], lCntHdr,
