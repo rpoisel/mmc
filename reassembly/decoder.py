@@ -8,7 +8,8 @@ class CDecoder(object):
     def getDecoder(pInputFormat, pOutputFormat=None):
         if pOutputFormat is not None and pOutputFormat.find('.dd') != -1:
             return CCopyDecoder()
-        elif pInputFormat.find("video") != -1:
+        elif pInputFormat.find("video") != -1 or \
+                pInputFormat.find(".mkv") != -1:
             return CFFMpegDecoder()
         elif pInputFormat.find("jpg") != -1:
             return CJpegDecoder()
@@ -87,23 +88,21 @@ class CFFMpegDecoder(CDecoder):
 
     def open(self, pPath, pPathDump=None):
         self.__mPath = pPath
+
         if platform.system().lower() == "linux":
+            lFFMpegPath = "ffmpeg"
             self.__mFH = open("/dev/null", "w")
-            self.__mFFMpeg = subprocess.Popen(
-                    ["ffmpeg", "-y", "-i", "-", pPath],
-                    bufsize=512,
-                    stdin=subprocess.PIPE,
-                    stdout=self.__mFH.fileno(),
-                    stderr=self.__mFH.fileno())
         else:
+            lFFMpegPath = os.path.join("bin", "ffmpeg")
             self.__mFH = open("NUL", "w")
-            self.__mFFMpeg = subprocess.Popen(
-                    [os.path.join("bin", "ffmpeg.exe"),
-                        "-y", "-i", "-", pPath],
-                    bufsize=512,
-                    stdin=subprocess.PIPE,
-                    stdout=self.__mFH.fileno(),
-                    stderr=self.__mFH.fileno())
+
+        self.__mFFMpeg = subprocess.Popen(
+                [lFFMpegPath, "-y", "-i", "-", pPath],
+                bufsize=512,
+                stdin=subprocess.PIPE,
+                stdout=self.__mFH.fileno(),
+                stderr=self.__mFH.fileno())
+
         if pPathDump is not None:
             self.__mFhDump = open(pPathDump, "wb")
 

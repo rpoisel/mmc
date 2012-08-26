@@ -43,8 +43,7 @@ class CReassembly(object):
                 os.makedirs(lFile.mFilePath)
             lFile.mFilePath = lFile.mFilePath + os.sep + pOptions.outputformat
 
-            lDecoder = decoder.CDecoder.getDecoder(pInputFileType,
-                    pOptions.outputformat)
+            lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
             lDecoder.open(lFile.mFilePath)
 
             logging.debug("Extract File " + lFile.mFileName + ": " +
