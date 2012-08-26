@@ -165,7 +165,8 @@ class CVideoHandler(CAbstractFileTypeHandler):
                 self._decodeVideo(pSortedFrags[lFragHeaderIdx].mOffset +
                         pSortedFrags[lFragHeaderIdx].mSize -
                         pOptions.extractsize, pOptions.output,
-                        "hdr", lCntHdr, pSortedFrags[lFragHeaderIdx].mSize,
+                        "hdr", lCntHdr,
+                        pOptions.extractsize,
                         lHdrData,
                         CVideoHandler.FRG_HDR,
                         lRecoverFH)
