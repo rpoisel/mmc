@@ -2,6 +2,7 @@
 import os.path
 import multiprocessing
 import logging
+import pprint
 
 # import only if necessary
 from preprocessing import preprocessing
@@ -46,7 +47,8 @@ class CFileCarver:
         logging.info("8<=============== FRAGMENTs ==============")
         lCnt = 0
         for lFragment in self.__mFragments:
-            logging.info("FragmentIdx %04d" % lCnt + ": " + str(lFragment))
+            logging.info("FragmentIdx %04d" % lCnt +
+                    ": " + str(lFragment))
             lCnt += 1
         logging.info("8<=============== FRAGMENTs ==============")
 
