@@ -1,0 +1,15 @@
+LIBRARY MAGIC
+EXPORTS
+magic_buffer
+magic_check
+magic_close
+magic_compile
+magic_descriptor
+magic_errno
+magic_error
+magic_file
+magic_getpath
+magic_list
+magic_load
+magic_open
+magic_setflags
