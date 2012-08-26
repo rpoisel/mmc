@@ -17,7 +17,7 @@ if platform.system().lower() == "windows":
     lBits = 32
     if sys.maxsize > 2 ** 32:
         lBits = 64
-    lPath = r"collating\magic\lib\magic\dll" + str(lBits)
+    lPath = r"collating\fragment\lib\magic\dll" + str(lBits)
     lPath += r";collating\fragment"
     os.environ['PATH'] += ";" + lPath
 

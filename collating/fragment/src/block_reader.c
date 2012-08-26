@@ -45,9 +45,12 @@ fragment_collection_t* classify(int pBlockSize,
     /* start multithreaded classification process */
     fragment_classifier_classify_mt(lHandle, callback_collect, 
             lBlocks /* callback data */, pImage, pOffset, pNumBlocks, 
-            "collating/fragment/data/magic/animation.mgc:" \
-                "collating/fragment/data/magic/jpeg.mgc:" \
-                "collating/fragment/data/magic/png.mgc", 
+            /* colons do not work in windows; thus one file is used only */
+#if defined __linux__
+            "collating/fragment/data/magic/media.mgc", 
+#elif defined _WIN32 || defined _WIN64
+            "collating\\fragment\\data\\magic\\media.mgc", 
+#endif
             pNumThreads);
 
     /* factor 1/4 is just an empirical value */

@@ -74,12 +74,7 @@ __declspec(dllexport) int fragment_classifier_classify_result(FragmentClassifier
         magic_t pMagic, 
         const unsigned char* pFragment,
         int pLen,
-        ClassifyT* pResult
-        #ifdef __linux__
-          );
-        #else
-          , HINSTANCE hInstLibrary);
-        #endif
+        ClassifyT* pResult);
 
 __declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
         const unsigned char* pFragment,

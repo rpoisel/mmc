@@ -52,7 +52,17 @@ class CJpegDecoder(CDecoder):
                     stdin=subprocess.PIPE,
                     stdout=self.__mFH.fileno(),
                     stderr=self.__mFH.fileno())
-
+        else:
+            self.__mFH = open("NUL", "w")
+            self.__mJpegProc = subprocess.Popen(
+                    [os.path.join("bin", "convert"), 
+                        self.__mPngPath.replace(".png", ".jpg"),
+                        self.__mPngPath],
+                    bufsize=512,
+                    stdin=subprocess.PIPE,
+                    stdout=self.__mFH.fileno(),
+                    stderr=self.__mFH.fileno())
+                    
         self.__mJpegProc.communicate()
         try:
             self.__mJpegProc.kill()
@@ -82,7 +92,7 @@ class CFFMpegDecoder(CDecoder):
         else:
             self.__mFH = open("NUL", "w")
             self.__mFFMpeg = subprocess.Popen(
-                    ["bin" + os.sep + "ffmpeg.exe",
+                    [os.path.join("bin", "ffmpeg.exe"),
                         "-y", "-i", "-", pPath],
                     bufsize=512,
                     stdin=subprocess.PIPE,
