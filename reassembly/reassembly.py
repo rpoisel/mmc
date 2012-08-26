@@ -24,7 +24,7 @@ class CReassembly(object):
                                                       lIdxNoHeader)
         pCaller.progressCallback(50)
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader)
-        self._extractReassembledFragments(pFragments, pOptions, "jpg")
+        self._extractReassembledFragments(pFragments, pOptions)
         pCaller.progressCallback(100)
         return self.mFiles
 
@@ -33,7 +33,7 @@ class CReassembly(object):
         pass
 
     def _extractReassembledFragments(self, pSortedFrags,
-            pOptions, pInputFileType):
+            pOptions):
         # extract determined files
         logging.info("Beginning extraction of reassembled files")
         for lFile in self.mFiles:
