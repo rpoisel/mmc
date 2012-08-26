@@ -25,6 +25,7 @@ class CReassembly(object):
         pCaller.progressCallback(50)
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader)
         self._extractReassembledFragments(pFragments, pOptions)
+        self._extractNonHeaderFragments(pFragments, pOptions)
         pCaller.progressCallback(100)
         return self.mFiles
 
@@ -56,7 +57,10 @@ class CReassembly(object):
 
             lDecoder.close()
         logging.info("Extraction finished")
-        return
+
+    def _extractNonHeaderFragments(self, pSortedFrags,
+            pOptions):
+        pass
 
 
 class CReassemblyPUP(CReassembly):
