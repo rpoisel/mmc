@@ -197,6 +197,10 @@ class CVideoHandler(CAbstractFileTypeHandler):
 
             lCntFrg = 0
             for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
+                # skip fragments that have already been decoded
+                if pSortedFrags[lFragIdx].mPicBegin != "" and \
+                        pSortedFrags[lFragIdx].mPicEnd != "":
+                            continue
                 logging.debug("Extracting fragment: " +
                         str(pSortedFrags[lFragIdx]))
                 # extract begin
