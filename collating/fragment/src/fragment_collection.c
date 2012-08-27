@@ -21,7 +21,7 @@ fragment_collection_t* fragment_collection_new(
     unsigned long long lBlockGap = 0;
     int lFlagExisting = 0;
     unsigned lBlockSize = block_collection_get_bs(pBlocks);
-    fragment_t lFragTmp = { 0, 0, -1, 0, 0, "", "", 0 };
+    fragment_t lFragTmp = { 0, 0, 0, 0, "", "", 0, -1 };
 
     fragment_collection_t* lFragments = 
         (fragment_collection_t* )malloc(sizeof(fragment_collection_t));
@@ -69,12 +69,13 @@ fragment_collection_t* fragment_collection_new(
                 /* lFragTmp = (fragment_t){ lBlockSize * lCntBlock, lBlockSize, -1, 1, 0, "", "", 0 }; */
                 lFragTmp.mOffset = lBlockSize * lCntBlock;
                 lFragTmp.mSize = lBlockSize;
-                lFragTmp.mNextIdx = -1;
                 lFragTmp.mIsHeader = 1;
                 lFragTmp.mIsFooter = 0;
                 lFragTmp.mPicBegin = "";
                 lFragTmp.mPicEnd = "";
                 lFragTmp.mIsSmall = 0;
+                lFragTmp.mIdxDecode = -1;
+                lFragTmp.mIdxFile = -1;
                 lBlockGap = 0;
             }
             else /* non-header block */
@@ -93,12 +94,13 @@ fragment_collection_t* fragment_collection_new(
                     /* lFragTmp = (fragment_t){ lBlockSize * lCntBlock, lBlockSize, -1, 0, 0, "", "", 0 }; */
                     lFragTmp.mOffset = lBlockSize * lCntBlock;
                     lFragTmp.mSize = lBlockSize;
-                    lFragTmp.mNextIdx = -1;
                     lFragTmp.mIsHeader = 0;
                     lFragTmp.mIsFooter = 0;
                     lFragTmp.mPicBegin = "";
                     lFragTmp.mPicEnd = "";
                     lFragTmp.mIsSmall = 0;
+                    lFragTmp.mIdxDecode = -1;
+                    lFragTmp.mIdxFile = -1;
                 }
                 lBlockGap = 0;
             }

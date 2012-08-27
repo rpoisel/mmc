@@ -11,12 +11,13 @@ typedef struct
 {
     unsigned long long mOffset;
     unsigned long long mSize;
-    long long mNextIdx;
     int mIsHeader;
     int mIsFooter;
     char* mPicBegin;
     char* mPicEnd;
     int mIsSmall;
+    int mIdxDecode;
+    int mIdxFile;
 } fragment_t;
 
 typedef struct

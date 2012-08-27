@@ -20,16 +20,16 @@ class CImgVisualizer(QGraphicsScene):
     in a nice way
     """
 
-    def __init__(self, ctx, pSize, pOffset, pFsType, parent=None):
+    def __init__(self, pFileCarver, pSize, pOffset, pFsType, parent=None):
         """
-        @param ctx - CFileCarver containing fragment informations
+        @param pFileCarver - CFileCarver containing fragment informations
         @param parent - Parent Widget container
         """
         super(CImgVisualizer, self).__init__(parent)
         #self.setSceneRect(0,0,500,500)
         self.setSceneRect(0, 0, self.parent().size().width(),
                 self.parent().size().height())
-        self.__mCtx = ctx
+        self.__mFileCarver = pFileCarver
         self.__mScale = 1.0
         self.__mHeaderBrush = QBrush(Qt.red)
         self.__mNonHeaderBrush = QBrush(Qt.green)
@@ -64,8 +64,8 @@ class CImgVisualizer(QGraphicsScene):
         lWidth = lSceneWidth / float(self.__mSize)
         # current position in bytes
         lX = (pPos.x() - lSceneX) / lWidth
-        if self.__mCtx.fragments is not None:
-            for lFrag in self.__mCtx.fragments:
+        if self.__mFileCarver.fragments is not None:
+            for lFrag in self.__mFileCarver.fragments:
                 if lX >= lFrag.mOffset and lX <= lFrag.mOffset + lFrag.mSize:
                     #logging.info('Paint tooltip')
                     self.__mHoverFragment = lFrag
@@ -172,7 +172,7 @@ class CImgVisualizer(QGraphicsScene):
         lHeight = lSceneHeight
 
         try:
-            for lFrag in self.__mCtx.fragments:
+            for lFrag in self.__mFileCarver.fragments:
                 lColor = None
                 if lFrag.mIsHeader:
                     lColor = QColor(255, 127, 127)
@@ -182,6 +182,9 @@ class CImgVisualizer(QGraphicsScene):
                 pPainter.fillRect(lSceneX + (lFrag.mOffset * lWidth) + 1,
                         lSceneY + 1, lFrameWidth, lHeight - 1, lColor)
         except TypeError, pExc:
+            # sometimes this callback is invoked when this object is not ready
+            pass
+        except AttributeError, pExc:
             # sometimes this callback is invoked when this object is not ready
             pass
 

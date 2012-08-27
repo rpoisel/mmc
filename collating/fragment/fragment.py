@@ -62,16 +62,18 @@ class CClassifyHandler(Structure):
 CClassifyHandlerPointer = POINTER(CClassifyHandler)
 
 
-#TODO: mNextIdx is no longer needed
 class CFragmentStruct(Structure):
-    _fields_ = [("mOffset", c_ulonglong),
+    _fields_ = [
+            ("mOffset", c_ulonglong),
             ("mSize", c_ulonglong),
-            ("mNextIdx", c_longlong),
             ("mIsHeader", c_int),
             ("mIsFooter", c_int),
             ("mPicBegin", c_char_p),
             ("mPicEnd", c_char_p),
-            ("mIsSmall", c_int)]
+            ("mIsSmall", c_int),
+            ("mIdxDecode", c_int),
+            ("mIdxFile", c_int)
+            ]
 
     def __str__(self):
         lString = str(self.mOffset) + " / " + str(self.mSize)
@@ -79,8 +81,6 @@ class CFragmentStruct(Structure):
             lString += " | Header"
         if self.mIsFooter:
             lString += " | Footer"
-        if self.mNextIdx >= 0:
-            lString += " | NextIdx " + str(self.mNextIdx)
         return lString
 
 

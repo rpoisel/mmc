@@ -25,7 +25,7 @@ class CReassembly(object):
         pCaller.progressCallback(50)
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader)
         self._extractReassembledFragments(pFragments, pOptions)
-        self._extractNonHeaderFragments(pFragments, pOptions)
+        self._extractNonHeaderFragments(pFragments, pOptions, lIdxNoHeader)
         pCaller.progressCallback(100)
         return self.mFiles
 
@@ -59,8 +59,33 @@ class CReassembly(object):
         logging.info("Extraction finished")
 
     def _extractNonHeaderFragments(self, pSortedFrags,
-            pOptions):
-        pass
+            pOptions, pIdxNoHeader):
+        lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
+        lRecoverFH = open(pOptions.imagefile, "rb")
+        for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
+            if pSortedFrags[lFragIdx].mIdxDecode != -1 and \
+                pSortedFrags[lFragIdx].mIdxFile == -1:
+                    logging.debug("Decoding left-over fragment: " +
+                            str(pSortedFrags[lFragIdx]))
+                    lFilePath = os.path.join(pOptions.output,
+                        str(lFragIdx) + ".part")
+                    if not os.path.exists(lFilePath):
+                        os.makedirs(lFilePath)
+                    lFilePath = os.path.join(lFilePath, pOptions.outputformat)
+                    lDecoder.open(lFilePath)
+                    # this corresponds to _assemble_impl()#key_element_1
+                    lRecoverFH.seek(
+                            pSortedFrags[
+                                pSortedFrags[lFragIdx].mIdxDecode
+                                ].mOffset,
+                            os.SEEK_SET)
+                    lHdrData = lRecoverFH.read(pOptions.hdrsize)
+                    lDecoder.write(lHdrData)
+                    lRecoverFH.seek(pSortedFrags[lFragIdx].mOffset)
+                    lDecoder.write(lRecoverFH.read(
+                        pSortedFrags[lFragIdx].mSize))
+                    lDecoder.close()
+        lRecoverFH.close()
 
 
 class CReassemblyPUP(CReassembly):
@@ -111,7 +136,9 @@ class CReassemblyPUP(CReassembly):
                 break
 
             self.mFiles[lBestResult['idxPath']].\
-                    addFragmentId(lBestResult['idxFrag'])
+                addFragmentId(lBestResult['idxFrag'])
+            pSortedFrags[lBestResult['idxFrag']].mIdxFile = \
+                lBestResult['idxPath']
             if pSortedFrags[lBestResult['idxFrag']].mIsFooter == 1:
                 self.mFiles[lBestResult['idxPath']].mComplete = True
                 logging.debug("Path " +
@@ -193,8 +220,6 @@ class CVideoHandler(CAbstractFileTypeHandler):
                     pOptions.minpicsize)
 
             # extract fragments frames
-            # TODO check if fragment has already been decoded successfully
-
             lCntFrg = 0
             for lFragIdx in xrange(pIdxNoHeader, len(pSortedFrags)):
                 # skip fragments that have already been decoded
@@ -226,16 +251,21 @@ class CVideoHandler(CAbstractFileTypeHandler):
                     pSortedFrags[lFragIdx].mIsSmall = True
                 self._determineCut(pOptions.output, "frg",
                         pSortedFrags[lFragIdx], lCntFrg,
-                        pOptions.minpicsize)
+                        pOptions.minpicsize, lFragHeaderIdx)
                 lCntFrg += 1
 
             lCntHdr += 1
 
         #Debugging purposes
         for lIdx in xrange(len(pSortedFrags)):
-            logging.debug("Fragment " + str(lIdx) + ": mPicBegin: " +
-                          pSortedFrags[lIdx].mPicBegin + " mPicEnd: " +
-                          pSortedFrags[lIdx].mPicEnd)
+            logging.debug("Fragment " + str(lIdx) + ": mPicBegin: '" +
+                          pSortedFrags[lIdx].mPicBegin + "' mPicEnd: '" +
+                          pSortedFrags[lIdx].mPicEnd + "'"
+                              + (" mIdxDecode: " +
+                                  str(pSortedFrags[lIdx].mIdxDecode)
+                                  if pSortedFrags[lIdx].mIsHeader == 0
+                                      else "")
+                          )
 
         # remove those fragments which could not be decoded
         # TODO check if del() is an alternative to creating a new array
@@ -286,7 +316,8 @@ class CVideoHandler(CAbstractFileTypeHandler):
 
         return lReturn
 
-    def _determineCut(self, pOut, pDir, pFrag, pIdx, pMinPicSize):
+    def _determineCut(self, pOut, pDir, pFrag, pIdx, pMinPicSize,
+            pIdxHeader=-1):
         # determine relevant files
         lFiles = []
         for lFile in os.listdir(os.path.join(pOut, pDir)):
@@ -316,6 +347,8 @@ class CVideoHandler(CAbstractFileTypeHandler):
             for lFile in lFiles:
                 if lFile[1] > (lRefSize * pMinPicSize / 100):
                     pFrag.mPicBegin = lFile[0]
+                    # key_element_1
+                    pFrag.mIdxDecode = pIdxHeader
                     lFiles.remove(lFile)
                     break
 
