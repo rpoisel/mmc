@@ -1,6 +1,6 @@
 RM=rm
 GCC=gcc
-LDFLAGS=
+LDFLAGS=-ltsk3
 CFLAGS=-g -Wall
 
 OBJ=tsk_test.o \
