@@ -3,6 +3,9 @@
 
 #include <tsk3/libtsk.h>
 
+#define IMAGE_IN "../../data/usbkey.dd"
+#define IMAGE_OUT "/tmp/out.dd"
+
 static TSK_WALK_RET_ENUM part_act(
         TSK_VS_INFO* pVsInfo,
         const TSK_VS_PART_INFO* pPartInfo,
@@ -14,9 +17,10 @@ static TSK_WALK_RET_ENUM block_act(
 
 int main(int argc, char* argv[])
 {
-    char* lImages[] = { "../../data/usbkey.dd" };
+    char* lImages[] = { IMAGE_IN };
     TSK_VS_INFO* lVsInfo = NULL;
-    FILE* lOut = fopen("/tmp/out.dd", "wb");
+    FILE* lOut = fopen(IMAGE_OUT, "wb");
+
     TSK_IMG_INFO* lImgInfo = tsk_img_open(
             1, /* number of images */
             (const TSK_TCHAR * const*)lImages, /* path to images */

@@ -18,5 +18,5 @@ $(BIN): $(OBJ)
 .PHONY: all clean
 
 clean:
-	$(RM) $(BIN) *.o
+	-$(RM) $(BIN) *.o
 
