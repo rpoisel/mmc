@@ -2,13 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef __linux__
-#include <pthread.h>
-#elif defined _WIN32 || defined _WIN64
-#include <Windows.h>
-#else
-#error "unknown platform"
-#endif
+#include "os_def.h"
 
 /* for the windows port see the following URL: */
 /* http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx */
@@ -43,11 +37,7 @@ typedef struct
     const char* mPathMagic;
 } thread_data;
 
-#ifdef __linux__
-void* classify_thread(void* pData);
-#else
-DWORD classify_thread(LPVOID pData);
-#endif
+THREAD_FUNC(classify_thread, pData);
 
 FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
         unsigned pNumSo, 
@@ -182,12 +172,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                     pResult->mIsHeader = 1;
                 }
             }
-#ifdef __linux__
-              snprintf(pResult->mInfo, MAX_STR_LEN, "%s", lMagicResult);
-#else
-              _snprintf(pResult->mInfo, MAX_STR_LEN, "%s", lMagicResult);
-#endif
-            
+            OS_SNPRINTF(pResult->mInfo, MAX_STR_LEN, "%s", lMagicResult);
             
 #if DEBUG == 1
             printf("%s | ", lMagicResult);
@@ -232,11 +217,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             if (lCntJpeg > 0)
             {
                 pResult->mType = FT_JPG;
-#ifdef __linux__
-                snprintf(pResult->mInfo, MAX_STR_LEN, "no header");
-#else
-                _snprintf(pResult->mInfo, MAX_STR_LEN, "no header");
-#endif
+                OS_SNPRINTF(pResult->mInfo, MAX_STR_LEN, "no header");
                 
                 pResult->mStrength = 1;
 #if DEBUG == 1
@@ -267,11 +248,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         unsigned int pNumThreads
         )
 {
-#ifdef __linux__
-      pthread_t* lThreads = NULL;
-#else
-      HANDLE* lThreads = NULL;
-#endif
+    OS_THREAD_TYPE* lThreads = NULL;
             
     int lCnt = 0;
     thread_data* lData = NULL;
@@ -285,14 +262,8 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
     }
        
-    /* TODO check return value */
-#ifdef __linux__
-    lThreads = (pthread_t* )malloc(sizeof(pthread_t) * pNumThreads);
-#else
-    lThreads = (HANDLE* )malloc(sizeof(HANDLE) * pNumThreads);
-#endif
-
-    
+    /* TODO check return values */
+    lThreads = (OS_THREAD_TYPE* )malloc(sizeof(OS_THREAD_TYPE) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
 
 #if DEBUG == 1
@@ -319,28 +290,13 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
                 lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
 #endif
         
-       
-#ifdef __linux__
-        pthread_create((lThreads + lCnt), NULL, 
-                classify_thread, (void*)(lData + lCnt));
-#elif defined _WIN32 || defined _WIN64
-          *(lThreads + lCnt) = CreateThread(NULL,0,classify_thread,(void*)(lData + lCnt),0,NULL);
-#else
-#error "unknown platform"
-#endif           
-                
+    OS_THREAD_CREATE((lThreads + lCnt), (lData + lCnt), classify_thread);
     }
 
     /* join threads */
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
-#ifdef __linux__
-          pthread_join(*(lThreads + lCnt), NULL);
-#elif defined _WIN32 || defined _WIN64
-          WaitForSingleObject(*(lThreads + lCnt),INFINITE);
-#else
-#error "unknown platform"
-#endif
+        OS_THREAD_JOIN(*(lThreads + lCnt));
     }
 
     free(lData);
@@ -349,20 +305,12 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     return EXIT_SUCCESS;
 }
 
-#ifdef __linux__
-void* classify_thread(void* pData)
-#elif defined _WIN32 || defined _WIN64
-DWORD WINAPI classify_thread(LPVOID pData)
-#endif
+THREAD_FUNC(classify_thread, pData)
 {
     thread_data* lData = (thread_data*)pData; 
     int lLen = lData->handle_fc->mFragmentSize;
     unsigned long long lCntBlock = lData->offset_img;
-#ifdef __linux__
-    FILE* lImage = NULL;
-#elif defined _WIN32 || defined _WIN64
-    HANDLE lImage = NULL;
-#endif
+    OS_FH_TYPE lImage = NULL;
     unsigned char* lBuf = NULL;
     ClassifyT lResult = { 0, 0, 0 };
     int lCnt = 0;
@@ -386,53 +334,22 @@ DWORD WINAPI classify_thread(LPVOID pData)
 #endif
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
-#ifdef __linux__
-    lImage = fopen(lData->path_image, "r");
-#elif defined _WIN32 || defined _WIN64
-    lImage = CreateFile(lData->path_image, 
-        GENERIC_READ, 
-        FILE_SHARE_READ, 
-        NULL, 
-        OPEN_EXISTING, 
-        0, 
-        NULL);
-#endif
+    lImage = OS_FOPEN_READ(lData->path_image);
 
-#ifdef __linux__
-    if (lImage == NULL)
-#elif defined _WIN32 || defined _WIN64
-    if (lImage == INVALID_HANDLE_VALUE)
-#endif
+    if (lImage == OS_FH_INVALID)
     {
         /* TODO return error back to GUI */
         perror("Could not open image file");
-#ifdef __linux__
-        return NULL;
-#else
-        return 0;
-#endif
+        return OS_THREAD_RETURN;
     }
-#ifdef __linux__
-    fseek(lImage, 
-            lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs, 
-            SEEK_SET);
-#elif defined _WIN32 || defined _WIN64
-    SetFilePointer(lImage, 
-        lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs, 
-        0, /* TODO: danger for 64-bit systems */
-        FILE_BEGIN);
-#endif
+    OS_FSEEK_SET(lImage,
+        lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
             
     /* classify fragments */
     while (lLen == lData->handle_fc->mFragmentSize && 
             (lCntBlock - lData->offset_img) < lData->num_frags)
     {
-#ifdef __linux__
-        lLen = fread(lBuf, 1, lData->handle_fc->mFragmentSize, lImage);
-#elif defined _WIN32 || defined _WIN64
-        ReadFile(lImage, lBuf, lData->handle_fc->mFragmentSize, &lLen, NULL);
-#endif
-        
+        OS_FREAD(lBuf, lData->handle_fc->mFragmentSize, lLen, lImage); 
         fragment_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult);
 
@@ -469,19 +386,10 @@ DWORD WINAPI classify_thread(LPVOID pData)
         lCntBlock++;
     }
     
- #if defined __linux__
-    fclose(lImage);
-#elif defined _WIN32 || defined _WIN64
-    CloseHandle(lImage);
-#endif
+    OS_FCLOSE(lImage);
     free(lBuf);
 
     magic_close(lMagic);  
     
-#ifdef __linux__
-    return NULL;
-#else
-    return 0;
-#endif
-    
+    return OS_THREAD_RETURN;
 }
