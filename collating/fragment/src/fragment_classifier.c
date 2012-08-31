@@ -9,12 +9,10 @@
 /* http://msdn.microsoft.com/en-us/library/kdzttdcb(v=vs.71).aspx */
 #include "magic.h"
 
+#include "logging.h"
 #include "fragment_classifier.h"
 #include "entropy/entropy.h"
 
-#define DEBUG 0
-/* turn to 1 for verbose messages */
-#define VERBOSE 0
 #define MAX_FILETYPES 24
 
 struct _FragmentClassifier
@@ -174,9 +172,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             }
             OS_SNPRINTF(pResult->mInfo, MAX_STR_LEN, "%s", lMagicResult);
             
-#if DEBUG == 1
-            printf("%s | ", lMagicResult);
-#endif
+            LOGGING(LOG_DEBUG, "%s \n", lMagicResult);
             return pResult->mStrength;
         }
     }
@@ -206,9 +202,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                     else if (pFragment[lCnt + 1] < 0xC0 || pFragment[lCnt + 1] > 0xFE)
                     {
                         lCntJpeg = 0;
-#if DEBUG == 1
-                        printf("FALSE - Wrong Marker\n");
-#endif
+                        LOGGING(LOG_DEBUG, "FALSE - Wrong Marker\n");
                         break;
                     }
                 }
@@ -220,9 +214,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                 OS_SNPRINTF(pResult->mInfo, MAX_STR_LEN, "no header");
                 
                 pResult->mStrength = 1;
-#if DEBUG == 1
-                printf("TRUE - Marker: %d\n",lCntJpeg);
-#endif
+                LOGGING(LOG_DEBUG, "TRUE - Marker: %d\n",lCntJpeg);
                 return pResult->mStrength;
             }
 
@@ -266,10 +258,8 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     lThreads = (OS_THREAD_TYPE* )malloc(sizeof(OS_THREAD_TYPE) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
 
-#if DEBUG == 1
-    printf("Fragments range: %lld\n", lFragsTotal);
-    printf("Filesystem offset: %lld\n", pOffset);
-#endif
+    LOGGING(LOG_DEBUG, "Fragments range: %lld\n", lFragsTotal);
+    LOGGING(LOG_DEBUG, "Filesystem offset: %lld\n", pOffset);
 
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
@@ -285,10 +275,8 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         lOffsetImg += (lData + lCnt)->num_frags;
         lFragsPerCpuR--;
 
-#if DEBUG == 1
-        printf("Starting thread %d with block range %lld to %lld.\n",
+        LOGGING(LOG_DEBUG, "Starting thread %d with block range %lld to %lld.\n",
                 lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
-#endif
         
     OS_THREAD_CREATE((lThreads + lCnt), (lData + lCnt), classify_thread);
     }
@@ -329,9 +317,8 @@ THREAD_FUNC(classify_thread, pData)
     }
 
 
-#if DEBUG == 1
-    printf("Offset: %lld\n", lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
-#endif
+    LOGGING(LOG_DEBUG,
+            "Offset: %lld\n", lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
     lImage = OS_FOPEN_READ(lData->path_image);
@@ -366,17 +353,15 @@ THREAD_FUNC(classify_thread, pData)
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
                 	/* relevant fragment */
-#if DEBUG == 0
                     if (lResult.mIsHeader)
                     {
-                        printf("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
+                        LOGGING(LOG_INFO, "ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
                                 lCntBlock,
                                 lResult.mType,
                                 lResult.mStrength,
                                 lResult.mIsHeader,
                                 lResult.mInfo);
                     }
-#endif
                     lData->callback(lData->callback_data, lCntBlock, 
                             lResult.mType, lResult.mStrength, lResult.mIsHeader, lResult.mInfo);
                     break;

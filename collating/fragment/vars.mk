@@ -6,8 +6,10 @@ LBITS := $(shell getconf LONG_BIT)
 
 # ================ START FRAGMENT CLASSIFIER =================
 BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so
-OBJ_FRAGMENT_CLASSIFIER= $(BUILD_DIR)/fragment_classifier.o \
-			 $(BUILD_DIR)/entropy/entropy.o
+OBJ_FRAGMENT_CLASSIFIER=$(BUILD_DIR)/logging.o \
+			$(BUILD_DIR)/fragment_classifier.o \
+			$(BUILD_DIR)/entropy/entropy.o \
+
 CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC \
 			   -Iinclude/entropy \
 			   -Iinclude/magic
