@@ -17,7 +17,6 @@
 #define LOG_LEVEL LOG_INFO
 
 void print_timestamp(void);
-void print_loglevel(unsigned LogLevel);
 
 #if LOG_LEVEL == LOG_DEBUG
 #define _LOG_PREAMBLE                                       \
