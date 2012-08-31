@@ -16,36 +16,3 @@ void print_timestamp(void)
     strftime(timeString, sizeof(timeString), "%Y-%m-%d %T    ", time_info);
     fprintf(stdout, "%s ", timeString);
 }
-
-void print_loglevel(enum LogLevel pLogLevel)
-{
-    switch(pLogLevel)
-    {
-        case LOG_EMERG:
-            fprintf(stdout, "EMERG ");
-            break;
-        case LOG_ALERT:
-            fprintf(stdout, "ALERT ");
-            break;
-        case LOG_CRIT:
-            fprintf(stdout, "CRIT ");
-            break;
-        case LOG_ERROR:
-            fprintf(stdout, "ERROR ");
-            break;
-        case LOG_WARN:
-            fprintf(stdout, "WARN ");
-            break;
-        case LOG_NOTICE:
-            fprintf(stdout, "NOTICE ");
-            break;
-        case LOG_INFO:
-            fprintf(stdout, "INFO ");
-            break;
-        case LOG_DEBUG:
-            fprintf(stdout, "DEBUG ");
-            break;
-        default:
-            break;
-    }
-}
