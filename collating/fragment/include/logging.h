@@ -3,11 +3,11 @@
 
 #include <time.h>
 
-#define LOG_ERROR    0
-#define LOG_WARN     1
-#define LOG_INFO     2
-#define LOG_DEBUG    3
-#define LOG_NONE     4
+#define LOG_NONE     0
+#define LOG_ERROR    1
+#define LOG_WARN     2
+#define LOG_INFO     3
+#define LOG_DEBUG    4
 
 /* set the global logging level here */
 #define LOG_LEVEL LOG_INFO
