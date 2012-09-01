@@ -172,7 +172,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
             }
             OS_SNPRINTF(pResult->mInfo, MAX_STR_LEN, "%s", lMagicResult);
             
-            LOGGING(LOG_DEBUG, "%s \n", lMagicResult);
+            LOGGING_DEBUG("%s \n", lMagicResult);
             return pResult->mStrength;
         }
     }
@@ -202,7 +202,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                     else if (pFragment[lCnt + 1] < 0xC0 || pFragment[lCnt + 1] > 0xFE)
                     {
                         lCntJpeg = 0;
-                        LOGGING(LOG_DEBUG, "FALSE - Wrong Marker\n");
+                        LOGGING_DEBUG("FALSE - Wrong Marker\n");
                         break;
                     }
                 }
@@ -214,7 +214,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
                 OS_SNPRINTF(pResult->mInfo, MAX_STR_LEN, "no header");
                 
                 pResult->mStrength = 1;
-                LOGGING(LOG_DEBUG, "TRUE - Marker: %d\n",lCntJpeg);
+                LOGGING_DEBUG("TRUE - Marker: %d\n",lCntJpeg);
                 return pResult->mStrength;
             }
 
@@ -258,8 +258,8 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     lThreads = (OS_THREAD_TYPE* )malloc(sizeof(OS_THREAD_TYPE) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
 
-    LOGGING(LOG_DEBUG, "Fragments range: %lld\n", lFragsTotal);
-    LOGGING(LOG_DEBUG, "Filesystem offset: %lld\n", pOffset);
+    LOGGING_DEBUG("Fragments range: %lld\n", lFragsTotal);
+    LOGGING_DEBUG("Filesystem offset: %lld\n", pOffset);
 
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
     {
@@ -275,7 +275,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         lOffsetImg += (lData + lCnt)->num_frags;
         lFragsPerCpuR--;
 
-        LOGGING(LOG_DEBUG, "Starting thread %d with block range %lld to %lld.\n",
+        LOGGING_DEBUG("Starting thread %d with block range %lld to %lld.\n",
                 lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
         
     OS_THREAD_CREATE((lThreads + lCnt), (lData + lCnt), classify_thread);
@@ -317,7 +317,7 @@ THREAD_FUNC(classify_thread, pData)
     }
 
 
-    LOGGING(LOG_DEBUG,
+    LOGGING_DEBUG(
             "Offset: %lld\n", lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
 
     lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
@@ -355,7 +355,7 @@ THREAD_FUNC(classify_thread, pData)
                 	/* relevant fragment */
                     if (lResult.mIsHeader)
                     {
-                        LOGGING(LOG_INFO, "ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
+                        LOGGING_INFO("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
                                 lCntBlock,
                                 lResult.mType,
                                 lResult.mStrength,
