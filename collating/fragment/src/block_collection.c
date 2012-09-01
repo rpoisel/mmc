@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "logging.h"
 #include "block_collection.h"
-
-#define DEBUG 0
 
 /* no ceiling performed */
 #define STORAGE_SIZE(x) (x * BITS_PER_BLOCK / (sizeof(storage_t) * 8) + 1)
@@ -22,9 +21,8 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks, unsigned
 
     block_collection_t* lHandle = (block_collection_t*)malloc(sizeof(block_collection_t));
 
-#if DEBUG == 1
-    printf("Storage size: %llu, Max Blocks: %lld\n", STORAGE_SIZE(pMaxBlocks), pMaxBlocks);
-#endif
+    LOGGING_DEBUG("Storage size: %llu, Max Blocks: %lld\n", STORAGE_SIZE(pMaxBlocks), pMaxBlocks);
+
     if (STORAGE_SIZE(pMaxBlocks) * sizeof(storage_t) > sizeof(storage_t))
     {
         lHandle->mBlockArray = (storage_t*)malloc(STORAGE_SIZE(pMaxBlocks) * sizeof(storage_t));
@@ -59,11 +57,9 @@ int block_collection_set(block_collection_t* pCollection,
 
     pCollection->mNumHeaders += (pIsHeader ? 1 : 0);
 
-#if DEBUG == 1
-    printf("Block %9llu, Bitmask: 0x%016llX, Storage: 0x%016llX, " \
+    LOGGING_DEBUG("Block %9llu, Bitmask: 0x%016llX, Storage: 0x%016llX, " \
             "Offset Storage: %05llu, Shifts: %02u\n", 
             pOffset, lBitmask, *lStorage, lOffsetStorage, lShifts);
-#endif
 
     return 0;
 }

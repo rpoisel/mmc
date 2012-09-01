@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "os_def.h"
 #include "fragment_classifier.h"
 #include "block_collection.h"
 
@@ -26,7 +27,7 @@ typedef struct
     long int mBlockSize;
 } thread_data;
 
-void return_error()
+void return_error() 
 {
     fprintf(stderr, USAGE, PROG_NAME);
     abort();

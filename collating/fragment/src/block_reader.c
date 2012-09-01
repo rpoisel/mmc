@@ -11,10 +11,7 @@
 #include "magic.h"
 #endif
 
-#if defined _WIN32 || defined _WIN64
-  #include <Windows.h>
-#endif
-
+#include "os_def.h"
 #include "block_reader.h"
 
 int callback_collect(void* pData, unsigned long long pOffset, 

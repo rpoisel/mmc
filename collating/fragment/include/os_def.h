@@ -45,6 +45,9 @@
 
 /* includes */
 #include <Windows.h>
+#include <sys/types.h>
+#include <sys/timeb.h>
+#include <string.h>
 
 /* data types */
 #define OS_FH_TYPE HANDLE
