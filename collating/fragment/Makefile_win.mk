@@ -15,15 +15,15 @@ BLOCK_READER=libblock_reader
 all: $(BLOCK_READER).dll
 
 $(LOGGING).obj: $(SRC_DIR)\$(LOGGING).c $(INCLUDE_DIR)\$(LOGGING).h
-    cl /c $(SRC_DIR)\logging.c /I$(INCLUDE_DIR)
+	cl /c $(SRC_DIR)\logging.c /I$(INCLUDE_DIR)
 
 $(BLOCK_READER).dll: $(BLOCK_COLLECTION).dll $(FRAGMENT_CLASSIFIER).dll $(LOGGING).obj
-    cl /c $(SRC_DIR)\block_reader.c /Iinclude /I$(INCLUDE_DIR)\magic
+	cl /c $(SRC_DIR)\block_reader.c /Iinclude /I$(INCLUDE_DIR)\magic
 	cl /c $(SRC_DIR)\fragment_collection.c /I$(INCLUDE_DIR)
 	link $(BLOCK_COLLECTION).lib $(FRAGMENT_CLASSIFIER).lib $(LOGGING).obj block_reader.obj fragment_collection.obj /DLL /out:$(BLOCK_READER).dll
 
 $(FRAGMENT_CLASSIFIER).dll: $(LOGGING).obj
-    cl /c $(SRC_DIR)\fragment_classifier.c /I$(INCLUDE_DIR) /I$(INCLUDE_DIR)\magic
+	cl /c $(SRC_DIR)\fragment_classifier.c /I$(INCLUDE_DIR) /I$(INCLUDE_DIR)\magic
 	cl /c $(SRC_DIR)\entropy\entropy.c /I$(INCLUDE_DIR)\entropy /I$(INCLUDE_DIR)
 	link .\lib\magic\dll64\magic.lib $(LOGGING).obj fragment_classifier.obj entropy.obj /DLL /out:$(FRAGMENT_CLASSIFIER).dll
     
