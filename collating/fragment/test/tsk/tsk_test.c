@@ -2,12 +2,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "logging.h"
+#include "os_def.h"
 #include <tsk3/libtsk.h>
-
-#define IMAGE_IN "../../data/usbkey.dd"
-#define IMAGE_OUT "/tmp/out.dd"
-
-#define DEBUG 0
 
 static TSK_WALK_RET_ENUM part_act(
         TSK_VS_INFO* pVsInfo,
@@ -25,36 +22,50 @@ static void data_act(
         void* pData
         );
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv1[])
 {
-    char* lImages[] = { argv[1] };
     TSK_VS_INFO* lVsInfo = NULL;
-    FILE* lOut = fopen(IMAGE_OUT, "wb");
-    unsigned long long lCnt = 0;
+	TSK_OFF_T lCnt = 0;
     char lBuf[32768] = { 0 };
     unsigned lCntRead = 0;
+	TSK_IMG_INFO* lImgInfo = OS_FH_INVALID;
+	OS_FH_TYPE lOut = OS_FH_INVALID;
+	TSK_TCHAR **argv;
 
-    TSK_IMG_INFO* lImgInfo = tsk_img_open(
+#ifdef TSK_WIN32
+	argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+#else
+	argv = (TSK_TCHAR **) argv1;
+#endif
+
+	lOut = OS_FOPEN_WRITE(argv[2]);
+
+	if (lOut == OS_FH_INVALID) 
+	{
+		LOGGING_ERROR("Could not open export image in write mode. \n")
+		exit(1);
+	}
+
+    lImgInfo = tsk_img_open(
             1, /* number of images */
-            (const TSK_TCHAR * const*)lImages, /* path to images */
+            (argv + 1), /* path to images */
             TSK_IMG_TYPE_DETECT, /* disk image type */
             0); /* size of device sector in bytes */
     if (lImgInfo != NULL)
     {
         TSK_OFF_T lSizeSectors = lImgInfo->size / lImgInfo->sector_size + \
                                  (lImgInfo->size % lImgInfo->sector_size ? 1 : 0);
-#if DEBUG == 1
-        fprintf(stdout, "Image size (Bytes): %lu, Image size (sectors): %lu\n",
+        LOGGING_INFO("Image size (Bytes): %lu, Image size (sectors): %lu\n",
                 lImgInfo->size,
                 lSizeSectors);
-#endif
+
         lVsInfo = tsk_vs_open(lImgInfo, 0, TSK_VS_TYPE_DETECT);
         if (lVsInfo != NULL)
         {
             if (tsk_vs_part_walk(lVsInfo,
                     0, /* start */
                     lVsInfo->part_count - 1, /* end */
-                    0, /* all partitions */
+                    TSK_VS_PART_FLAG_ALL, /* all partitions */
                     part_act, /* callback */
                     (void*) lOut /* data passed to the callback */
                     ) != 0)
@@ -64,20 +75,16 @@ int main(int argc, char* argv[])
         }
         else
         {
-#if DEBUG == 1
-            fprintf(stderr, "Volume system cannot be opened.\n");
-#endif
+            LOGGING_DEBUG("Volume system cannot be opened.\n");
             for (lCnt = 0; lCnt < lSizeSectors; lCnt++)
             {
                 lCntRead = lCnt == lSizeSectors - 1 ? 
                                 lImgInfo->size % lImgInfo->sector_size :
                                 lImgInfo->sector_size;
-#if DEBUG == 1
-                fprintf(stderr, "Reading %u bytes\n", 
-                        lCntRead
-                       );
-#endif
-                tsk_img_read(
+
+				LOGGING_DEBUG("Reading %u bytes\n", lCntRead);
+
+				tsk_img_read(
                         lImgInfo, /* handler */
                         lCnt * lImgInfo->sector_size, /* start address */
                         lBuf, /* buffer to store data in */
@@ -89,9 +96,14 @@ int main(int argc, char* argv[])
     }
     else
     {
-        fprintf(stderr, "Problem opening the image. \n");
+        LOGGING_ERROR("Problem opening the image. \n");
+		tsk_error_print(stderr);
+		exit(1);
     }
-    fclose(lOut);
+	if (lOut != OS_FH_INVALID)
+	{
+		OS_FCLOSE(lOut);
+	}
 
     return EXIT_SUCCESS;
 }
@@ -102,7 +114,7 @@ TSK_WALK_RET_ENUM part_act(
         void* pData)
 {
     TSK_FS_INFO* lFsInfo = NULL;
-    FILE* lOut = (FILE *)pData;
+    OS_FH_TYPE lOut = (OS_FH_TYPE)pData;
     unsigned long long lCnt = 0;
     char lBuf[32768] = { 0 };
     unsigned long long lOffsetBlock = 0;
@@ -135,14 +147,14 @@ TSK_WALK_RET_ENUM part_act(
         for (lCnt = 0; lCnt < pPartInfo->len; lCnt++)
         {
             lOffsetBlock = (pPartInfo->start + lCnt) * pPartInfo->vs->block_size;
-#if DEBUG == 1
-            fprintf(stdout,
+
+            LOGGING_DEBUG(
                     "Block in unknown partition (Len: %lu blocks). " 
                     "Size: %u, Absolute address (Bytes): %lld\n",
                     pPartInfo->len,
                     pPartInfo->vs->block_size,
                     lOffsetBlock);
-#endif
+
             /* use the following function so that forensic images are supported */
             /* HINT: this is not the case with fopen/fseek/fread/fclose functions */
             tsk_vs_part_read_block(
@@ -165,16 +177,16 @@ TSK_WALK_RET_ENUM block_act(
         const TSK_FS_BLOCK *a_block,
         void* a_ptr)
 {
-    FILE* lOut = (FILE* )a_ptr;
-#if DEBUG == 1
-    fprintf(stdout,
+    OS_FH_TYPE lOut = (OS_FH_TYPE)a_ptr;
+
+    LOGGING_DEBUG(
             "FS-Offset (Bytes): %lu, Size: %u, "
             "Block: %lu, Absolute address: %ld\n",
             a_block->fs_info->offset,
             a_block->fs_info->block_size,
             a_block->addr, 
             a_block->fs_info->offset + a_block->addr * a_block->fs_info->block_size);
-#endif
+
     data_act(
             a_block->buf, /* block data */
             a_block->fs_info->block_size, /* size in bytes */
@@ -190,7 +202,8 @@ static void data_act(
         void* pData
         )
 {
-    FILE* lOut = (FILE*)pData;
-    fseek(lOut, pOffset, SEEK_SET);
-    fwrite(pBuf, pLen, 1, lOut);
+	int lWritten = -1;
+    OS_FH_TYPE lOut = (OS_FH_TYPE)pData;
+    OS_FSEEK_SET(lOut, pOffset);
+    OS_FWRITE(pBuf, pLen, lWritten, lOut);
 }

@@ -74,7 +74,7 @@
         GENERIC_WRITE,                                  \
         FILE_SHARE_READ,                                \
         NULL,                                           \
-        OPEN_EXISTING,                                  \
+        CREATE_ALWAYS,                                  \
         0,                                              \
         NULL)
 

@@ -1,5 +1,5 @@
 # Set up the building environment: 
-# C:\Program Files\Microsoft SDKs\Windows\v7.0>setenv /x64 /release /xp
+# C:\Program Files\Microsoft SDKs\Windows\v7.1>setenv /x64 /release /xp
 
 # ================ START =================
 SRC_DIR=src
@@ -25,7 +25,8 @@ $(BLOCK_READER).dll: $(BLOCK_COLLECTION).dll $(FRAGMENT_CLASSIFIER).dll $(LOGGIN
 $(FRAGMENT_CLASSIFIER).dll: $(LOGGING).obj
 	cl /c $(SRC_DIR)\fragment_classifier.c /I$(INCLUDE_DIR) /I$(INCLUDE_DIR)\magic
 	cl /c $(SRC_DIR)\entropy\entropy.c /I$(INCLUDE_DIR)\entropy /I$(INCLUDE_DIR)
-	link .\lib\magic\dll64\magic.lib $(LOGGING).obj fragment_classifier.obj entropy.obj /DLL /out:$(FRAGMENT_CLASSIFIER).dll
+	link .\lib\magic\dll64\magic.lib .\lib\tsk\win32\libtsk.lib \
+		$(LOGGING).obj fragment_classifier.obj entropy.obj /DLL /out:$(FRAGMENT_CLASSIFIER).dll
     
 # ================ START =================
 #CFLAGS_BLOCK_COLLECTION=$(CFLAGS) -fPIC
