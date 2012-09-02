@@ -1,12 +1,8 @@
 #include <math.h>
 #include <stdio.h>
-
-#ifdef _MSC_VER
-#include "stdint_ms.h"
-#else 
 #include <stdint.h>
-#endif /* _MSC_VER */
 
+#include "os_def.h"
 #include "entropy.h"
 
 #define MAX_FRAG_SIZE 4096
