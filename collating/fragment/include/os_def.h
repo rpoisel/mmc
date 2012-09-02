@@ -14,17 +14,23 @@
 #define OS_FOPEN_READ(pPath)                            \
     fopen(pPath, "r")
 
+#define OS_FOPEN_WRITE(pPath)                           \
+    fopen(pPath, "w")
+
 #define OS_FCLOSE(pHandle)                              \
     fclose(pHandle)
 
 #define OS_FREAD(pBuf, pLen, pNumRead, pHandle)         \
     pNumRead = fread(pBuf, 1, pLen, pHandle)
 
+/* TODO check return type */
+#define OS_WRITE(pBuf, pLen, pNumWrite, pHandle)        \
+    pNumWrite = fwrite(pBuf, 1, pLen, pHandle)
+
 #define OS_FSEEK_SET(pHandle, pOffset)                  \
     fseek(pHandle, pOffset, SEEK_SET)
 
-#define OS_SNPRINTF(pString, pLen, ...)                 \
-    snprintf(pString, pLen, ##__VA_ARGS__)
+#define OS_SNPRINTF snprintf
 
 #define OS_THREAD_CREATE(pHandle, pData, pFunc)         \
         pthread_create(pHandle, NULL,                   \
@@ -69,8 +75,11 @@
 #define OS_FREAD(pBuf, pLen, pNumRead, pHandle)         \
     ReadFile(pHandle, pBuf, pLen, &pNumRead, NULL)
 
-#define OS_SNPRINTF(pString, pLen, ...)                 \
-    _snprintf(pString, pLen, ##__VA_ARGS__)
+/* TODO check return type */
+#define OS_WRITE(pBuf, pLen, pNumWrite, pHandle)        \
+    WriteFile(pHandle, pBuf, pLen, &pNumWrite, NULL)
+
+#define OS_SNPRINTF _snprintf
 
 #define OS_FSEEK_SET(pHandle, pOffset)                  \
     /* danger on 64-bit systems for third parameter */  \
