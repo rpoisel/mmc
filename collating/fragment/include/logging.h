@@ -22,15 +22,15 @@ void print_timestamp(void);
         print_timestamp();
 #endif
 
-#if LOG_LEVEL >= LOG_EMERG
-#define LOGGING_EMERG(...)                                  \
+#if LOG_LEVEL >= LOG_ERROR
+#define LOGGING_ERROR(...)                                  \
     {                                                       \
         _LOG_PREAMBLE                                       \
-        fprintf(stdout, "EMERG ");                          \
+        fprintf(stdout, "ERROR ");                          \
         fprintf(stdout, ##__VA_ARGS__);                     \
     }
 #else
-#define LOGGING_EMERG(...)
+#define LOGGING_ERROR(...)
 #endif
 
 #if LOG_LEVEL >= LOG_WARN
