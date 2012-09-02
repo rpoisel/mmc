@@ -2,11 +2,13 @@
 #include <limits.h>
 #include <errno.h>
 #include <string.h>
-#include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include "os_def.h"
+#include "const_def.h"
+#include "logging.h"
 #include "fragment_classifier.h"
 #include "block_collection.h"
 
@@ -21,14 +23,14 @@ int callback_print(void* pData, unsigned long long pOffset,
 
 typedef struct
 {
-    pthread_mutex_t mMutex;
+    OS_MUTEX_TYPE mMutex;
     block_collection_t* mStorage;
     long int mBlockSize;
 } thread_data;
 
 void return_error() 
 {
-    fprintf(stderr, USAGE, PROG_NAME);
+    LOGGING_ERROR(USAGE, PROG_NAME);
     abort();
 }
 
@@ -36,7 +38,7 @@ int main(int argc, char* argv[])
 {
     FragmentClassifier* lHandle = NULL;
     ClassifyOptions lOptions[NUM_OPTIONS];
-    thread_data lData = { PTHREAD_MUTEX_INITIALIZER, NULL };
+    thread_data lData = { OS_MUTEX_INIT_VALUE, NULL };
     long int lNumThreads = NUM_THREADS_DEFAULT;
     long int lBlockSize = 4096;
     struct stat lStat;
@@ -50,13 +52,13 @@ int main(int argc, char* argv[])
         switch(lOption)
         {
             case 'h':
-                fprintf(stderr, USAGE, PROG_NAME);
+                LOGGING_ERROR(USAGE, PROG_NAME);
                 return EXIT_SUCCESS;
             case 't':
                 lNumThreads = strtol(optarg, NULL, 10);
                 if (errno == ERANGE || lNumThreads < 1 || lNumThreads > 2048)
                 {
-                    fprintf(stderr, "Illegal number of threads. Needs to be between 1 and 2048 (inclusive). \n");
+                    LOGGING_ERROR("Illegal number of threads. Needs to be between 1 and 2048 (inclusive). \n");
                     return EXIT_FAILURE;
                 }
                 break;
@@ -64,7 +66,7 @@ int main(int argc, char* argv[])
                 lBlockSize = strtol(optarg, NULL, 10);
                 if (errno == ERANGE || lBlockSize < 1 || lBlockSize > 131072)
                 {
-                    fprintf(stderr, "Illegal block size given. Needs to be between 1 and 131072 (inclusive). \n");
+                    LOGGING_ERROR("Illegal block size given. Needs to be between 1 and 131072 (inclusive). \n");
                     return EXIT_FAILURE;
                 }
                 break;
@@ -75,14 +77,14 @@ int main(int argc, char* argv[])
 
     if (optind == argc)
     {
-        printf("Missing image file. \n");
+        LOGGING_ERROR("Missing image file. \n");
         return_error();
     }
 
     strncpy(lFilename, argv[optind], MAX_STR_LEN);
     if (stat(lFilename, &lStat) != 0)
     {
-        fprintf(stderr, "Cannot stat(2) given file: %s. \n", 
+        LOGGING_ERROR("Cannot stat(2) given file: %s. \n", 
                 lFilename);
         return EXIT_FAILURE;
     }
@@ -90,7 +92,7 @@ int main(int argc, char* argv[])
 
     /* see this for porting pthreads-code to windows */
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/ms686908(v=vs.85).aspx */
-    pthread_mutex_init(&lData.mMutex, NULL);
+    OS_MUTEX_INIT(lData.mMutex);
 
     lData.mBlockSize = lBlockSize;
     lImageNumBlocks = lImageSize / lBlockSize;
@@ -112,12 +114,10 @@ int main(int argc, char* argv[])
             (void *)&lData, lFilename, 
             0 /* filesystem offset */, 
             lImageNumBlocks,
-            "data/magic/animation.mgc:" \
-                "data/magic/jpeg.mgc:" \
-                "data/magic/png.mgc", 
+            PATH_MAGIC_DB,
             lNumThreads);
 
-    pthread_mutex_destroy(&lData.mMutex);
+    OS_MUTEX_DESTROY(lData.mMutex);
 
     block_collection_free(lData.mStorage);
 
@@ -130,48 +130,55 @@ int main(int argc, char* argv[])
 int callback_print(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader, char* pInfo)
 {
+    char* lType = NULL;
     thread_data* lData = (thread_data* )pData;
 
-    pthread_mutex_lock(&lData->mMutex);
+    OS_MUTEX_LOCK(lData->mMutex);
 
-    printf("%lld ", 
-            pOffset * lData->mBlockSize);
     switch (pType)
     {
         case FT_HIGH_ENTROPY:
-            printf("high");
+            lType = "high";
             break;
         case FT_LOW_ENTROPY:
-            printf("low");
+            lType = "low";
             break;
         case FT_JPG:
-            printf("jpeg");
+            lType = "jpeg";
             break;
         case FT_PNG:
-            printf("png");
+            lType = "png";
             break;
         case FT_VIDEO:
-            printf("video");
+            lType = "video";
             break;
         case FT_IMAGE:
-            printf("image");
+            lType = "image";
             break;
         case FT_H264:
-            printf("h264");
+            lType = "h264";
             break;
         case FT_TXT:
-            printf("text");
+            lType = "text";
             break;
         default:
-            printf("unknown");
+            lType = "unknown";
     }
     if (strlen(pInfo) > 0)
     {
-        printf(" %s%s", pInfo,
+        LOGGING_INFO("%lld %s %s%s\n", 
+                pOffset * lData->mBlockSize,
+                lType, pInfo,
                 pIsHeader ?  " (Header)" : "");
     }
-    printf("\n");
+    else
+    {
+        LOGGING_INFO("%lld %s %s\n", 
+                pOffset * lData->mBlockSize,
+                lType, 
+                pIsHeader ?  " (Header)" : "");
+    }
 
-    pthread_mutex_unlock(&lData->mMutex);
+    OS_MUTEX_UNLOCK(lData->mMutex);
     return 0;
 }

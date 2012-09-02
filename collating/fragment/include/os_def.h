@@ -9,6 +9,7 @@
 /* data types */
 #define OS_FH_TYPE FILE*
 #define OS_THREAD_TYPE pthread_t
+#define OS_MUTEX_TYPE pthread_mutex_t
 
 /* functions */
 #define OS_FOPEN_READ(pPath)                            \
@@ -39,6 +40,18 @@
 #define OS_THREAD_JOIN(pHandle)                         \
     pthread_join(pHandle, NULL);
 
+#define OS_MUTEX_INIT(pHandle)                          \
+    pthread_mutex_init(&pHandle, NULL)
+
+#define OS_MUTEX_DESTROY(pHandle)                       \
+    pthread_mutex_destroy(&pHandle)
+
+#define OS_MUTEX_LOCK(pHandle)                          \
+    pthread_mutex_lock(&pHandle)
+
+#define OS_MUTEX_UNLOCK(pHandle)                        \
+    pthread_mutex_unlock(&pHandle)
+
 /* user-defined functions */
 #define THREAD_FUNC(pFuncName, pData)                   \
     void* pFuncName(void* pData)
@@ -46,6 +59,7 @@
 /* values */
 #define OS_FH_INVALID NULL
 #define OS_THREAD_RETURN NULL
+#define OS_MUTEX_INIT_VALUE PTHREAD_MUTEX_INITIALIZER
 
 #elif defined _WIN32 || defined _WIN64
 
@@ -58,6 +72,7 @@
 /* data types */
 #define OS_FH_TYPE HANDLE
 #define OS_THREAD_TYPE HANDLE
+#define OS_MUTEX_TYPE CRITICAL_SECTION
 
 /* functions */
 #define OS_FOPEN_READ(pPath)                            \
@@ -102,6 +117,18 @@
             pFunc, (void*)(pData),                      \
             0, NULL);
 
+#define OS_MUTEX_INIT(pHandle)                          \
+    InitializeCriticalSection(&pHandle)
+
+#define OS_MUTEX_DESTROY(pHandle)                       \
+    DeleteCriticalSection(&pHandle)
+
+#define OS_MUTEX_LOCK(pHandle)                          \
+    EnterCriticalSection(&pHandle)
+
+#define OS_MUTEX_UNLOCK(pHandle)                        \
+    LeaveCriticalSection(&pHandle)
+
 /* user-defined functions */
 #define THREAD_FUNC(pFuncName, pData)                   \
     DWORD pFuncName(LPVOID pData)
@@ -109,6 +136,7 @@
 /* values */
 #define OS_FH_INVALID INVALID_HANDLE_VALUE
 #define OS_THREAD_RETURN 0
+#define OS_MUTEX_INIT_VALUE NULL
 
 #else
 #error "Unsupported platform"
