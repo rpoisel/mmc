@@ -40,7 +40,6 @@ int main(int argc, char* argv[])
     struct stat lStat;
     off_t lImageSize;
     off_t lImageNumBlocks = 0;
-    int lOption = -1;
     char lFilename[MAX_STR_LEN] = {'\0'};
 
 	if (argc != 4)
