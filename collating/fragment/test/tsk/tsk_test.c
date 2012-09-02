@@ -25,17 +25,17 @@ static void data_act(
 int main(int argc, char* argv1[])
 {
     TSK_VS_INFO* lVsInfo = NULL;
-	TSK_OFF_T lCnt = 0;
+    TSK_OFF_T lCnt = 0;
     char lBuf[32768] = { 0 };
     unsigned lCntRead = 0;
-	TSK_IMG_INFO* lImgInfo = OS_FH_INVALID;
-	OS_FH_TYPE lOut = OS_FH_INVALID;
-	TSK_TCHAR **argv;
+    TSK_IMG_INFO* lImgInfo = OS_FH_INVALID;
+    OS_FH_TYPE lOut = OS_FH_INVALID;
+    const TSK_TCHAR *const *argv;
 
 #ifdef TSK_WIN32
 	argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 #else
-	argv = (TSK_TCHAR **) argv1;
+	argv = (const TSK_TCHAR *const *) argv1;
 #endif
 
 	lOut = OS_FOPEN_WRITE(argv[2]);
@@ -202,7 +202,7 @@ static void data_act(
         void* pData
         )
 {
-	int lWritten = -1;
+    int lWritten = -1;
     OS_FH_TYPE lOut = (OS_FH_TYPE)pData;
     OS_FSEEK_SET(lOut, pOffset);
     OS_FWRITE(pBuf, pLen, lWritten, lOut);
