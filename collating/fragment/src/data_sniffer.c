@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
@@ -89,6 +88,8 @@ int main(int argc, char* argv[])
     }
     lImageSize = lStat.st_size;
 
+    /* see this for porting pthreads-code to windows */
+    /* http://msdn.microsoft.com/en-us/library/windows/desktop/ms686908(v=vs.85).aspx */
     pthread_mutex_init(&lData.mMutex, NULL);
 
     lData.mBlockSize = lBlockSize;

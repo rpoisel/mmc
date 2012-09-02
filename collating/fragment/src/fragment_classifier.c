@@ -352,7 +352,7 @@ THREAD_FUNC(classify_thread, pData)
             {
                 if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
                 {
-                	/* relevant fragment */
+                    /* relevant fragment */
                     if (lResult.mIsHeader)
                     {
                         LOGGING_INFO("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
