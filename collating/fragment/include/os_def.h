@@ -24,7 +24,7 @@
     pNumRead = fread(pBuf, 1, pLen, pHandle)
 
 /* TODO check return type */
-#define OS_WRITE(pBuf, pLen, pNumWrite, pHandle)        \
+#define OS_FWRITE(pBuf, pLen, pNumWrite, pHandle)       \
     pNumWrite = fwrite(pBuf, 1, pLen, pHandle)
 
 #define OS_FSEEK_SET(pHandle, pOffset)                  \
@@ -85,7 +85,7 @@
     ReadFile(pHandle, pBuf, pLen, &pNumRead, NULL)
 
 /* TODO check return type */
-#define OS_WRITE(pBuf, pLen, pNumWrite, pHandle)        \
+#define OS_FWRITE(pBuf, pLen, pNumWrite, pHandle)       \
     WriteFile(pHandle, pBuf, pLen, &pNumWrite, NULL)
 
 #define OS_SNPRINTF _snprintf
