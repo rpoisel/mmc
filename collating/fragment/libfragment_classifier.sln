@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libblock_reader", "libblock_reader.vcxproj", "{BF038CD3-3DDA-6445-361D-90B141E3FA3F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfragment_classifier", "libfragment_classifier.vcxproj", "{BF038CD3-3DDA-6445-361D-90B141E3FA3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

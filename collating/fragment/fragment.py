@@ -166,9 +166,9 @@ class CFragmentClassifier(object):
 
         # load library (do not change)
         if platform.system().lower() == "windows":
-            self._mLH = cdll.LoadLibrary("libblock_reader.dll")
+            self._mLH = cdll.LoadLibrary("libfragment_classifier.dll")
         elif platform.system().lower() == "linux":
-            self._mLH = cdll.LoadLibrary("libblock_reader.so")
+            self._mLH = cdll.LoadLibrary("libfragment_classifier.so")
 
         self._mClassify = self._mLH.classify
         self._mClassify.restype = CFragmentCollectionPointer
