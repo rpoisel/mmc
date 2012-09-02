@@ -67,7 +67,16 @@
         NULL,                                           \
         OPEN_EXISTING,                                  \
         0,                                              \
-        NULL)                   
+        NULL)
+
+#define OS_FOPEN_WRITE(pPath)                           \
+    CreateFile(pPath,                                   \
+        GENERIC_WRITE,                                  \
+        FILE_SHARE_READ,                                \
+        NULL,                                           \
+        OPEN_EXISTING,                                  \
+        0,                                              \
+        NULL)
 
 #define OS_FCLOSE(pHandle)                              \
     CloseHandle(pHandle)
