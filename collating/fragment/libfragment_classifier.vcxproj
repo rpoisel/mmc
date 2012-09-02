@@ -115,6 +115,7 @@
   <ItemGroup>
     <ClInclude Include="include\block_collection.h" />
     <ClInclude Include="include\block_reader.h" />
+    <ClInclude Include="include\const_def.h" />
     <ClInclude Include="include\entropy\entropy.h" />
     <ClInclude Include="include\fragment_classifier.h" />
     <ClInclude Include="include\fragment_collection.h" />

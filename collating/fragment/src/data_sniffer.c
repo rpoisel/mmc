@@ -3,7 +3,6 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <stdio.h>
 
 #include "os_def.h"
@@ -12,11 +11,8 @@
 #include "fragment_classifier.h"
 #include "block_collection.h"
 
-#define NUM_OPTIONS 0
 #define PROG_NAME "data_sniffer"
-#define USAGE "Invocation: %s [-b <= 131072] [-t <= 2048] <path-to-image> \n" \
-    "-b ... block size  \n" \
-    "-t ... thread number \n" 
+#define USAGE "Invocation: %s <block-size> <number-of-threads> <path-to-image> \n"
 
 int callback_print(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader, char* pInfo);
@@ -31,13 +27,13 @@ typedef struct
 void return_error() 
 {
     LOGGING_ERROR(USAGE, PROG_NAME);
-    abort();
+    exit(1);
 }
 
 int main(int argc, char* argv[])
 {
     FragmentClassifier* lHandle = NULL;
-    ClassifyOptions lOptions[NUM_OPTIONS];
+    ClassifyOptions lOptions[1];
     thread_data lData = { OS_MUTEX_INIT_VALUE, NULL };
     long int lNumThreads = NUM_THREADS_DEFAULT;
     long int lBlockSize = 4096;
@@ -47,41 +43,14 @@ int main(int argc, char* argv[])
     int lOption = -1;
     char lFilename[MAX_STR_LEN] = {'\0'};
 
-    while ((lOption = getopt(argc, argv, "ht:b:")) != -1)
-    {
-        switch(lOption)
-        {
-            case 'h':
-                LOGGING_ERROR(USAGE, PROG_NAME);
-                return EXIT_SUCCESS;
-            case 't':
-                lNumThreads = strtol(optarg, NULL, 10);
-                if (errno == ERANGE || lNumThreads < 1 || lNumThreads > 2048)
-                {
-                    LOGGING_ERROR("Illegal number of threads. Needs to be between 1 and 2048 (inclusive). \n");
-                    return EXIT_FAILURE;
-                }
-                break;
-            case 'b':
-                lBlockSize = strtol(optarg, NULL, 10);
-                if (errno == ERANGE || lBlockSize < 1 || lBlockSize > 131072)
-                {
-                    LOGGING_ERROR("Illegal block size given. Needs to be between 1 and 131072 (inclusive). \n");
-                    return EXIT_FAILURE;
-                }
-                break;
-            default:
-                return_error();
-        }
-    }
+	if (argc != 4)
+	{
+		return_error();
+	}
 
-    if (optind == argc)
-    {
-        LOGGING_ERROR("Missing image file. \n");
-        return_error();
-    }
-
-    strncpy(lFilename, argv[optind], MAX_STR_LEN);
+	lBlockSize = strtol(argv[1], NULL, 10);
+	lNumThreads = strtol(argv[2], NULL, 10);
+	strncpy(lFilename, argv[3], MAX_STR_LEN);
     if (stat(lFilename, &lStat) != 0)
     {
         LOGGING_ERROR("Cannot stat(2) given file: %s. \n", 
@@ -90,8 +59,6 @@ int main(int argc, char* argv[])
     }
     lImageSize = lStat.st_size;
 
-    /* see this for porting pthreads-code to windows */
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/ms686908(v=vs.85).aspx */
     OS_MUTEX_INIT(lData.mMutex);
 
     lData.mBlockSize = lBlockSize;
@@ -101,7 +68,7 @@ int main(int argc, char* argv[])
         ++lImageNumBlocks;
     }
 
-    lHandle = fragment_classifier_new(lOptions, NUM_OPTIONS, lBlockSize);
+    lHandle = fragment_classifier_new(lOptions, 0, lBlockSize);
     if (!lHandle)
     {
         return EXIT_FAILURE;

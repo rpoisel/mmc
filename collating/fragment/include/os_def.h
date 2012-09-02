@@ -5,6 +5,7 @@
 
 /* includes */
 #include <pthread.h>
+#include <unistd.h>
 
 /* data types */
 #define OS_FH_TYPE FILE*
@@ -136,7 +137,7 @@
 /* values */
 #define OS_FH_INVALID INVALID_HANDLE_VALUE
 #define OS_THREAD_RETURN 0
-#define OS_MUTEX_INIT_VALUE NULL
+#define OS_MUTEX_INIT_VALUE 0
 
 #else
 #error "Unsupported platform"

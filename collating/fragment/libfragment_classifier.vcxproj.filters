@@ -62,5 +62,8 @@
     <ClInclude Include="include\magic\magic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\const_def.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,9 +4,7 @@
 #define MAX_STR_LEN 256
 #define NUM_THREADS_DEFAULT 1
 
-#ifndef _MSC_VER
 #include <magic.h>
-#endif
 
 /* data types */
 typedef enum _FileType
