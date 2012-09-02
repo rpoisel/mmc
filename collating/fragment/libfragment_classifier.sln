@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfragment_classifier", "libfragment_classifier.vcxproj", "{BF038CD3-3DDA-6445-361D-90B141E3FA3F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfragment_classifier", "libfragment_classifier.vcxproj", "{54F8F8BB-8BF2-A995-AD39-03225073F14B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,14 +11,14 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Debug|Win32.ActiveCfg = Debug|x64
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Debug|Win32.Build.0 = Debug|x64
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Debug|x64.ActiveCfg = Debug|x64
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Debug|x64.Build.0 = Debug|x64
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Release|Win32.ActiveCfg = Release|x64
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Release|Win32.Build.0 = Release|x64
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Release|x64.ActiveCfg = Release|x64
-		{BF038CD3-3DDA-6445-361D-90B141E3FA3F}.Release|x64.Build.0 = Release|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Debug|Win32.ActiveCfg = Debug|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Debug|Win32.Build.0 = Debug|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Debug|x64.ActiveCfg = Debug|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Debug|x64.Build.0 = Debug|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Release|Win32.ActiveCfg = Release|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Release|Win32.Build.0 = Release|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Release|x64.ActiveCfg = Release|x64
+		{54F8F8BB-8BF2-A995-AD39-03225073F14B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
