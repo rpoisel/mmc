@@ -1,6 +1,6 @@
 # g++ -g -o HowToUse_Dll HowToUse_Dll.cpp -ldl -lpthread
 
-include vars.mk
+include vars_lnx.mk
 
 CC=gcc
 CXX=g++
@@ -28,6 +28,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 init:
 	@if [ ! -d $(BUILD_DIR) ] ; then $(MKDIR) -p $(BUILD_DIR) ; fi
 	@if [ ! -d $(BUILD_DIR)/entropy ] ; then $(MKDIR) -p $(BUILD_DIR)/entropy ; fi
+	@if [ ! -d $(BUILD_DIR)/pipe ] ; then $(MKDIR) -p $(BUILD_DIR)/pipe ; fi
 	@if [ ! -d $(OUT_DIR) ] ; then $(MKDIR) -p $(OUT_DIR) ; fi
 
 clean:

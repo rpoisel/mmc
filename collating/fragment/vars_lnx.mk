@@ -12,10 +12,15 @@ OBJ_FRAGMENT_CLASSIFIER=$(BUILD_DIR)/logging.o \
 			$(BUILD_DIR)/block_collection.o \
 			$(BUILD_DIR)/block_reader.o \
 			$(BUILD_DIR)/entropy/entropy.o \
+			$(BUILD_DIR)/pipe/pipe.o \
 
 CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC \
+			   -Wall -Wextra -Wpointer-arith \
+			   -fstrict-aliasing -std=c99 \
+			   -DFORTIFY_SOURCE=2 -pipe -pedantic \
 			   -Iinclude/entropy \
-			   -Iinclude/magic
+			   -Iinclude/magic \
+			   -Iinclude/pipe
 
 ifeq ($(LBITS),64)
     LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \

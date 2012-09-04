@@ -1,6 +1,6 @@
 # g++ -g -o HowToUse_Dll HowToUse_Dll.cpp -ldl -lpthread
 
-include vars.mk
+include vars_lnx.mk
 
 CC=gcc
 CXX=g++
