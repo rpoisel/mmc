@@ -1,3 +1,4 @@
+/* TODO this file should be called block_reader_nofs.c */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,11 +15,14 @@
 #include "os_def.h"
 #include "block_reader.h"
 
+/* TODO put in separate c-file; definition in separate h-file */
 int callback_collect(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader, char* pInfo);
 
+/* TODO this is part of the non-fs based classifier */
+/* TODO pNumBlocks is not relevant for fs based classifiers */
 fragment_collection_t* classify(int pBlockSize, 
-        int pNumBlocks, 
+        int pNumBlocks, /* TODO only non-fs relevant */
         const char* pImage, 
         unsigned long long pOffset, 
         ClassifyT* pTypes, 
@@ -58,11 +62,14 @@ fragment_collection_t* classify(int pBlockSize,
     return lFragments;
 }
 
+/* TODO this is part of the non-fs based classifier */
 void classify_free(fragment_collection_t* pCollection)
 {
     fragment_collection_free(pCollection);
 }
 
+/* generally valid call-back */
+/* TODO put in separate c-file; definition in separate h-file */
 int callback_collect(void* pData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader, char* pInfo)
 {

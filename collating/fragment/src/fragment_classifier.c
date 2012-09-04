@@ -1,3 +1,4 @@
+/* TODO call this file block_classifier.c */
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -230,6 +231,7 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     return pResult->mStrength;
 }
 
+/* TODO this is part of the non-fs based classifier: block_reader_nofs.c */
 int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
         fragment_cb pCallback, 
         void* pCallbackData, 
@@ -293,6 +295,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
     return EXIT_SUCCESS;
 }
 
+/* TODO this is part of the non-fs based classifier: block_reader_nofs.c */
 THREAD_FUNC(classify_thread, pData)
 {
     thread_data* lData = (thread_data*)pData; 
