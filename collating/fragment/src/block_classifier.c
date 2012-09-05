@@ -205,3 +205,40 @@ int block_classifier_classify_result(BlockClassifier* pBlockClassifier,
 
     return pResult->mStrength;
 }
+
+void callback_selective(BlockClassifier* pBlockClassifier,
+    fragment_cb pCallback,
+    void* pCallbackData,
+    unsigned long long pCntBlock,
+    ClassifyT pResult)
+{
+    unsigned lCnt;
+    /* do something with the classification result */
+    if (pBlockClassifier->mNumFileTypes == 0)
+    {
+        pCallback(pCallbackData, pCntBlock, 
+                pResult.mType, pResult.mStrength, pResult.mIsHeader, pResult.mInfo);
+    }
+    else
+    {
+        for (lCnt = 0; lCnt < pBlockClassifier->mNumFileTypes; ++lCnt)
+        {
+            if (pBlockClassifier->mFileTypes[lCnt].mType == pResult.mType)
+            {
+                /* relevant fragment */
+                if (pResult.mIsHeader)
+                {
+                    LOGGING_INFO("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
+                            pCntBlock,
+                            pResult.mType,
+                            pResult.mStrength,
+                            pResult.mIsHeader,
+                            pResult.mInfo);
+                }
+                pCallback(pCallbackData, pCntBlock, 
+                        pResult.mType, pResult.mStrength, pResult.mIsHeader, pResult.mInfo);
+                break;
+            }
+        }
+    }
+}

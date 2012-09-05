@@ -142,34 +142,12 @@ THREAD_FUNC(classify_thread, pData)
         block_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult);
 
-        /* do something with the classification result */
-        if (lData->handle_fc->mNumFileTypes == 0)
-        {
-            lData->callback(lData->callback_data, lCntBlock, 
-                    lResult.mType, lResult.mStrength, lResult.mIsHeader, lResult.mInfo);
-        }
-        else
-        {
-            for (lCnt = 0; lCnt < lData->handle_fc->mNumFileTypes; ++lCnt)
-            {
-                if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
-                {
-                    /* relevant fragment */
-                    if (lResult.mIsHeader)
-                    {
-                        LOGGING_INFO("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
-                                lCntBlock,
-                                lResult.mType,
-                                lResult.mStrength,
-                                lResult.mIsHeader,
-                                lResult.mInfo);
-                    }
-                    lData->callback(lData->callback_data, lCntBlock, 
-                            lResult.mType, lResult.mStrength, lResult.mIsHeader, lResult.mInfo);
-                    break;
-                }
-            }
-        }
+        callback_selective(lData->handle_fc,
+                lData->callback,
+                lData->callback_data,
+                lCntBlock,
+                lResult);
+
         lCntBlock++;
     }
     

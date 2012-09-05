@@ -64,6 +64,12 @@ typedef struct _ClassifyOptions
 typedef int (*fragment_cb)(void* pCallbackData, unsigned long long pOffset, 
         FileType pType, int pStrength, int pIsHeader, char* pInfo);
 
+void callback_selective(BlockClassifier* pBlockClassifier,
+    fragment_cb pCallback,
+    void* pCallbackData,
+    unsigned long long pCntBlock,
+    ClassifyT pResult);
+
 #ifndef _MSC_VER
 #define __declspec(dllexport) 
 #endif
