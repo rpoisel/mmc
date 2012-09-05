@@ -11,7 +11,7 @@
 #include "magic.h"
 
 #include "logging.h"
-#include "fragment_classifier.h"
+#include "block_classifier.h"
 #include "entropy/entropy.h"
 
 #define MAX_FILETYPES 24

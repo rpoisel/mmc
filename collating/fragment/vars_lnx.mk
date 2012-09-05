@@ -5,16 +5,16 @@ OUT_DIR=.
 LBITS := $(shell getconf LONG_BIT)
 
 # ================ START FRAGMENT CLASSIFIER =================
-BIN_FRAGMENT_CLASSIFIER=$(OUT_DIR)/libfragment_classifier.so
-OBJ_FRAGMENT_CLASSIFIER=$(BUILD_DIR)/logging.o \
-			$(BUILD_DIR)/fragment_classifier.o \
+BIN_BLOCK_CLASSIFIER=$(OUT_DIR)/libblock_classifier.so
+OBJ_BLOCK_CLASSIFIER=$(BUILD_DIR)/logging.o \
+			$(BUILD_DIR)/block_classifier.o \
 			$(BUILD_DIR)/fragment_collection.o \
 			$(BUILD_DIR)/block_collection.o \
 			$(BUILD_DIR)/block_reader.o \
 			$(BUILD_DIR)/entropy/entropy.o \
 			$(BUILD_DIR)/pipe/pipe.o \
 
-CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC \
+CFLAGS_BLOCK_CLASSIFIER=$(CFLAGS) -fPIC \
 			   -Wall -Wextra -Wpointer-arith \
 			   -fstrict-aliasing -std=c99 \
 			   -DFORTIFY_SOURCE=2 -pipe -pedantic \
@@ -23,10 +23,10 @@ CFLAGS_FRAGMENT_CLASSIFIER=$(CFLAGS) -fPIC \
 			   -Iinclude/pipe
 
 ifeq ($(LBITS),64)
-    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
+    LDFLAGS_BLOCK_CLASSIFIER=-shared -Wl,-soname, -lm \
 	-lpthread -Llib/magic/linux-x86_64 -lmagic #-lsvm
 else
-    LDFLAGS_FRAGMENT_CLASSIFIER=-shared -Wl,-soname, -lm \
+    LDFLAGS_BLOCK_CLASSIFIER=-shared -Wl,-soname, -lm \
 	-lpthread -Llib/magic/linux-i686 -lmagic #-lsvm
 endif
 # ================= END FRAGMENT CLASSIFIER ==================
@@ -42,7 +42,7 @@ else
 endif
 OBJ_DATA_SNIFFER=$(BUILD_DIR)/data_sniffer.o \
 		 $(BUILD_DIR)/logging.o \
-		 $(BUILD_DIR)/fragment_classifier.o \
+		 $(BUILD_DIR)/block_classifier.o \
 		 $(BUILD_DIR)/fragment_collection.o \
 		 $(BUILD_DIR)/block_collection.o \
 		 $(BUILD_DIR)/entropy/entropy.o \

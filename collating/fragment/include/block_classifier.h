@@ -1,5 +1,5 @@
-#ifndef __FRAGMENT_CLASSIFIER_H__
-#define __FRAGMENT_CLASSIFIER_H__ 1
+#ifndef __BLOCK_CLASSIFIER_H__
+#define __BLOCK_CLASSIFIER_H__ 1
 
 #define MAX_STR_LEN 256
 #define NUM_THREADS_DEFAULT 1
@@ -87,4 +87,4 @@ __declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pF
         const char* pPathMagic, 
         unsigned int pNumThreads);
 
-#endif /* __FRAGMENT_CLASSIFIER_H__ */
+#endif /* __BLOCK_CLASSIFIER_H__ */

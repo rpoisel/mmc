@@ -1,7 +1,7 @@
 #ifndef __BLOCK_READER_H__
 #define __BLOCK_READER_H__ 1
 
-#include "fragment_classifier.h"
+#include "block_classifier.h"
 #include "block_collection.h"
 #include "fragment_collection.h"
 

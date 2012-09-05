@@ -8,7 +8,7 @@
 #include "os_def.h"
 #include "const_def.h"
 #include "logging.h"
-#include "fragment_classifier.h"
+#include "block_classifier.h"
 #include "block_collection.h"
 
 #define PROG_NAME "data_sniffer"
