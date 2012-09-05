@@ -1,4 +1,4 @@
-#include "classify_nofs_collect.h"
+#include "classify_tsk_collect.h"
 
 #include <stdlib.h>
 
@@ -7,11 +7,14 @@
 #include "fragment_collection.h"
 #include "callback_collect.h"
 
-/* TODO pNumBlocks is not relevant for fs based classifiers */
-fragment_collection_t* classify_nofs(int pBlockSize, 
-        int pNumBlocks, /* TODO only non-fs relevant */
+/* TODO check if it makes more sense to pass the actual function to call 
+ * as parameter (e. g. as c-string) instead of having complete independent 
+ * functions 
+ */
+fragment_collection_t* classify_tsk(int pBlockSize, 
+        int pNumBlocks, /* ignored */
         const char* pImage, 
-        unsigned long long pOffset, 
+        unsigned long long pOffset,  /* ignored */
         ClassifyT* pTypes, 
         int pNumTypes, 
         unsigned long long pBlockGap,
@@ -31,10 +34,12 @@ fragment_collection_t* classify_nofs(int pBlockSize,
     lBlocks = block_collection_new(pNumBlocks, pBlockSize); 
 
     /* start multithreaded classification process */
-    block_classify_nofs_mt(lHandle, classify_collect, 
-            lBlocks /* callback data */, pImage, pOffset, pNumBlocks, 
-            /* colons do not work in windows; thus one file is used only */
-            PATH_MAGIC,
+    block_classify_tsk_mt(lHandle, classify_collect, 
+            lBlocks /* callback data */,
+            pImage,
+            pOffset,
+            pNumBlocks, 
+            PATH_MAGIC, /* colons do not work in windows; thus one file is used only */
             pNumThreads);
 
     /* factor 1/4 is just an empirical value */
@@ -49,7 +54,8 @@ fragment_collection_t* classify_nofs(int pBlockSize,
     return lFragments;
 }
 
-void classify_nofs_free(fragment_collection_t* pCollection)
+void classify_tsk_free(fragment_collection_t* pCollection)
 {
     fragment_collection_free(pCollection);
 }
+

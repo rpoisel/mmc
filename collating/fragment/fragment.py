@@ -136,7 +136,7 @@ class CFragmentClassifier(object):
             [c_int, c_int, c_char_p, c_ulonglong,
             ClassifyTArray, c_int, c_ulonglong, c_ulonglong, c_int]
 
-        self._mClassifyFree = self._mLH.classify_free
+        self._mClassifyFree = self._mLH.classify_nofs_free
         self._mClassifyFree.restype = None
         self._mClassifyFree.argtypes = \
             [CFragmentCollectionPointer]

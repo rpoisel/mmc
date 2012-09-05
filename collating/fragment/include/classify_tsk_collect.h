@@ -1,5 +1,5 @@
-#ifndef __CLASSIFY_NOFS_COLLECT_H__
-#define __CLASSIFY_NOFS_COLLECT_H__ 1
+#ifndef __CLASSIFY_TSK_COLLECT_H__
+#define __CLASSIFY_TSK_COLLECT_H__ 1
 
 #include "block_classifier.h"
 #include "fragment_collection.h"
@@ -8,7 +8,7 @@
 #define __declspec(dllexport) 
 #endif
 
-__declspec(dllexport) fragment_collection_t* classify_nofs(int pBlockSize, 
+__declspec(dllexport) fragment_collection_t* classify_tsk(int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
         unsigned long long pOffset, 
@@ -18,6 +18,6 @@ __declspec(dllexport) fragment_collection_t* classify_nofs(int pBlockSize,
         unsigned long long pMinFragSize, 
         int pNumThreads); 
 
-__declspec(dllexport) void classify_nofs_free(fragment_collection_t* pCollection);
+__declspec(dllexport) void classify_tsk_free(fragment_collection_t* pCollection);
 
-#endif /* __CLASSIFY_NOFS_COLLECT_H__ */
+#endif /* __CLASSIFY_TSK_COLLECT_H__ */

@@ -11,8 +11,10 @@ OBJ_BLOCK_CLASSIFIER=$(BUILD_DIR)/logging.o \
 			$(BUILD_DIR)/fragment_collection.o \
 			$(BUILD_DIR)/block_collection.o \
 			$(BUILD_DIR)/classify_nofs_collect.o \
+			$(BUILD_DIR)/classify_tsk_collect.o \
 			$(BUILD_DIR)/callback_collect.o \
 			$(BUILD_DIR)/block_reader_nofs.o \
+			$(BUILD_DIR)/block_reader_tsk.o \
 			$(BUILD_DIR)/entropy/entropy.o \
 			$(BUILD_DIR)/pipe/pipe.o \
 
@@ -26,10 +28,12 @@ CFLAGS_BLOCK_CLASSIFIER=$(CFLAGS) -fPIC \
 
 ifeq ($(LBITS),64)
     LDFLAGS_BLOCK_CLASSIFIER=-shared -Wl,-soname, -lm \
-	-lpthread -Llib/magic/linux-x86_64 -lmagic #-lsvm
+	-lpthread -Llib/magic/linux-x86_64 \
+	-lmagic -ltsk3 #-lsvm
 else
     LDFLAGS_BLOCK_CLASSIFIER=-shared -Wl,-soname, -lm \
-	-lpthread -Llib/magic/linux-i686 -lmagic #-lsvm
+	-lpthread -Llib/magic/linux-i686 \
+	-lmagic -ltsk3 #-lsvm
 endif
 # ================= END FRAGMENT CLASSIFIER ==================
 
