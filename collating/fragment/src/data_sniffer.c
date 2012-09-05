@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 {
     FragmentClassifier* lHandle = NULL;
     ClassifyOptions lOptions[1];
-    thread_data lData = { OS_MUTEX_INIT_VALUE, NULL };
+    thread_data lData = { OS_MUTEX_INIT_VALUE, NULL, -1 };
     long int lNumThreads = NUM_THREADS_DEFAULT;
     long int lBlockSize = 4096;
     struct stat lStat;

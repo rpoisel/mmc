@@ -20,7 +20,7 @@ fragment_collection_t* fragment_collection_new(
     unsigned long long lBlockGap = 0;
     int lFlagExisting = 0;
     unsigned lBlockSize = block_collection_get_bs(pBlocks);
-    fragment_t lFragTmp = { 0, 0, 0, 0, "", "", 0, -1 };
+    fragment_t lFragTmp = { 0, 0, 0, 0, "", "", 0, -1, -1 };
 
     fragment_collection_t* lFragments = 
         (fragment_collection_t* )malloc(sizeof(fragment_collection_t));

@@ -244,7 +244,7 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
 {
     OS_THREAD_TYPE* lThreads = NULL;
             
-    int lCnt = 0;
+    unsigned lCnt = 0;
     thread_data* lData = NULL;
     unsigned long long lSize = pSizeReal * pFragmentClassifier->mFragmentSize - pOffset;
     unsigned long long lFragsTotal = lSize / pFragmentClassifier->mFragmentSize;
@@ -299,12 +299,12 @@ int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
 THREAD_FUNC(classify_thread, pData)
 {
     thread_data* lData = (thread_data*)pData; 
-    int lLen = lData->handle_fc->mFragmentSize;
+    unsigned lLen = lData->handle_fc->mFragmentSize;
     unsigned long long lCntBlock = lData->offset_img;
     OS_FH_TYPE lImage = NULL;
     unsigned char* lBuf = NULL;
-    ClassifyT lResult = { 0, 0, 0 };
-    int lCnt = 0;
+    ClassifyT lResult = { FT_UNKNOWN, 0, 0, { '\0' } };
+    unsigned lCnt = 0;
     magic_t lMagic;
 
     lMagic = magic_open(MAGIC_NONE);

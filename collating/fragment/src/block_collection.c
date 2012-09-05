@@ -17,7 +17,7 @@ struct _block_collection_t
 
 block_collection_t* block_collection_new(unsigned long long pMaxBlocks, unsigned pBlockSize)
 {
-    int lCnt = 0;
+    unsigned lCnt = 0;
 
     block_collection_t* lHandle = (block_collection_t*)malloc(sizeof(block_collection_t));
 
