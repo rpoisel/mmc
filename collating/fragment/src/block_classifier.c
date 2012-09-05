@@ -1,4 +1,3 @@
-/* TODO call this file block_classifier.c */
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,37 +13,13 @@
 #include "block_classifier.h"
 #include "entropy/entropy.h"
 
-#define MAX_FILETYPES 24
-
-struct _FragmentClassifier
-{
-    unsigned mFragmentSize;
-    ClassifyT mFileTypes[MAX_FILETYPES];
-    unsigned mNumFileTypes;
-};
-
-typedef struct 
-{
-    FragmentClassifier* handle_fc;
-    fragment_cb callback;
-    void* callback_data;
-    int result;
-    char path_image[MAX_STR_LEN];
-    unsigned long long offset_img;
-    unsigned long long offset_fs;
-    unsigned long long num_frags;
-    const char* mPathMagic;
-} thread_data;
-
-THREAD_FUNC(classify_thread, pData);
-
-FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
+BlockClassifier* block_classifier_new(ClassifyOptions* pOptions, 
         unsigned pNumSo, 
         unsigned pFragmentSize)
 {
     /* initialize handle structure */
-    struct _FragmentClassifier* lHandle = 
-        (struct _FragmentClassifier*)malloc(sizeof(struct _FragmentClassifier));
+    struct _BlockClassifier* lHandle = 
+        (struct _BlockClassifier*)malloc(sizeof(struct _BlockClassifier));
 
     lHandle->mFragmentSize = pFragmentSize;
 
@@ -60,13 +35,13 @@ FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions,
     return lHandle;
 }
 
-FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions, 
+BlockClassifier* block_classifier_new_ct(ClassifyOptions* pOptions, 
         unsigned pNumSo, 
         unsigned pFragmentSize,
         ClassifyT* pTypes,
         unsigned pNumTypes)
 {
-    struct _FragmentClassifier* lHandle = fragment_classifier_new(
+    struct _BlockClassifier* lHandle = block_classifier_new(
             pOptions,
             pNumSo,
             pFragmentSize);
@@ -78,13 +53,13 @@ FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions,
     return lHandle;
 }
 
-void fragment_classifier_free(FragmentClassifier* pFragmentClassifier)
+void block_classifier_free(BlockClassifier* pBlockClassifier)
 {
     /* free handle resources */
-    free(pFragmentClassifier);
+    free(pBlockClassifier);
 }
 
-int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
+int block_classifier_classify_result(BlockClassifier* pBlockClassifier, 
         magic_t pMagic, 
         const unsigned char* pFragment,
         int pLen,
@@ -229,155 +204,4 @@ int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier,
     }
 
     return pResult->mStrength;
-}
-
-/* TODO this is part of the non-fs based classifier: block_reader_nofs.c */
-int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier,
-        fragment_cb pCallback, 
-        void* pCallbackData, 
-        const char* pImage, 
-        unsigned long long pOffset, 
-        unsigned long long pSizeReal,
-        const char* pPathMagic, 
-        unsigned int pNumThreads
-        )
-{
-    OS_THREAD_TYPE* lThreads = NULL;
-            
-    unsigned lCnt = 0;
-    thread_data* lData = NULL;
-    unsigned long long lSize = pSizeReal * pFragmentClassifier->mFragmentSize - pOffset;
-    unsigned long long lFragsTotal = lSize / pFragmentClassifier->mFragmentSize;
-    unsigned long long lFragsPerCpu = lFragsTotal / pNumThreads;
-    unsigned long long lFragsPerCpuR = 0;
-    unsigned long long lOffsetImg = 0;
-    if (lFragsPerCpu > 0)
-    {
-        lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
-    }
-       
-    /* TODO check return values */
-    lThreads = (OS_THREAD_TYPE* )malloc(sizeof(OS_THREAD_TYPE) * pNumThreads);
-    lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
-
-    LOGGING_DEBUG("Fragments range: %lld\n", lFragsTotal);
-    LOGGING_DEBUG("Filesystem offset: %lld\n", pOffset);
-
-    for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
-    {
-        strncpy((lData + lCnt)->path_image, pImage, MAX_STR_LEN);
-        (lData + lCnt)->handle_fc = pFragmentClassifier;
-        (lData + lCnt)->callback = pCallback;
-        (lData + lCnt)->callback_data = pCallbackData; 
-        (lData + lCnt)->mPathMagic = pPathMagic;
-
-        (lData + lCnt)->num_frags = lFragsPerCpu + (lFragsPerCpuR > 0 ? 1 : 0);
-        (lData + lCnt)->offset_img = lOffsetImg;
-        (lData + lCnt)->offset_fs = pOffset;
-        lOffsetImg += (lData + lCnt)->num_frags;
-        lFragsPerCpuR--;
-
-        LOGGING_DEBUG("Starting thread %d with block range %lld to %lld.\n",
-                lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
-        
-    OS_THREAD_CREATE((lThreads + lCnt), (lData + lCnt), classify_thread);
-    }
-
-    /* join threads */
-    for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
-    {
-        OS_THREAD_JOIN(*(lThreads + lCnt));
-    }
-
-    free(lData);
-    free(lThreads);
-    
-    return EXIT_SUCCESS;
-}
-
-/* TODO this is part of the non-fs based classifier: block_reader_nofs.c */
-THREAD_FUNC(classify_thread, pData)
-{
-    thread_data* lData = (thread_data*)pData; 
-    unsigned lLen = lData->handle_fc->mFragmentSize;
-    unsigned long long lCntBlock = lData->offset_img;
-    OS_FH_TYPE lImage = NULL;
-    unsigned char* lBuf = NULL;
-    ClassifyT lResult = { FT_UNKNOWN, 0, 0, { '\0' } };
-    unsigned lCnt = 0;
-    magic_t lMagic;
-
-    lMagic = magic_open(MAGIC_NONE);
-    if (!lMagic)
-    {
-        printf("Could not load library\n");
-    }
-    
-    /* TODO load proper file */
-    if (magic_load(lMagic, lData->mPathMagic))
-    {
-        printf("%s\n", magic_error(lMagic));
-    }
-
-
-    LOGGING_DEBUG(
-            "Offset: %lld\n", lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
-
-    lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
-    lImage = OS_FOPEN_READ(lData->path_image);
-
-    if (lImage == OS_FH_INVALID)
-    {
-        /* TODO return error back to GUI */
-        perror("Could not open image file");
-        return OS_THREAD_RETURN;
-    }
-    OS_FSEEK_SET(lImage,
-        lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
-            
-    /* classify fragments */
-    while (lLen == lData->handle_fc->mFragmentSize && 
-            (lCntBlock - lData->offset_img) < lData->num_frags)
-    {
-        OS_FREAD(lBuf, lData->handle_fc->mFragmentSize, lLen, lImage); 
-        fragment_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
-                &lResult);
-
-        /* do something with the classification result */
-        if (lData->handle_fc->mNumFileTypes == 0)
-        {
-            lData->callback(lData->callback_data, lCntBlock, 
-                    lResult.mType, lResult.mStrength, lResult.mIsHeader, lResult.mInfo);
-        }
-        else
-        {
-            for (lCnt = 0; lCnt < lData->handle_fc->mNumFileTypes; ++lCnt)
-            {
-                if (lData->handle_fc->mFileTypes[lCnt].mType == lResult.mType)
-                {
-                    /* relevant fragment */
-                    if (lResult.mIsHeader)
-                    {
-                        LOGGING_INFO("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
-                                lCntBlock,
-                                lResult.mType,
-                                lResult.mStrength,
-                                lResult.mIsHeader,
-                                lResult.mInfo);
-                    }
-                    lData->callback(lData->callback_data, lCntBlock, 
-                            lResult.mType, lResult.mStrength, lResult.mIsHeader, lResult.mInfo);
-                    break;
-                }
-            }
-        }
-        lCntBlock++;
-    }
-    
-    OS_FCLOSE(lImage);
-    free(lBuf);
-
-    magic_close(lMagic);  
-    
-    return OS_THREAD_RETURN;
 }

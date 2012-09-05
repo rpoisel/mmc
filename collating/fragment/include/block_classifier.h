@@ -3,8 +3,14 @@
 
 #define MAX_STR_LEN 256
 #define NUM_THREADS_DEFAULT 1
+#define MAX_FILETYPES 24
 
 #include <magic.h>
+#if defined __linux__
+#define PATH_MAGIC "collating/fragment/data/magic/media.mgc"
+#elif defined _WIN32 || defined _WIN64
+#define PATH_MAGIC "collating\\fragment\\data\\magic\\media.mgc"
+#endif
 
 /* data types */
 typedef enum _FileType
@@ -36,7 +42,14 @@ typedef struct _ClassifyT
     char mInfo[MAX_STR_LEN];
 } ClassifyT;
 
-typedef struct _FragmentClassifier FragmentClassifier;
+struct _BlockClassifier
+{
+    unsigned mFragmentSize;
+    ClassifyT mFileTypes[MAX_FILETYPES];
+    unsigned mNumFileTypes;
+};
+
+typedef struct _BlockClassifier BlockClassifier;
 
 typedef struct _ClassifyOptions
 {
@@ -56,29 +69,29 @@ typedef int (*fragment_cb)(void* pCallbackData, unsigned long long pOffset,
 #endif
 
 /* function declarations */
-__declspec(dllexport) FragmentClassifier* fragment_classifier_new(ClassifyOptions* pOptions, 
+__declspec(dllexport) BlockClassifier* block_classifier_new(ClassifyOptions* pOptions, 
         unsigned pNumOptions, 
         unsigned pFragmentSize);
 
-__declspec(dllexport) FragmentClassifier* fragment_classifier_new_ct(ClassifyOptions* pOptions, 
+__declspec(dllexport) BlockClassifier* block_classifier_new_ct(ClassifyOptions* pOptions, 
         unsigned pNumOptions, 
         unsigned pFragmentSize,
         ClassifyT* pTypes,
         unsigned pNumTypes);
 
-__declspec(dllexport) void fragment_classifier_free(FragmentClassifier* pFragmentClassifier);
+__declspec(dllexport) void block_classifier_free(BlockClassifier* pBlockClassifier);
 
-__declspec(dllexport) int fragment_classifier_classify_result(FragmentClassifier* pFragmentClassifier, 
+__declspec(dllexport) int block_classifier_classify_result(BlockClassifier* pBlockClassifier, 
         magic_t pMagic, 
         const unsigned char* pFragment,
         int pLen,
         ClassifyT* pResult);
 
-__declspec(dllexport) int fragment_classifier_classify(FragmentClassifier* pFragmentClassifier, 
+__declspec(dllexport) int block_classifier_classify(BlockClassifier* pBlockClassifier, 
         const unsigned char* pFragment,
         int pLen);
 
-__declspec(dllexport) int fragment_classifier_classify_mt(FragmentClassifier* pFragmentClassifier, 
+__declspec(dllexport) int block_classify_nofs_mt(BlockClassifier* pBlockClassifier, 
         fragment_cb pCallback, 
         void* pCallbackData, 
         const char* pImage, 

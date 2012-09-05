@@ -32,7 +32,7 @@ void return_error()
 
 int main(int argc, char* argv[])
 {
-    FragmentClassifier* lHandle = NULL;
+    BlockClassifier* lHandle = NULL;
     ClassifyOptions lOptions[1];
     thread_data lData = { OS_MUTEX_INIT_VALUE, NULL, -1 };
     long int lNumThreads = NUM_THREADS_DEFAULT;
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
         ++lImageNumBlocks;
     }
 
-    lHandle = fragment_classifier_new(lOptions, 0, lBlockSize);
+    lHandle = block_classifier_new(lOptions, 0, lBlockSize);
     if (!lHandle)
     {
         return EXIT_FAILURE;
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     lData.mStorage = block_collection_new(lImageNumBlocks, lBlockSize);
 
     /* start multithreaded classification process */
-    fragment_classifier_classify_mt(lHandle, callback_print, 
+    block_classify_nofs_mt(lHandle, callback_print, 
             (void *)&lData, lFilename, 
             0 /* filesystem offset */, 
             lImageNumBlocks,
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     block_collection_free(lData.mStorage);
 
     /* destruct fragment classifier */
-    fragment_classifier_free(lHandle);
+    block_classifier_free(lHandle);
 
     return EXIT_SUCCESS;
 }

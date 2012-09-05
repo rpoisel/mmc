@@ -10,7 +10,9 @@ OBJ_BLOCK_CLASSIFIER=$(BUILD_DIR)/logging.o \
 			$(BUILD_DIR)/block_classifier.o \
 			$(BUILD_DIR)/fragment_collection.o \
 			$(BUILD_DIR)/block_collection.o \
-			$(BUILD_DIR)/block_reader.o \
+			$(BUILD_DIR)/classify_nofs_collect.o \
+			$(BUILD_DIR)/callback_collect.o \
+			$(BUILD_DIR)/block_reader_nofs.o \
 			$(BUILD_DIR)/entropy/entropy.o \
 			$(BUILD_DIR)/pipe/pipe.o \
 
@@ -43,6 +45,7 @@ endif
 OBJ_DATA_SNIFFER=$(BUILD_DIR)/data_sniffer.o \
 		 $(BUILD_DIR)/logging.o \
 		 $(BUILD_DIR)/block_classifier.o \
+		 $(BUILD_DIR)/block_reader_nofs.o \
 		 $(BUILD_DIR)/fragment_collection.o \
 		 $(BUILD_DIR)/block_collection.o \
 		 $(BUILD_DIR)/entropy/entropy.o \

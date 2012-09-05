@@ -119,46 +119,6 @@ class CFragments(object):
         self.__mCollection = None
 
 
-class CBlockClassifier:
-
-    def __init__(self):
-        # open library handle (do not change)
-        if platform.system().lower() == "windows":
-            self.__mLH = cdll.LoadLibrary("libfragment_classifier.dll")
-        elif platform.system().lower() == "linux":
-            self.__mLH = cdll.LoadLibrary("libfragment_classifier.so")
-
-        self.__mOpen = self.__mLH.fragment_classifier_new_ct
-        self.__mOpen.restype = CClassifyHandlerPointer
-        self.__mOpen.argtypes = \
-            [CBlockOptionsPointer, c_uint, c_uint, ClassifyTArray, c_uint]
-
-        self.__mFree = self.__mLH.fragment_classifier_free
-        self.__mFree.restype = None
-        self.__mFree.argtypes = \
-            [CClassifyHandlerPointer]
-
-        self.__mClassify = self.__mLH.fragment_classifier_classify
-        self.__mClassify.restype = CFragmentCollectionPointer
-        self.__mClassify.argtypes = \
-            [CClassifyHandlerPointer, c_char_p, c_int]
-
-    def open(self, pOptions, pTypes):
-        lCnt = 0
-        lTypes = ClassifyTArray()
-        for lType in pTypes:
-            lTypes[lCnt].mType = lType['mType']
-            lTypes[lCnt].mStrength = lType['mStrength']
-            lCnt += 1
-        self.__mCH = self.__mOpen(None, 0, pOptions.fragmentsize, lTypes, lCnt)
-
-    def free(self):
-        self.__mFree(self.__mCH)
-
-    def classify(self, pBuffer):
-        return self.__mClassify(self.__mCH, pBuffer, len(pBuffer))
-
-
 class CFragmentClassifier(object):
 
     def __init__(self):
@@ -166,11 +126,11 @@ class CFragmentClassifier(object):
 
         # load library (do not change)
         if platform.system().lower() == "windows":
-            self._mLH = cdll.LoadLibrary("libfragment_classifier.dll")
+            self._mLH = cdll.LoadLibrary("libblock_classifier.dll")
         elif platform.system().lower() == "linux":
-            self._mLH = cdll.LoadLibrary("libfragment_classifier.so")
+            self._mLH = cdll.LoadLibrary("libblock_classifier.so")
 
-        self._mClassify = self._mLH.classify
+        self._mClassify = self._mLH.classify_nofs
         self._mClassify.restype = CFragmentCollectionPointer
         self._mClassify.argtypes = \
             [c_int, c_int, c_char_p, c_ulonglong,
