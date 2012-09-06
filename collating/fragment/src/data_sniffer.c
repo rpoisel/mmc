@@ -14,8 +14,10 @@
 #define PROG_NAME "data_sniffer"
 #define USAGE "Invocation: %s <block-size> <number-of-threads> <path-to-image> \n"
 
-int callback_print(void* pData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader, char* pInfo);
+int callback_print(
+        void* pData, unsigned long long pOffset, unsigned pSizeRange, 
+        FileType pType, int pStrength, int pIsHeader, char* pInfo
+        );
 
 typedef struct
 {
@@ -93,8 +95,10 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
-int callback_print(void* pData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader, char* pInfo)
+int callback_print(
+        void* pData, unsigned long long pOffset, unsigned pSizeRange, 
+        FileType pType, int pStrength, int pIsHeader, char* pInfo
+        )
 {
     char* lType = NULL;
     thread_data* lData = (thread_data* )pData;

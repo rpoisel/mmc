@@ -20,6 +20,8 @@ __declspec(dllexport) block_collection_t* block_collection_new(unsigned long lon
         unsigned pBlockSize);
 __declspec(dllexport) int block_collection_set(block_collection_t* pCollection, 
         unsigned long long pOffset, int pIsHeader);
+__declspec(dllexport) int block_collection_set_range(block_collection_t* pCollection, 
+        unsigned long long pOffset, int pIsHeader, unsigned pSizeRange);
 __declspec(dllexport) unsigned long long block_collection_get(block_collection_t* pCollection, 
         unsigned long long pOffset);
 __declspec(dllexport) unsigned long long block_collection_len(block_collection_t* pCollection);

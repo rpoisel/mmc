@@ -61,13 +61,16 @@ typedef struct _ClassifyOptions
     struct _ClassifyOptions* mSubOptions;
 } ClassifyOptions;
 
-typedef int (*fragment_cb)(void* pCallbackData, unsigned long long pOffset, 
-        FileType pType, int pStrength, int pIsHeader, char* pInfo);
+typedef int (*fragment_cb)(
+        void* pCallbackData, unsigned long long pOffset, unsigned pSizeRange,
+        FileType pType, int pStrength, int pIsHeader, char* pInfo
+        );
 
 void callback_selective(BlockClassifier* pBlockClassifier,
     fragment_cb pCallback,
     void* pCallbackData,
     unsigned long long pCntBlock,
+    unsigned pSizeRange, 
     ClassifyT pResult);
 
 #ifndef _MSC_VER

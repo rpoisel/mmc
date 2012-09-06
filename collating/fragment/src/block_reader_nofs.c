@@ -146,6 +146,7 @@ THREAD_FUNC(classify_thread, pData)
                 lData->callback,
                 lData->callback_data,
                 lCntBlock,
+                lData->handle_fc->mFragmentSize,
                 lResult);
 
         lCntBlock++;

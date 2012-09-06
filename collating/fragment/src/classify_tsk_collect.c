@@ -11,8 +11,9 @@
  * as parameter (e. g. as c-string) instead of having complete independent 
  * functions 
  */
-fragment_collection_t* classify_tsk(int pBlockSize, 
-        int pNumBlocks, /* ignored */
+fragment_collection_t* classify_tsk(
+        int pBlockSize, 
+        int pNumBlocks, 
         const char* pImage, 
         unsigned long long pOffset,  /* ignored */
         ClassifyT* pTypes, 
@@ -31,6 +32,7 @@ fragment_collection_t* classify_tsk(int pBlockSize,
         return NULL;
     }
 
+    /* initialize block_collection with default sector size */
     lBlocks = block_collection_new(pNumBlocks, pBlockSize); 
 
     /* start multithreaded classification process */

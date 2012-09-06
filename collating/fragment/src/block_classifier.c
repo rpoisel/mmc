@@ -210,13 +210,14 @@ void callback_selective(BlockClassifier* pBlockClassifier,
     fragment_cb pCallback,
     void* pCallbackData,
     unsigned long long pCntBlock,
+    unsigned pSizeRange, 
     ClassifyT pResult)
 {
     unsigned lCnt;
     /* do something with the classification result */
     if (pBlockClassifier->mNumFileTypes == 0)
     {
-        pCallback(pCallbackData, pCntBlock, 
+        pCallback(pCallbackData, pCntBlock, pSizeRange, 
                 pResult.mType, pResult.mStrength, pResult.mIsHeader, pResult.mInfo);
     }
     else
@@ -235,7 +236,7 @@ void callback_selective(BlockClassifier* pBlockClassifier,
                             pResult.mIsHeader,
                             pResult.mInfo);
                 }
-                pCallback(pCallbackData, pCntBlock, 
+                pCallback(pCallbackData, pCntBlock, pSizeRange, 
                         pResult.mType, pResult.mStrength, pResult.mIsHeader, pResult.mInfo);
                 break;
             }
