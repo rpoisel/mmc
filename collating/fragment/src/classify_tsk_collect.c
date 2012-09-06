@@ -8,11 +8,14 @@
 #include "callback_collect.h"
 #include "block_reader_tsk.h"
 
+#define SECTOR_SIZE 512
+
 /* TODO check if it makes more sense to pass the actual function to call 
  * as parameter (e. g. as c-string) instead of having complete independent 
  * functions 
  */
 fragment_collection_t* classify_tsk(
+        unsigned long long pImageSize, 
         int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
@@ -34,7 +37,13 @@ fragment_collection_t* classify_tsk(
     }
 
     /* initialize block_collection with default sector size */
+#if 0
     lBlocks = block_collection_new(pNumBlocks, pBlockSize); 
+#else
+    /* block size fixed for tsk */
+    lBlocks = block_collection_new(pImageSize / SECTOR_SIZE + (pImageSize % SECTOR_SIZE != 0 ? 1 : 0),
+            SECTOR_SIZE); 
+#endif
 
     /* start multithreaded classification process */
     block_classify_tsk_mt(lHandle,

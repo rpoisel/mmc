@@ -9,7 +9,9 @@
 #include "block_reader_nofs.h"
 
 /* TODO pNumBlocks is not relevant for fs based classifiers */
-fragment_collection_t* classify_nofs(int pBlockSize, 
+fragment_collection_t* classify_nofs(
+        unsigned long long pImageSize, 
+        int pBlockSize, 
         int pNumBlocks, /* TODO only non-fs relevant */
         const char* pImage, 
         unsigned long long pOffset, 

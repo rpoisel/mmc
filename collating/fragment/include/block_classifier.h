@@ -69,7 +69,7 @@ typedef int (*fragment_cb)(
 void callback_selective(BlockClassifier* pBlockClassifier,
     fragment_cb pCallback,
     void* pCallbackData,
-    unsigned long long pCntBlock,
+    unsigned long long pBlockOffset /* offset in blocks */,
     unsigned pSizeRange, 
     ClassifyT pResult);
 

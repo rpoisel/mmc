@@ -209,7 +209,7 @@ int block_classifier_classify_result(BlockClassifier* pBlockClassifier,
 void callback_selective(BlockClassifier* pBlockClassifier,
     fragment_cb pCallback,
     void* pCallbackData,
-    unsigned long long pCntBlock,
+    unsigned long long pBlockOffset,
     unsigned pSizeRange, 
     ClassifyT pResult)
 {
@@ -217,7 +217,7 @@ void callback_selective(BlockClassifier* pBlockClassifier,
     /* do something with the classification result */
     if (pBlockClassifier->mNumFileTypes == 0)
     {
-        pCallback(pCallbackData, pCntBlock, pSizeRange, 
+        pCallback(pCallbackData, pBlockOffset, pSizeRange, 
                 pResult.mType, pResult.mStrength, pResult.mIsHeader, pResult.mInfo);
     }
     else
@@ -230,13 +230,13 @@ void callback_selective(BlockClassifier* pBlockClassifier,
                 if (pResult.mIsHeader)
                 {
                     LOGGING_INFO("ClassifyThread: Block(%lld), Typ(%d), Strength(%d), Header(%d), Info (%s) \n",
-                            pCntBlock,
+                            pBlockOffset,
                             pResult.mType,
                             pResult.mStrength,
                             pResult.mIsHeader,
                             pResult.mInfo);
                 }
-                pCallback(pCallbackData, pCntBlock, pSizeRange, 
+                pCallback(pCallbackData, pBlockOffset, pSizeRange, 
                         pResult.mType, pResult.mStrength, pResult.mIsHeader, pResult.mInfo);
                 break;
             }

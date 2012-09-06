@@ -8,7 +8,9 @@
 #define __declspec(dllexport) 
 #endif
 
-__declspec(dllexport) fragment_collection_t* classify_tsk(int pBlockSize, 
+__declspec(dllexport) fragment_collection_t* classify_tsk(
+        unsigned long long pImageSize, 
+        int pBlockSize, 
         int pNumBlocks, 
         const char* pImage, 
         unsigned long long pOffset, 
