@@ -30,7 +30,7 @@ ARCH := $(shell uname -m)
 all: fragment_context 
 	
 fragment_context:
-	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT) -f Makefile_lnx.mk
+	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT)
 
 .PHONY: clean fragment_context
 
@@ -71,7 +71,7 @@ debclean:
 	-rm -rf $(WORK_DIR)/$(PROG_NAME)*
 
 clean:
-	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT) -f Makefile_lnx.mk clean
+	$(MAKE) -C $(DIR_FRAGMENT_CONTEXT) clean
 	-$(RM) $(RM_FLAGS) $(DIR_DIST_STATIC)
 	-$(RM) $(RM_FLAGS) $(DIR_BUILD) $(DIR_DIST)
 	-$(RM) $(RM_FLAGS) logdict*
