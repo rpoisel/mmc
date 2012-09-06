@@ -6,6 +6,7 @@
 #include "block_collection.h"
 #include "fragment_collection.h"
 #include "callback_collect.h"
+#include "block_reader_nofs.h"
 
 /* TODO pNumBlocks is not relevant for fs based classifiers */
 fragment_collection_t* classify_nofs(int pBlockSize, 

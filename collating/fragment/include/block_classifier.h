@@ -100,13 +100,4 @@ __declspec(dllexport) int block_classifier_classify(BlockClassifier* pBlockClass
         const unsigned char* pFragment,
         int pLen);
 
-__declspec(dllexport) int block_classify_nofs_mt(BlockClassifier* pBlockClassifier, 
-        fragment_cb pCallback, 
-        void* pCallbackData, 
-        const char* pImage, 
-        unsigned long long pOffset, 
-        unsigned long long pSizeReal, 
-        const char* pPathMagic, 
-        unsigned int pNumThreads);
-
 #endif /* __BLOCK_CLASSIFIER_H__ */

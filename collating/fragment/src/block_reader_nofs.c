@@ -103,7 +103,6 @@ THREAD_FUNC(classify_thread, pData)
     OS_FH_TYPE lImage = NULL;
     unsigned char* lBuf = NULL;
     ClassifyT lResult = { FT_UNKNOWN, 0, 0, { '\0' } };
-    unsigned lCnt = 0;
     magic_t lMagic;
 
     lMagic = magic_open(MAGIC_NONE);

@@ -37,7 +37,8 @@ typedef struct
 THREAD_FUNC(tsk_read_thread, pData);
 THREAD_FUNC(tsk_classify_thread, pData);
 
-int block_classify_tsk_mt(BlockClassifier* pBlockClassifier,
+int block_classify_tsk_mt(
+        BlockClassifier* pBlockClassifier,
         fragment_cb pCallback, 
         void* pCallbackData, 
         const char* pImage, 

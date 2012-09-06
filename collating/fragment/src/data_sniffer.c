@@ -10,6 +10,7 @@
 #include "logging.h"
 #include "block_classifier.h"
 #include "block_collection.h"
+#include "block_reader_nofs.h"
 
 #define PROG_NAME "data_sniffer"
 #define USAGE "Invocation: %s <block-size> <number-of-threads> <path-to-image> \n"

@@ -68,18 +68,16 @@ int block_collection_set(block_collection_t* pCollection,
 int block_collection_set_range(block_collection_t* pCollection, 
         unsigned long long pOffset, int pIsHeader, unsigned pRangeSize)
 {
-    unsigned long long lOffsetStorage = pOffset / BLOCKS_PER_STORAGE;
-    storage_t* lStorage = pCollection->mBlockArray + lOffsetStorage;
-    unsigned lShifts = (BLOCKS_PER_STORAGE - 1 - pOffset % BLOCKS_PER_STORAGE) * BITS_PER_BLOCK;
+    unsigned lCnt = 0;
 
-    storage_t lBitmask = ((pIsHeader ? (storage_t)0x03 : (storage_t)0x01) << lShifts);
-    (*lStorage) |= lBitmask;
-
-    pCollection->mNumHeaders += (pIsHeader ? 1 : 0);
-
-    LOGGING_DEBUG("Block %9llu, Bitmask: 0x%016llX, Storage: 0x%016llX, " \
-            "Offset Storage: %05llu, Shifts: %02u\n", 
-            pOffset, lBitmask, *lStorage, lOffsetStorage, lShifts);
+    for (lCnt = 0;
+            lCnt < (pRangeSize / pCollection->mBlockSize + (pRangeSize % pCollection->mBlockSize != 0 ? 1 : 0));
+            lCnt++)
+    {
+        block_collection_set(pCollection,
+                pOffset + lCnt * pCollection->mBlockSize,
+                pIsHeader);
+    }
 
     return 0;
 }

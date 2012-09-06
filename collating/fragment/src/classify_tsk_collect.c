@@ -6,6 +6,7 @@
 #include "block_collection.h"
 #include "fragment_collection.h"
 #include "callback_collect.h"
+#include "block_reader_tsk.h"
 
 /* TODO check if it makes more sense to pass the actual function to call 
  * as parameter (e. g. as c-string) instead of having complete independent 
@@ -36,7 +37,8 @@ fragment_collection_t* classify_tsk(
     lBlocks = block_collection_new(pNumBlocks, pBlockSize); 
 
     /* start multithreaded classification process */
-    block_classify_tsk_mt(lHandle, classify_collect, 
+    block_classify_tsk_mt(lHandle,
+            classify_collect, 
             lBlocks /* callback data */,
             pImage,
             pOffset,
