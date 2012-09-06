@@ -46,8 +46,8 @@ int block_classify_nofs_mt(BlockClassifier* pBlockClassifier,
             
     unsigned lCnt = 0;
     thread_data* lData = NULL;
-    unsigned long long lSize = pSizeReal * pBlockClassifier->mFragmentSize - pOffset;
-    unsigned long long lFragsTotal = lSize / pBlockClassifier->mFragmentSize;
+    unsigned long long lSize = pSizeReal * pBlockClassifier->mBlockSize - pOffset;
+    unsigned long long lFragsTotal = lSize / pBlockClassifier->mBlockSize;
     unsigned long long lFragsPerCpu = lFragsTotal / pNumThreads;
     unsigned long long lFragsPerCpuR = 0;
     unsigned long long lOffsetImg = 0;
@@ -98,7 +98,7 @@ int block_classify_nofs_mt(BlockClassifier* pBlockClassifier,
 THREAD_FUNC(classify_thread, pData)
 {
     thread_data* lData = (thread_data*)pData; 
-    unsigned lLen = lData->handle_fc->mFragmentSize;
+    unsigned lLen = lData->handle_fc->mBlockSize;
     unsigned long long lCntBlock = lData->offset_img;
     OS_FH_TYPE lImage = NULL;
     unsigned char* lBuf = NULL;
@@ -120,9 +120,9 @@ THREAD_FUNC(classify_thread, pData)
 
 
     LOGGING_DEBUG(
-            "Offset: %lld\n", lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
+            "Offset: %lld\n", lData->offset_img * lData->handle_fc->mBlockSize + lData->offset_fs);
 
-    lBuf = (unsigned char*)malloc(lData->handle_fc->mFragmentSize);
+    lBuf = (unsigned char*)malloc(lData->handle_fc->mBlockSize);
     lImage = OS_FOPEN_READ(lData->path_image);
 
     if (lImage == OS_FH_INVALID)
@@ -132,13 +132,13 @@ THREAD_FUNC(classify_thread, pData)
         return OS_THREAD_RETURN;
     }
     OS_FSEEK_SET(lImage,
-        lData->offset_img * lData->handle_fc->mFragmentSize + lData->offset_fs);
+        lData->offset_img * lData->handle_fc->mBlockSize + lData->offset_fs);
             
     /* classify fragments */
-    while (lLen == lData->handle_fc->mFragmentSize && 
+    while (lLen == lData->handle_fc->mBlockSize && 
             (lCntBlock - lData->offset_img) < lData->num_frags)
     {
-        OS_FREAD(lBuf, lData->handle_fc->mFragmentSize, lLen, lImage); 
+        OS_FREAD(lBuf, lData->handle_fc->mBlockSize, lLen, lImage); 
         block_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult);
 
@@ -146,7 +146,7 @@ THREAD_FUNC(classify_thread, pData)
                 lData->callback,
                 lData->callback_data,
                 lCntBlock,
-                lData->handle_fc->mFragmentSize,
+                lData->handle_fc->mBlockSize,
                 lResult);
 
         lCntBlock++;

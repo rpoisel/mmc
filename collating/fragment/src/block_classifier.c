@@ -15,13 +15,13 @@
 
 BlockClassifier* block_classifier_new(ClassifyOptions* pOptions, 
         unsigned pNumSo, 
-        unsigned pFragmentSize)
+        unsigned pBlockSize)
 {
     /* initialize handle structure */
     struct _BlockClassifier* lHandle = 
         (struct _BlockClassifier*)malloc(sizeof(struct _BlockClassifier));
 
-    lHandle->mFragmentSize = pFragmentSize;
+    lHandle->mBlockSize = pBlockSize;
 
     /* initialize function pointers to the following functions (windows) */
     /* magic_open, magic_close, magic_load, magic_buffer, magic_error */
@@ -37,14 +37,14 @@ BlockClassifier* block_classifier_new(ClassifyOptions* pOptions,
 
 BlockClassifier* block_classifier_new_ct(ClassifyOptions* pOptions, 
         unsigned pNumSo, 
-        unsigned pFragmentSize,
+        unsigned pBlockSize,
         ClassifyT* pTypes,
         unsigned pNumTypes)
 {
     struct _BlockClassifier* lHandle = block_classifier_new(
             pOptions,
             pNumSo,
-            pFragmentSize);
+            pBlockSize);
 
     /* initialize additional fields */
     memcpy(lHandle->mFileTypes, pTypes, sizeof(ClassifyT) * pNumTypes);

@@ -44,7 +44,7 @@ typedef struct _ClassifyT
 
 struct _BlockClassifier
 {
-    unsigned mFragmentSize;
+    unsigned mBlockSize;
     ClassifyT mFileTypes[MAX_FILETYPES];
     unsigned mNumFileTypes;
 };
@@ -80,11 +80,11 @@ void callback_selective(BlockClassifier* pBlockClassifier,
 /* function declarations */
 __declspec(dllexport) BlockClassifier* block_classifier_new(ClassifyOptions* pOptions, 
         unsigned pNumOptions, 
-        unsigned pFragmentSize);
+        unsigned pBlockSize);
 
 __declspec(dllexport) BlockClassifier* block_classifier_new_ct(ClassifyOptions* pOptions, 
         unsigned pNumOptions, 
-        unsigned pFragmentSize,
+        unsigned pBlockSize,
         ClassifyT* pTypes,
         unsigned pNumTypes);
 
