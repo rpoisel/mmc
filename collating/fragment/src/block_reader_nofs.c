@@ -30,7 +30,7 @@ typedef struct
     const char* mPathMagic;
 } thread_data;
 
-THREAD_FUNC(classify_thread, pData);
+THREAD_FUNC(nofs_classify_thread, pData);
 
 int block_classify_nofs_mt(BlockClassifier* pBlockClassifier,
         fragment_cb pCallback, 
@@ -80,7 +80,7 @@ int block_classify_nofs_mt(BlockClassifier* pBlockClassifier,
         LOGGING_DEBUG("Starting thread %d with block range %lld to %lld.\n",
                 lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
         
-    OS_THREAD_CREATE((lThreads + lCnt), (lData + lCnt), classify_thread);
+        OS_THREAD_CREATE((lThreads + lCnt), (lData + lCnt), nofs_classify_thread);
     }
 
     /* join threads */
@@ -95,7 +95,7 @@ int block_classify_nofs_mt(BlockClassifier* pBlockClassifier,
     return EXIT_SUCCESS;
 }
 
-THREAD_FUNC(classify_thread, pData)
+THREAD_FUNC(nofs_classify_thread, pData)
 {
     thread_data* lData = (thread_data*)pData; 
     unsigned lLen = lData->handle_fc->mBlockSize;
@@ -116,7 +116,6 @@ THREAD_FUNC(classify_thread, pData)
     {
         printf("%s\n", magic_error(lMagic));
     }
-
 
     LOGGING_DEBUG(
             "Offset: %lld\n", lData->offset_img * lData->handle_fc->mBlockSize + lData->offset_fs);
@@ -144,8 +143,8 @@ THREAD_FUNC(classify_thread, pData)
         callback_selective(lData->handle_fc,
                 lData->callback,
                 lData->callback_data,
-                lCntBlock,
-                lData->handle_fc->mBlockSize,
+                lCntBlock /* offset in blocks */,
+                lData->handle_fc->mBlockSize /* size range is one block */,
                 lResult);
 
         lCntBlock++;
