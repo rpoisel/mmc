@@ -32,7 +32,7 @@ class Jobs(object):
 
 
 class CThreadWorker(QtCore.QThread):
-    sBegin = QtCore.Signal(int, int, int, str)
+    sBegin = QtCore.Signal(int, long, int, str)
     sProgress = QtCore.Signal(int)
     # job, jobs, error
     sFinished = QtCore.Signal(int, int, int)
