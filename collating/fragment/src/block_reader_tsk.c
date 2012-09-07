@@ -22,7 +22,7 @@
 #include "classify_tsk_collect.h"
 
 /* number a FIFO queue can take */
-#define SIZE_FIFO 5
+#define SIZE_FIFO 2048
 
 /* maximum size of a block read from an image */
 #define MAX_BLOCK_SIZE 32768
