@@ -40,7 +40,7 @@ int block_classify_nofs_mt(
         unsigned long long pOffset, 
         unsigned long long pSizeReal,
         const char* pPathMagic, 
-        unsigned int pNumThreads
+        unsigned pNumThreads
         )
 {
     OS_THREAD_TYPE* lThreads = NULL;
