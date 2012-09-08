@@ -7,7 +7,7 @@
 
 #define MAX_FRAG_SIZE 4096
 
-float calc_entropy(const unsigned char* pFragment, int pLen)
+float calc_entropy(const char* pFragment, int pLen)
 {
     /* http://stackoverflow.com/questions/990477/how-to-calculate-the-entropy-of-a-file */
     /* http://ezbitz.com/2009/05/08/calculate-a-file-shannon-entropy-in-c/ */
@@ -27,7 +27,7 @@ float calc_entropy(const unsigned char* pFragment, int pLen)
     /* calculate binary distribution */
     for (lCnt = 0; lCnt < pLen; lCnt++)
     {
-        lCounts[pFragment[lCnt]]++;
+        lCounts[pFragment[lCnt] + 128]++;
     }
 
     /* calculate information entropy */

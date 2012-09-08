@@ -92,12 +92,12 @@ __declspec(dllexport) void block_classifier_free(BlockClassifier* pBlockClassifi
 
 __declspec(dllexport) int block_classifier_classify_result(BlockClassifier* pBlockClassifier, 
         magic_t pMagic, 
-        const unsigned char* pFragment,
+        const char* pFragment,
         int pLen,
         ClassifyT* pResult);
 
 __declspec(dllexport) int block_classifier_classify(BlockClassifier* pBlockClassifier, 
-        const unsigned char* pFragment,
+        const char* pFragment,
         int pLen);
 
 #endif /* __BLOCK_CLASSIFIER_H__ */

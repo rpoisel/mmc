@@ -46,7 +46,7 @@ typedef struct
 /* data structure for data passed between threads through FIFOs */
 typedef struct
 {
-    unsigned char* mBuf;
+    char* mBuf;
     unsigned mLen;
 } classify_data;
 
@@ -158,7 +158,7 @@ THREAD_FUNC(tsk_read_thread, pData)
             lDataCurrent = 
                 (classify_data* )malloc(sizeof(classify_data));
             lDataCurrent->mBuf = 
-                (unsigned char* )malloc(sizeof(unsigned char) * MAX_BLOCK_SIZE);
+                (char* )malloc(sizeof(char) * MAX_BLOCK_SIZE);
                 
             ++lCntCirculating;
         }

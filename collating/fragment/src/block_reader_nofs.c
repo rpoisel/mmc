@@ -102,7 +102,7 @@ THREAD_FUNC(nofs_classify_thread, pData)
     unsigned lLen = lData->handle_fc->mBlockSize;
     unsigned long long lCntBlock = lData->offset_img;
     OS_FH_TYPE lImage = NULL;
-    unsigned char* lBuf = NULL;
+    char* lBuf = NULL;
     ClassifyT lResult = { FT_UNKNOWN, 0, 0, { '\0' } };
     magic_t lMagic;
 
@@ -121,7 +121,7 @@ THREAD_FUNC(nofs_classify_thread, pData)
     LOGGING_DEBUG(
             "Offset: %lld\n", lData->offset_img * lData->handle_fc->mBlockSize + lData->offset_fs);
 
-    lBuf = (unsigned char*)malloc(lData->handle_fc->mBlockSize);
+    lBuf = (char*)malloc(lData->handle_fc->mBlockSize);
     lImage = OS_FOPEN_READ(lData->path_image);
 
     if (lImage == OS_FH_INVALID)
