@@ -100,10 +100,10 @@ int main(int argc, char* argv1[])
 		tsk_error_print(stderr);
 		exit(1);
     }
-	if (lOut != OS_FH_INVALID)
-	{
-		OS_FCLOSE(lOut);
-	}
+    if (lOut != OS_FH_INVALID)
+    {
+            OS_FCLOSE(lOut);
+    }
 
     return EXIT_SUCCESS;
 }
