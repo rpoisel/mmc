@@ -167,7 +167,7 @@ int block_classifier_classify_result(BlockClassifier* pBlockClassifier,
             /* comparably cheap check for JPEG file fragments */
             for (lCnt = 0; lCnt < pLen - 1; lCnt++)
             {
-                if (pFragment[lCnt] == 0xFF)
+                if ((unsigned char)pFragment[lCnt] == 0xFF)
                 {
                     /* these usually occur in JPEG file fragments */
                     if (pFragment[lCnt + 1] == 0x00)
@@ -175,7 +175,8 @@ int block_classifier_classify_result(BlockClassifier* pBlockClassifier,
                         lCntJpeg++;
                     }
                     /* illegal sequence in JPEG files */
-                    else if (pFragment[lCnt + 1] < 0xC0 || pFragment[lCnt + 1] > 0xFE)
+                    else if ((unsigned char)pFragment[lCnt + 1] < 0xC0 || 
+                            (unsigned char)pFragment[lCnt + 1] > 0xFE)
                     {
                         lCntJpeg = 0;
                         LOGGING_DEBUG("FALSE - Wrong Marker\n");

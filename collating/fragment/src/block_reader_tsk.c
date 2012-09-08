@@ -33,7 +33,7 @@ typedef struct
     fragment_cb callback;
     void* callback_data;
     int result;
-    char path_image[MAX_STR_LEN];
+    const char* mPathImage;
     unsigned long long offset_img;
     unsigned long long offset_fs;
     unsigned long long num_frags;
@@ -43,6 +43,14 @@ typedef struct
     unsigned mNumThreads;
 } thread_data;
 
+typedef struct
+{
+    const char* mPathImage;
+    unsigned mCntCirculating;
+    pipe_producer_t* mPipeClassifyProducer;
+    pipe_consumer_t* mPipeClassifyFreeConsumer;
+} tsk_cb_data;
+
 /* data structure for data passed between threads through FIFOs */
 typedef struct
 {
@@ -50,8 +58,29 @@ typedef struct
     unsigned mLen;
 } classify_data;
 
+/* function definitions */
 THREAD_FUNC(tsk_read_thread, pData);
 THREAD_FUNC(tsk_classify_thread, pData);
+
+static void blocks_read_tsk(
+        tsk_cb_data* pTskCbData
+        );
+
+static TSK_WALK_RET_ENUM part_act(
+        TSK_VS_INFO* pVsInfo,
+        const TSK_VS_PART_INFO* pPartInfo,
+        void* pTskCbData);
+
+static TSK_WALK_RET_ENUM block_act(
+        const TSK_FS_BLOCK *a_block,
+        void* pTskCbData);
+
+static void data_act(
+        char* pBuf,
+        const unsigned pLen,
+        const unsigned long long pOffset,
+        void* pTskCbData
+        );
 
 int block_classify_tsk_mt(
         BlockClassifier* pBlockClassifier,
@@ -103,6 +132,7 @@ int block_classify_tsk_mt(
     }
 
     /* initialize reader data */
+    lDataRead->mPathImage = pImage;
     lDataRead->mPipeClassify = lPipeClassify;
     lDataRead->mPipeClassifyFree = lPipeClassifyFree;
     lDataRead->mNumThreads = pNumThreads;
@@ -137,10 +167,10 @@ THREAD_FUNC(tsk_read_thread, pData)
     thread_data* lData = (thread_data* )pData;
     pipe_producer_t* lPipeClassifyProducer = NULL;
     pipe_consumer_t* lPipeClassifyFreeConsumer = NULL;
-    unsigned lCnt = 0;
-    unsigned lCntCirculating = 0;
     classify_data* lDataCurrent = NULL;
+    unsigned lCnt = 0;
     size_t lReturnPop = -1;
+    tsk_cb_data lTskCbData;
 
     /* KillPill is a NULL pointer */
     classify_data* lKillPill = NULL;
@@ -149,41 +179,19 @@ THREAD_FUNC(tsk_read_thread, pData)
     lPipeClassifyProducer = pipe_producer_new(lData->mPipeClassify);
     lPipeClassifyFreeConsumer = pipe_consumer_new(lData->mPipeClassifyFree);
 
-    /* read blocks from image */
-    for (lCnt = 0; lCnt < 10 /*placeholder */; lCnt++)
-    {
-        /* more elements can be allocated */
-        if (lCntCirculating < SIZE_FIFO)
-        {
-            lDataCurrent = 
-                (classify_data* )malloc(sizeof(classify_data));
-            lDataCurrent->mBuf = 
-                (char* )malloc(sizeof(char) * MAX_BLOCK_SIZE);
-                
-            ++lCntCirculating;
-        }
-        /* wait for free FIFO to receive elements for re-use */
-        else
-        {
-            lReturnPop = pipe_pop(lPipeClassifyFreeConsumer, &lDataCurrent, 1);
-            if (lReturnPop == 0)
-            {
-                /* problem with FIFO */
-                break;
-            }
-        }
+    /* call iterating functions */
+    lTskCbData.mPathImage = lData->mPathImage;
+    lTskCbData.mCntCirculating = 0;
+    lTskCbData.mPipeClassifyProducer = lPipeClassifyProducer;
+    lTskCbData.mPipeClassifyFreeConsumer = lPipeClassifyFreeConsumer;
 
-        /* read data into buffer start */
+    LOGGING_DEBUG("Path image: %s\n", lData->mPathImage)
 
-        /* read data into buffer end */
-
-        /* enqueue lDataCurrent */
-        pipe_push(lPipeClassifyProducer, &lDataCurrent, 1);
-    }
+    blocks_read_tsk(&lTskCbData);
 
     /* read from FIFO to free memory until all read elements have been classified */
     /* reduce lCntCirculating to determine the end */
-    for(; lCntCirculating > 0; --lCntCirculating)
+    for(; lTskCbData.mCntCirculating > 0; --lTskCbData.mCntCirculating)
     {
         lReturnPop = pipe_pop(lPipeClassifyFreeConsumer, &lDataCurrent, 1);
         if (lReturnPop == 0)
@@ -272,4 +280,220 @@ THREAD_FUNC(tsk_classify_thread, pData)
     LOGGING_INFO("Exiting classification thread. \n");
 
     return OS_THREAD_RETURN;
+}
+
+void blocks_read_tsk(
+        tsk_cb_data* pTskCbData
+        )
+{
+    TSK_VS_INFO* lVsInfo = NULL;
+    TSK_IMG_INFO* lImgInfo = OS_FH_INVALID;
+    TSK_OFF_T lCnt = 0;
+    const char* lPathImageChar[1] = { pTskCbData->mPathImage };
+    const TSK_TCHAR *const *lPathImage;
+    /* TODO replace the following with buffer to be put into classification queue */
+    char lBuf[MAX_BLOCK_SIZE] = { 0 };
+    unsigned lCntRead = 0;
+
+    lPathImage = (const TSK_TCHAR *const *) lPathImageChar;
+
+    lImgInfo = tsk_img_open(
+            1, /* number of images */
+            lPathImage, /* path to images */
+            TSK_IMG_TYPE_DETECT, /* disk image type */
+            0); /* size of device sector in bytes */
+    if (lImgInfo != NULL)
+    {
+        TSK_OFF_T lSizeSectors = lImgInfo->size / lImgInfo->sector_size + \
+                                 (lImgInfo->size % lImgInfo->sector_size ? 1 : 0);
+        LOGGING_INFO("Image size (Bytes): %lu, Image size (sectors): %lu\n",
+                lImgInfo->size,
+                lSizeSectors);
+
+        lVsInfo = tsk_vs_open(lImgInfo, 0, TSK_VS_TYPE_DETECT);
+        if (lVsInfo != NULL)
+        {
+            if (tsk_vs_part_walk(lVsInfo,
+                    0, /* start */
+                    lVsInfo->part_count - 1, /* end */
+                    TSK_VS_PART_FLAG_ALL, /* all partitions */
+                    part_act, /* callback */
+                    (void*) NULL /* data passed to the callback */
+                    ) != 0)
+            {
+                fprintf(stderr, "Problem when walking partitions. \n");
+            }
+        }
+        else
+        {
+            LOGGING_DEBUG("Volume system cannot be opened.\n");
+            for (lCnt = 0; lCnt < lSizeSectors; lCnt++)
+            {
+                lCntRead = lCnt == lSizeSectors - 1 ? 
+                                lImgInfo->size % lImgInfo->sector_size :
+                                lImgInfo->sector_size;
+
+				LOGGING_DEBUG("Reading %u bytes\n", lCntRead);
+
+				tsk_img_read(
+                        lImgInfo, /* handler */
+                        lCnt * lImgInfo->sector_size, /* start address */
+                        lBuf, /* buffer to store data in */
+                        lCntRead /* amount of data to read */
+                        );
+                data_act(lBuf, lCntRead, lCnt * lImgInfo->sector_size, NULL);
+            }
+        }
+    }
+    else
+    {
+        LOGGING_ERROR("Problem opening the image. \n");
+		tsk_error_print(stderr);
+		exit(1);
+    }
+}
+
+TSK_WALK_RET_ENUM part_act(
+        TSK_VS_INFO* pVsInfo,
+        const TSK_VS_PART_INFO* pPartInfo,
+        void* pTskCbData)
+{
+    TSK_FS_INFO* lFsInfo = NULL;
+    tsk_cb_data* lTskCbData = (tsk_cb_data* )pTskCbData;
+    unsigned long long lCnt = 0;
+    char lBuf[32768] = { 0 };
+    unsigned long long lOffsetBlock = 0;
+
+    /* open file system */
+    if ((lFsInfo = tsk_fs_open_vol(
+            pPartInfo, /* partition to open */
+            TSK_FS_TYPE_DETECT /* auto-detect mode on */
+            )) != NULL)
+    {
+        /* known file-system */
+
+        /* iterate over unallocated blocks of fs */
+        tsk_fs_block_walk(
+                lFsInfo, /* file-system info */
+                0, /* start */
+                lFsInfo->block_count - 1, /* end */
+                TSK_FS_BLOCK_WALK_FLAG_UNALLOC, /* only unallocated blocks */
+                block_act, /* callback */
+                pTskCbData /* file-handle */
+                );
+        /* close fs */
+        tsk_fs_close(lFsInfo);
+    }
+    else
+    {
+        /* unknown file-system */
+
+        /* iterate through all blocks of this volume regardless of their state */
+        for (lCnt = 0; lCnt < pPartInfo->len; lCnt++)
+        {
+            lOffsetBlock = (pPartInfo->start + lCnt) * pPartInfo->vs->block_size;
+
+            LOGGING_DEBUG(
+                    "Block in unknown partition (Len: %lu blocks). " 
+                    "Size: %u, Absolute address (Bytes): %lld\n",
+                    pPartInfo->len,
+                    pPartInfo->vs->block_size,
+                    lOffsetBlock);
+
+            /* use the following function so that forensic images are supported */
+            /* HINT: this is not the case with fopen/fseek/fread/fclose functions */
+            tsk_vs_part_read_block(
+                    pPartInfo,
+                    lCnt, /* start address (blocks) relative to start of volume */
+                    lBuf, /* buffer to store data in */
+                    pPartInfo->vs->block_size /* amount of data to read */
+                    );
+            data_act(lBuf,
+                    pPartInfo->vs->block_size, 
+                    lOffsetBlock,
+                    lTskCbData);
+        }
+    }
+
+    return TSK_WALK_CONT;
+}
+
+TSK_WALK_RET_ENUM block_act(
+        const TSK_FS_BLOCK *a_block,
+        void* pTskCbData)
+{
+    tsk_cb_data* lTskCbData = (tsk_cb_data* )pTskCbData;
+
+    LOGGING_DEBUG(
+            "FS-Offset (Bytes): %lu, Size: %u, "
+            "Block: %lu, Absolute address: %ld\n",
+            a_block->fs_info->offset,
+            a_block->fs_info->block_size,
+            a_block->addr, 
+            a_block->fs_info->offset + a_block->addr * a_block->fs_info->block_size);
+
+    data_act(
+            a_block->buf, /* block data */
+            a_block->fs_info->block_size, /* size in bytes */
+            a_block->fs_info->offset + a_block->addr * a_block->fs_info->block_size,
+            lTskCbData); /* file-handle */
+    return TSK_WALK_CONT;
+}
+
+static void data_act(
+        char* pBuf,
+        const unsigned pLen,
+        const unsigned long long pOffset,
+        void* pTskCbData
+        )
+{
+    int lWritten = -1;
+    tsk_cb_data* lTskCbData = (tsk_cb_data* )pTskCbData;
+
+/* TODO put into callback function */
+#if 0
+    unsigned lCnt = 0;
+    unsigned lCntCirculating = 0;
+    classify_data* lDataCurrent = NULL;
+    size_t lReturnPop = -1;
+
+    for (lCnt = 0; lCnt < 10 /*placeholder */; lCnt++)
+    {
+        /* this happens inside the block-callback */
+        /* more elements can be allocated */
+        if (lCntCirculating < SIZE_FIFO)
+        {
+            lDataCurrent = 
+                (classify_data* )malloc(sizeof(classify_data));
+            lDataCurrent->mBuf = 
+                (char* )malloc(sizeof(char) * MAX_BLOCK_SIZE);
+            lDataCurrent->mLen = 0;
+                
+            ++lCntCirculating;
+        }
+        /* wait for free FIFO to receive elements for re-use */
+        else
+        {
+            lReturnPop = pipe_pop(pPipeClassifyFreeConsumer, &lDataCurrent, 1);
+            if (lReturnPop == 0)
+            {
+                /* problem with FIFO */
+                break;
+            }
+        }
+
+        /* read data into buffer start */
+
+        /* read data into buffer end */
+
+        /* enqueue lDataCurrent */
+        pipe_push(pPipeClassifyProducer, &lDataCurrent, 1);
+    }
+
+#endif
+
+#if 0
+    OS_FSEEK_SET(lOut, pOffset);
+    OS_FWRITE(pBuf, pLen, lWritten, lOut);
+#endif
 }
