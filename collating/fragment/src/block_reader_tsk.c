@@ -173,8 +173,11 @@ THREAD_FUNC(tsk_read_thread, pData)
             }
         }
 
-        /* read data into buffer */
-        lDataCurrent->mLen = 0; /* placeholder */
+        /* read data into buffer start */
+#define SAMPLE_TEXT "Hello World. This is a beautiful saying. \n"
+        lDataCurrent->mLen = strlen(SAMPLE_TEXT); /* placeholder */
+        snprintf(lDataCurrent->mBuf, lDataCurrent->mLen, "%s", SAMPLE_TEXT);
+        /* read data into buffer end */
 
         /* enqueue lDataCurrent */
         pipe_push(lPipeClassifyProducer, &lDataCurrent, 1);
@@ -248,12 +251,14 @@ THREAD_FUNC(tsk_classify_thread, pData)
             break;
         }
 
-#if 0
+#if 1
         /* classify data of block */
         block_classifier_classify_result(
                 lData->handle_fc, lMagic,
                 lClassifyData->mBuf, lClassifyData->mLen,
                 &lResult);
+
+        /* print classification result */
 
         /* call this for each block read */
         callback_selective(lData->handle_fc,
