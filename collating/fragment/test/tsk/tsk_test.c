@@ -33,18 +33,18 @@ int main(int argc, char* argv1[])
     const TSK_TCHAR *const *argv;
 
 #ifdef TSK_WIN32
-	argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 #else
-	argv = (const TSK_TCHAR *const *) argv1;
+    argv = (const TSK_TCHAR *const *) argv1;
 #endif
 
-	lOut = OS_FOPEN_WRITE(argv[2]);
+    lOut = OS_FOPEN_WRITE(argv[2]);
 
-	if (lOut == OS_FH_INVALID) 
-	{
-		LOGGING_ERROR("Could not open export image in write mode. \n")
-		exit(1);
-	}
+    if (lOut == OS_FH_INVALID) 
+    {
+        LOGGING_ERROR("Could not open export image in write mode. \n")
+        exit(1);
+    }
 
     lImgInfo = tsk_img_open(
             1, /* number of images */
