@@ -47,6 +47,7 @@ typedef struct
 {
     const char* mPathImage;
     unsigned mCntCirculating;
+    unsigned mSectorSize;
     pipe_producer_t* mPipeClassifyProducer;
     pipe_consumer_t* mPipeClassifyFreeConsumer;
 } tsk_cb_data;
@@ -56,6 +57,7 @@ typedef struct
 {
     char* mBuf;
     unsigned mLen;
+    unsigned long long mOffset;
 } classify_data;
 
 /* function definitions */
@@ -127,6 +129,8 @@ int block_classify_tsk_mt(
         (lDataClassify + lCnt)->mPathMagic = pPathMagic;
         (lDataClassify + lCnt)->mPipeClassify = lPipeClassify;
         (lDataClassify + lCnt)->mPipeClassifyFree = lPipeClassifyFree;
+        (lDataClassify + lCnt)->callback = pCallback;
+        (lDataClassify + lCnt)->callback_data = pCallbackData;
 
         OS_THREAD_CREATE((lThreadsClassify + lCnt), (lDataClassify + lCnt), tsk_classify_thread);
     }
@@ -191,6 +195,7 @@ THREAD_FUNC(tsk_read_thread, pData)
 
     /* read from FIFO to free memory until all read elements have been classified */
     /* reduce lCntCirculating to determine the end */
+    /* TODO consider problem with pipe (return value of pop) in data_act() */
     for(; lTskCbData.mCntCirculating > 0; --lTskCbData.mCntCirculating)
     {
         lReturnPop = pipe_pop(lPipeClassifyFreeConsumer, &lDataCurrent, 1);
@@ -267,7 +272,7 @@ THREAD_FUNC(tsk_classify_thread, pData)
         callback_selective(lData->handle_fc,
                 lData->callback,
                 lData->callback_data,
-                0 /* lCntBlock */ /* offset in blocks */,
+                lClassifyData->mOffset, /* lCntBlock */ /* offset in blocks */
                 lData->handle_fc->mBlockSize,
                 lResult);
 
@@ -310,6 +315,8 @@ void blocks_read_tsk(
                 lImgInfo->size,
                 lSizeSectors);
 
+        pTskCbData->mSectorSize = lImgInfo->sector_size;
+
         lVsInfo = tsk_vs_open(lImgInfo, 0, TSK_VS_TYPE_DETECT);
         if (lVsInfo != NULL)
         {
@@ -318,7 +325,7 @@ void blocks_read_tsk(
                     lVsInfo->part_count - 1, /* end */
                     TSK_VS_PART_FLAG_ALL, /* all partitions */
                     part_act, /* callback */
-                    (void*) NULL /* data passed to the callback */
+                    (void*) pTskCbData /* data passed to the callback */
                     ) != 0)
             {
                 fprintf(stderr, "Problem when walking partitions. \n");
@@ -341,7 +348,7 @@ void blocks_read_tsk(
                         lBuf, /* buffer to store data in */
                         lCntRead /* amount of data to read */
                         );
-                data_act(lBuf, lCntRead, lCnt * lImgInfo->sector_size, NULL);
+                data_act(lBuf, lCntRead, lCnt * lImgInfo->sector_size, pTskCbData);
             }
         }
     }
@@ -447,53 +454,38 @@ static void data_act(
         void* pTskCbData
         )
 {
-    int lWritten = -1;
     tsk_cb_data* lTskCbData = (tsk_cb_data* )pTskCbData;
-
-/* TODO put into callback function */
-#if 0
-    unsigned lCnt = 0;
-    unsigned lCntCirculating = 0;
     classify_data* lDataCurrent = NULL;
     size_t lReturnPop = -1;
 
-    for (lCnt = 0; lCnt < 10 /*placeholder */; lCnt++)
+    /* more elements can be allocated */
+    if (lTskCbData->mCntCirculating < SIZE_FIFO)
     {
-        /* this happens inside the block-callback */
-        /* more elements can be allocated */
-        if (lCntCirculating < SIZE_FIFO)
-        {
-            lDataCurrent = 
-                (classify_data* )malloc(sizeof(classify_data));
-            lDataCurrent->mBuf = 
-                (char* )malloc(sizeof(char) * MAX_BLOCK_SIZE);
-            lDataCurrent->mLen = 0;
-                
-            ++lCntCirculating;
-        }
-        /* wait for free FIFO to receive elements for re-use */
-        else
-        {
-            lReturnPop = pipe_pop(pPipeClassifyFreeConsumer, &lDataCurrent, 1);
-            if (lReturnPop == 0)
-            {
-                /* problem with FIFO */
-                break;
-            }
-        }
-
-        /* read data into buffer start */
-
-        /* read data into buffer end */
-
-        /* enqueue lDataCurrent */
-        pipe_push(pPipeClassifyProducer, &lDataCurrent, 1);
+        lDataCurrent = 
+            (classify_data* )malloc(sizeof(classify_data));
+        lDataCurrent->mBuf = 
+            (char* )malloc(sizeof(char) * MAX_BLOCK_SIZE);
+            
+        ++lTskCbData->mCntCirculating;
     }
+    /* wait for free FIFO to receive elements for re-use */
+    else
+    {
+        lReturnPop = pipe_pop(lTskCbData->mPipeClassifyFreeConsumer,
+                &lDataCurrent, 1);
+        if (lReturnPop == 0)
+        {
+            /* problem with FIFO */
+            return;
+        }
+    }
+    
+    /* copy data to buffer */
+    memcpy(lDataCurrent->mBuf, pBuf, pLen);
+    lDataCurrent->mLen = pLen;
+    lDataCurrent->mOffset = pOffset / lTskCbData->mSectorSize;
 
-#endif
-
-#if 0
-    OS_FSEEK_SET(lOut, pOffset);
-    OS_FWRITE(pBuf, pLen, lWritten, lOut);
-#endif
+    /* enqueue lDataCurrent */
+    pipe_push(lTskCbData->mPipeClassifyProducer,
+            &lDataCurrent, 1);
 }

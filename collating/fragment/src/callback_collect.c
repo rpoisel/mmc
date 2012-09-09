@@ -1,6 +1,7 @@
 #include "callback_collect.h"
 
 #include "block_collection.h"
+#include "logging.h"
 
 int classify_collect(
         void* pData, unsigned long long pOffset, unsigned pSizeRange, 
@@ -12,4 +13,3 @@ int classify_collect(
     return block_collection_set_range(pBlocks, pOffset,
             pIsHeader, pSizeRange);
 }
-

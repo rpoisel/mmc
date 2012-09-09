@@ -141,6 +141,8 @@ THREAD_FUNC(nofs_classify_thread, pData)
         block_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult);
 
+        LOGGING_INFO("Block-Offset: %lld\n", lCntBlock)
+
         callback_selective(lData->handle_fc,
                 lData->callback,
                 lData->callback_data,

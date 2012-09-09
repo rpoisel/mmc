@@ -41,8 +41,11 @@ fragment_collection_t* classify_tsk(
     lBlocks = block_collection_new(pNumBlocks, pBlockSize); 
 #else
     /* block size fixed for tsk */
-    lBlocks = block_collection_new(pImageSize / SECTOR_SIZE + (pImageSize % SECTOR_SIZE != 0 ? 1 : 0),
-            SECTOR_SIZE); 
+    /* TODO use sector size from image here */
+    lBlocks = block_collection_new(
+            pImageSize / SECTOR_SIZE + (pImageSize % SECTOR_SIZE != 0 ? 1 : 0),
+            SECTOR_SIZE
+            ); 
 #endif
 
     /* start multithreaded classification process */

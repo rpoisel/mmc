@@ -1,6 +1,7 @@
 #ifndef __LOGGING_H__
 #define __LOGGING_H__ 1
 
+#include <stdio.h>
 #include <time.h>
 
 #define LOG_NONE     0
