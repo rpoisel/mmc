@@ -101,6 +101,9 @@ int callback_print(
         FileType pType, int pStrength, int pIsHeader, char* pInfo
         )
 {
+    UNUSED(pSizeRange);
+    UNUSED(pStrength);
+
     char* lType = NULL;
     thread_data* lData = (thread_data* )pData;
 

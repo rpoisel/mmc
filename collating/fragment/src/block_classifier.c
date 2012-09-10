@@ -17,6 +17,9 @@ BlockClassifier* block_classifier_new(ClassifyOptions* pOptions,
         unsigned pNumSo, 
         unsigned pBlockSize)
 {
+    UNUSED(pOptions);
+    UNUSED(pNumSo);
+
     /* initialize handle structure */
     struct _BlockClassifier* lHandle = 
         (struct _BlockClassifier*)malloc(sizeof(struct _BlockClassifier));
@@ -65,6 +68,7 @@ int block_classifier_classify_result(BlockClassifier* pBlockClassifier,
         int pLen,
         ClassifyT* pResult)
 {
+    UNUSED(pBlockClassifier);
         
     const char* lMagicResult = NULL;
     float lEntropy = 0;

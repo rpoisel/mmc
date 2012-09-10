@@ -6,6 +6,7 @@
 #include "fragment_collection.h"
 #include "callback_collect.h"
 #include "block_reader_nofs.h"
+#include "os_def.h"
 
 /* TODO pNumBlocks is not relevant for fs based classifiers */
 fragment_collection_t* classify_nofs(
@@ -20,6 +21,7 @@ fragment_collection_t* classify_nofs(
         unsigned long long pMinFragSize,
         int pNumThreads)
 {
+    UNUSED(pImageSize);
     BlockClassifier* lHandle = NULL;
     block_collection_t* lBlocks = NULL;
     fragment_collection_t* lFragments = NULL;

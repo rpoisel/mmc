@@ -95,6 +95,9 @@ int block_classify_tsk_mt(
         unsigned pNumThreads
         )
 {
+    UNUSED(pOffset);
+    UNUSED(pSizeReal);
+
     unsigned lCnt = 0;
     OS_THREAD_TYPE* lThreadRead = NULL;
     OS_THREAD_TYPE* lThreadsClassify = NULL;
@@ -365,6 +368,8 @@ TSK_WALK_RET_ENUM part_act(
         const TSK_VS_PART_INFO* pPartInfo,
         void* pTskCbData)
 {
+    UNUSED(pVsInfo);
+
     TSK_FS_INFO* lFsInfo = NULL;
     tsk_cb_data* lTskCbData = (tsk_cb_data* )pTskCbData;
     unsigned long long lCnt = 0;

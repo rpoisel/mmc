@@ -1,6 +1,8 @@
 #ifndef __OS_DEF_H__
 #define __OS_DEF_H__ 1
 
+#define UNUSED(x) (void)(x)
+
 #if defined __linux__
 
 /* includes */
