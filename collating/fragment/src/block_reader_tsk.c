@@ -118,7 +118,7 @@ int block_classify_tsk_mt(
     }
 
     /* create one FIFO pipe for passing the read data to classifiers */
-    lPipeClassify = pipe_new(sizeof(classify_data* ), SIZE_FIFO);
+    lPipeClassify = pipe_new(sizeof(classify_data* ), 0);
 
     /* create one FIFO pipe for passing back empty buffers to the reader */
     /* pipe size is unlimited on purpose */
@@ -194,11 +194,13 @@ THREAD_FUNC(tsk_read_thread, pData)
 
     LOGGING_DEBUG("Path image: %s\n", lData->mPathImage)
 
+    LOGGING_INFO("Interpreting file-system data-structures.\n")
     blocks_read_tsk(&lTskCbData);
 
     /* read from FIFO to free memory until all read elements have been classified */
     /* reduce lCntCirculating to determine the end */
     /* TODO consider problem with pipe (return value of pop) in data_act() */
+    LOGGING_INFO("Waiting for data structures to be freed.\n")
     for(; lTskCbData.mCntCirculating > 0; --lTskCbData.mCntCirculating)
     {
         lReturnPop = pipe_pop(lPipeClassifyFreeConsumer, &lDataCurrent, 1);
@@ -211,6 +213,7 @@ THREAD_FUNC(tsk_read_thread, pData)
         free(lDataCurrent);
     }
 
+    LOGGING_INFO("Sending kill-pills.\n")
     for (lCnt = 0; lCnt < lData->mNumThreads; ++lCnt)
     {
         pipe_push(lPipeClassifyProducer, &lKillPill, 1);

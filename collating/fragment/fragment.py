@@ -131,7 +131,7 @@ class CFragmentClassifier(object):
         elif platform.system().lower() == "linux":
             self._mLH = cdll.LoadLibrary("libblock_classifier.so")
 
-        self._mClassify = self._mLH.classify_nofs
+        self._mClassify = self._mLH.classify_tsk
         self._mClassify.restype = CFragmentCollectionPointer
         self._mClassify.argtypes = \
             [c_ulonglong, c_int, c_int, c_char_p, c_ulonglong,

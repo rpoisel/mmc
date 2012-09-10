@@ -6,9 +6,9 @@
 
 #if 0
 #define PATH_IMAGE "../../../../data/image_ref_h264_ntfs_formatted.img"
-#elif 0
-#define PATH_IMAGE "../../../../data/image_ref_h264_ntfs.img"
 #elif 1
+#define PATH_IMAGE "../../../../data/image_ref_h264_ntfs.img"
+#elif 0
 #define PATH_IMAGE "../../../../data/usbkey.dd"
 #endif
 #define PATH_MAGIC "../../data/magic/media.mgc"
