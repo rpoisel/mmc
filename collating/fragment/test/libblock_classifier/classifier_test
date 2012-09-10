@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=../..
+./classifier_test.bin $@
+
+exit $?
