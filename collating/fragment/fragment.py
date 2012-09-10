@@ -1,4 +1,5 @@
 import platform
+import os
 from ctypes import *
 
 
@@ -130,11 +131,12 @@ class CFragmentClassifier(object):
         elif platform.system().lower() == "linux":
             self._mLH = cdll.LoadLibrary("libblock_classifier.so")
 
-        self._mClassify = self._mLH.classify_tsk
+        self._mClassify = self._mLH.classify_nofs
         self._mClassify.restype = CFragmentCollectionPointer
         self._mClassify.argtypes = \
             [c_ulonglong, c_int, c_int, c_char_p, c_ulonglong,
-            ClassifyTArray, c_int, c_ulonglong, c_ulonglong, c_int]
+            ClassifyTArray, c_int, c_ulonglong, c_ulonglong,
+            c_char_p, c_int]
 
         self._mClassifyFree = self._mLH.classify_nofs_free
         self._mClassifyFree.restype = None
@@ -142,8 +144,7 @@ class CFragmentClassifier(object):
             [CFragmentCollectionPointer]
 
     def classify(self, pImageSize, pBlockSize, pNumBlocks, pImage,
-            pOffset, pTypes, pBlockGap, pMinFragSize,
-            pNumThreads):
+            pOffset, pTypes, pBlockGap, pMinFragSize, pNumThreads):
 
         lCnt = 0
         lTypes = ClassifyTArray()
@@ -152,6 +153,15 @@ class CFragmentClassifier(object):
             lTypes[lCnt].mStrength = lType['mStrength']
             lCnt += 1
 
-        return CFragments(self._mClassify(pImageSize, pBlockSize, pNumBlocks,
-                pImage, pOffset, lTypes, lCnt, pBlockGap,
-                pMinFragSize, pNumThreads), self._mClassifyFree)
+        return CFragments(self._mClassify(
+                    pImageSize, pBlockSize, pNumBlocks,
+                    pImage, pOffset, lTypes, lCnt, pBlockGap,
+                    pMinFragSize,
+                    os.path.join(
+                        "collating",
+                        "fragment",
+                        "data",
+                        "magic",
+                        "media.mgc"),
+                    pNumThreads
+                ), self._mClassifyFree)

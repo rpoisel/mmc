@@ -7,9 +7,9 @@
 
 #include <magic.h>
 #if defined __linux__
-#define PATH_MAGIC "collating/fragment/data/magic/media.mgc"
+/* #define PATH_MAGIC "collating/fragment/data/magic/media.mgc" */
 #elif defined _WIN32 || defined _WIN64
-#define PATH_MAGIC "collating\\fragment\\data\\magic\\media.mgc"
+/* #define PATH_MAGIC "collating\\fragment\\data\\magic\\media.mgc" */
 #endif
 
 /* data types */

@@ -23,6 +23,7 @@ fragment_collection_t* classify_tsk(
         int pNumTypes, 
         unsigned long long pBlockGap,
         unsigned long long pMinFragSize,
+        const char* pPathMagic,
         int pNumThreads)
 {
     BlockClassifier* lHandle = NULL;
@@ -54,7 +55,7 @@ fragment_collection_t* classify_tsk(
             pImage,
             pOffset,
             pNumBlocks, 
-            PATH_MAGIC, /* colons do not work in windows; thus one file is used only */
+            pPathMagic, /* colons do not work in windows; thus one file is used only */
             pNumThreads);
 
     /* factor 1/4 is just an empirical value */

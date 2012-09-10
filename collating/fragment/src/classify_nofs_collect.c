@@ -19,6 +19,7 @@ fragment_collection_t* classify_nofs(
         int pNumTypes, 
         unsigned long long pBlockGap,
         unsigned long long pMinFragSize,
+        const char* pPathMagic,
         int pNumThreads)
 {
     UNUSED(pImageSize);
@@ -38,7 +39,7 @@ fragment_collection_t* classify_nofs(
     block_classify_nofs_mt(lHandle, classify_collect, 
             lBlocks /* callback data */, pImage, pOffset, pNumBlocks, 
             /* colons do not work in windows; thus one file is used only */
-            PATH_MAGIC,
+            pPathMagic,
             pNumThreads);
 
     /* factor 1/4 is just an empirical value */

@@ -18,6 +18,7 @@ __declspec(dllexport) fragment_collection_t* classify_nofs(
         int pNumTypes, 
         unsigned long long pBlockGap,
         unsigned long long pMinFragSize, 
+        const char* pPathMagic,
         int pNumThreads); 
 
 __declspec(dllexport) fragment_collection_t* classify_tsk(
@@ -30,6 +31,7 @@ __declspec(dllexport) fragment_collection_t* classify_tsk(
         int pNumTypes, 
         unsigned long long pBlockGap,
         unsigned long long pMinFragSize, 
+        const char* pPathMagic,
         int pNumThreads); 
 
 __declspec(dllexport) void classify_free(fragment_collection_t* pCollection);
