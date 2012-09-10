@@ -1,7 +1,6 @@
-#include "classify_nofs_collect.h"
-
 #include <stdlib.h>
 
+#include "classify_collect.h"
 #include "block_classifier.h"
 #include "block_collection.h"
 #include "fragment_collection.h"

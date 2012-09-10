@@ -19,7 +19,7 @@
 #include "logging.h"
 #include "block_classifier.h"
 #include "block_reader_tsk.h"
-#include "classify_tsk_collect.h"
+#include "classify_collect.h"
 
 /* number a FIFO queue can take */
 #define SIZE_FIFO 2048

@@ -15,7 +15,7 @@
 #include "logging.h"
 #include "block_classifier.h"
 #include "block_reader_nofs.h"
-#include "classify_nofs_collect.h"
+#include "classify_collect.h"
 
 typedef struct 
 {
