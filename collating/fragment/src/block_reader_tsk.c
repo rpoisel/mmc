@@ -38,8 +38,10 @@ typedef struct
     unsigned long long offset_fs;
     unsigned long long num_frags;
     const char* mPathMagic;
-    pipe_t* mPipeClassify;
-    pipe_t* mPipeClassifyFree;
+    pipe_producer_t* mPipeClassifyProducer;
+    pipe_consumer_t* mPipeClassifyConsumer;
+    pipe_producer_t* mPipeClassifyFreeProducer;
+    pipe_consumer_t* mPipeClassifyFreeConsumer;
     unsigned mNumThreads;
 } thread_data;
 
@@ -105,6 +107,10 @@ int block_classify_tsk_mt(
     thread_data* lDataRead = NULL;
     pipe_t* lPipeClassify = NULL; 
     pipe_t* lPipeClassifyFree = NULL; 
+    pipe_producer_t* lPipeClassifyProducer = NULL;
+    pipe_consumer_t* lPipeClassifyConsumer = NULL;
+    pipe_producer_t* lPipeClassifyFreeProducer = NULL;
+    pipe_consumer_t* lPipeClassifyFreeConsumer = NULL;
 
     lThreadRead = (OS_THREAD_TYPE* )malloc(sizeof(OS_THREAD_TYPE));
     lDataRead = (thread_data* )malloc(sizeof(thread_data));
@@ -119,10 +125,14 @@ int block_classify_tsk_mt(
 
     /* create one FIFO pipe for passing the read data to classifiers */
     lPipeClassify = pipe_new(sizeof(classify_data* ), 0);
+    lPipeClassifyProducer = pipe_producer_new(lPipeClassify);
+    lPipeClassifyConsumer = pipe_consumer_new(lPipeClassify);
 
     /* create one FIFO pipe for passing back empty buffers to the reader */
     /* pipe size is unlimited on purpose */
     lPipeClassifyFree = pipe_new(sizeof(classify_data* ), 0);
+    lPipeClassifyFreeConsumer = pipe_consumer_new(lPipeClassifyFree);
+    lPipeClassifyFreeProducer = pipe_producer_new(lPipeClassifyFree);
 
     /* create classification threads */
     for (lCnt = 0; lCnt < pNumThreads; lCnt++)
@@ -130,8 +140,10 @@ int block_classify_tsk_mt(
         /* initialize thread data */
         (lDataClassify + lCnt)->handle_fc = pBlockClassifier;
         (lDataClassify + lCnt)->mPathMagic = pPathMagic;
-        (lDataClassify + lCnt)->mPipeClassify = lPipeClassify;
-        (lDataClassify + lCnt)->mPipeClassifyFree = lPipeClassifyFree;
+        (lDataClassify + lCnt)->mPipeClassifyProducer = lPipeClassifyProducer;
+        (lDataClassify + lCnt)->mPipeClassifyConsumer = lPipeClassifyConsumer;
+        (lDataClassify + lCnt)->mPipeClassifyFreeConsumer = lPipeClassifyFreeConsumer;
+        (lDataClassify + lCnt)->mPipeClassifyFreeProducer = lPipeClassifyFreeProducer;
         (lDataClassify + lCnt)->callback = pCallback;
         (lDataClassify + lCnt)->callback_data = pCallbackData;
 
@@ -140,8 +152,8 @@ int block_classify_tsk_mt(
 
     /* initialize reader data */
     lDataRead->mPathImage = pImage;
-    lDataRead->mPipeClassify = lPipeClassify;
-    lDataRead->mPipeClassifyFree = lPipeClassifyFree;
+    lDataRead->mPipeClassifyProducer = lPipeClassifyProducer;
+    lDataRead->mPipeClassifyFreeConsumer = lPipeClassifyFreeConsumer;
     lDataRead->mNumThreads = pNumThreads;
 
     /* create reader thread */
@@ -158,6 +170,10 @@ int block_classify_tsk_mt(
     OS_THREAD_JOIN(*lThreadRead);
     LOGGING_INFO("Reading thread joined.\n")
 
+    pipe_producer_free(lPipeClassifyProducer);
+    pipe_consumer_free(lPipeClassifyConsumer);
+    pipe_producer_free(lPipeClassifyFreeProducer);
+    pipe_consumer_free(lPipeClassifyFreeConsumer);
     pipe_free(lPipeClassify);
     pipe_free(lPipeClassifyFree);
 
@@ -172,8 +188,6 @@ int block_classify_tsk_mt(
 THREAD_FUNC(tsk_read_thread, pData)
 {
     thread_data* lData = (thread_data* )pData;
-    pipe_producer_t* lPipeClassifyProducer = NULL;
-    pipe_consumer_t* lPipeClassifyFreeConsumer = NULL;
     classify_data* lDataCurrent = NULL;
     unsigned lCnt = 0;
     size_t lReturnPop = -1;
@@ -183,14 +197,11 @@ THREAD_FUNC(tsk_read_thread, pData)
     classify_data* lKillPill = NULL;
     LOGGING_INFO("Reading thread started. \n");
 
-    lPipeClassifyProducer = pipe_producer_new(lData->mPipeClassify);
-    lPipeClassifyFreeConsumer = pipe_consumer_new(lData->mPipeClassifyFree);
-
     /* call iterating functions */
     lTskCbData.mPathImage = lData->mPathImage;
     lTskCbData.mCntCirculating = 0;
-    lTskCbData.mPipeClassifyProducer = lPipeClassifyProducer;
-    lTskCbData.mPipeClassifyFreeConsumer = lPipeClassifyFreeConsumer;
+    lTskCbData.mPipeClassifyProducer = lData->mPipeClassifyProducer;
+    lTskCbData.mPipeClassifyFreeConsumer = lData->mPipeClassifyFreeConsumer;
 
     LOGGING_DEBUG("Path image: %s\n", lData->mPathImage)
 
@@ -200,10 +211,10 @@ THREAD_FUNC(tsk_read_thread, pData)
     /* read from FIFO to free memory until all read elements have been classified */
     /* reduce lCntCirculating to determine the end */
     /* TODO consider problem with pipe (return value of pop) in data_act() */
-    LOGGING_INFO("Waiting for data structures to be freed.\n")
+    LOGGING_INFO("Waiting for read classification-data structures to be freed.\n")
     for(; lTskCbData.mCntCirculating > 0; --lTskCbData.mCntCirculating)
     {
-        lReturnPop = pipe_pop(lPipeClassifyFreeConsumer, &lDataCurrent, 1);
+        lReturnPop = pipe_pop(lData->mPipeClassifyFreeConsumer, &lDataCurrent, 1);
         if (lReturnPop == 0)
         {
             /* problem with FIFO */
@@ -216,14 +227,12 @@ THREAD_FUNC(tsk_read_thread, pData)
     LOGGING_INFO("Sending kill-pills.\n")
     for (lCnt = 0; lCnt < lData->mNumThreads; ++lCnt)
     {
-        pipe_push(lPipeClassifyProducer, &lKillPill, 1);
+        pipe_push(lData->mPipeClassifyProducer, &lKillPill, 1);
     }
 
     /* free allocated memory */
 
     /* free other resources */
-    pipe_producer_free(lPipeClassifyProducer);
-    pipe_consumer_free(lPipeClassifyFreeConsumer);
 
     LOGGING_INFO("Exiting reading thread. \n");
 
@@ -235,15 +244,10 @@ THREAD_FUNC(tsk_classify_thread, pData)
     thread_data* lData = (thread_data* )pData;
     ClassifyT lResult = { FT_UNKNOWN, 0, 0, { '\0' } };
     magic_t lMagic;
-    pipe_consumer_t* lPipeClassifyConsumer = NULL;
-    pipe_producer_t* lPipeClassifyFreeProducer = NULL;
     classify_data* lClassifyData = NULL;
     size_t lReturnPop = -1;
 
     LOGGING_INFO("Classification thread started. \n");
-
-    lPipeClassifyConsumer = pipe_consumer_new(lData->mPipeClassify);
-    lPipeClassifyFreeProducer = pipe_producer_new(lData->mPipeClassifyFree);
 
     lMagic = magic_open(MAGIC_NONE);
     if (!lMagic)
@@ -260,7 +264,7 @@ THREAD_FUNC(tsk_classify_thread, pData)
     for(;;) 
     {
         /* read from FIFO */
-        lReturnPop = pipe_pop(lPipeClassifyConsumer, &lClassifyData, 1);
+        lReturnPop = pipe_pop(lData->mPipeClassifyConsumer, &lClassifyData, 1);
 
         /* check for kill-pill => break out of loop and shutdown thread */
         if (lClassifyData == NULL || lReturnPop == 0)
@@ -282,11 +286,8 @@ THREAD_FUNC(tsk_classify_thread, pData)
                 lData->handle_fc->mBlockSize,
                 lResult);
 
-        pipe_push(lPipeClassifyFreeProducer, &lClassifyData, 1);
+        pipe_push(lData->mPipeClassifyFreeProducer, &lClassifyData, 1);
     }
-
-    pipe_producer_free(lPipeClassifyFreeProducer);
-    pipe_consumer_free(lPipeClassifyConsumer);
 
     LOGGING_INFO("Exiting classification thread. \n");
 
