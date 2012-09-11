@@ -3,20 +3,26 @@
 #include <sys/stat.h>
 
 #include "classify_collect.h"
+#include "block_classifier.h"
 
 #if 0
 #define PATH_IMAGE "../../../../data/image_ref_h264_ntfs_formatted.img"
-#elif 1
-#define PATH_IMAGE "../../../../data/image_ref_h264_ntfs.img"
 #elif 0
+#define PATH_IMAGE "../../../../data/image_ref_h264_ntfs.img"
+#elif 1
 #define PATH_IMAGE "../../../../data/usbkey.dd"
 #endif
 #define PATH_MAGIC "../../data/magic/media.mgc"
 
 int main(void)
 {
-    /* calculate image size */
     struct stat lStat;
+    ClassifyT lTypes[] = { 
+        { FT_H264, 0, 0, { '\0' } }, 
+        { FT_HIGH_ENTROPY, 0, 0, { '\0' } },
+    };
+
+    /* calculate image size */
     stat(PATH_IMAGE, &lStat);
 
     /* invoke file-type classification */
@@ -26,8 +32,8 @@ int main(void)
             0 /* number of blocks */,  /* later ignored */
             PATH_IMAGE /* image path */,
             0 /* offset */,  /* ignored */
-            NULL /* ClassifyT* pTypes */, 
-            0 /* int pNumTypes */,
+            lTypes /* ClassifyT* pTypes */, 
+            sizeof(lTypes)/sizeof(ClassifyT) /* int pNumTypes */,
             32 /* block gap */,
             4 /* min fragment size */,
             PATH_MAGIC /* path to magic database file */,
