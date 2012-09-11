@@ -26,6 +26,7 @@ typedef struct
     char path_image[MAX_STR_LEN];
     unsigned long long offset_img;
     unsigned long long offset_fs;
+    unsigned block_size;
     unsigned long long num_frags;
     const char* mPathMagic;
 } thread_data;
@@ -38,6 +39,7 @@ int block_classify_nofs_mt(
         void* pCallbackData, 
         const char* pImage, 
         unsigned long long pOffset, 
+        unsigned pBlockSize, 
         unsigned long long pSizeReal,
         const char* pPathMagic, 
         unsigned pNumThreads
@@ -47,8 +49,8 @@ int block_classify_nofs_mt(
             
     unsigned lCnt = 0;
     thread_data* lData = NULL;
-    unsigned long long lSize = pSizeReal * pBlockClassifier->mBlockSize - pOffset;
-    unsigned long long lFragsTotal = lSize / pBlockClassifier->mBlockSize;
+    unsigned long long lSize = pSizeReal * pBlockSize - pOffset;
+    unsigned long long lFragsTotal = lSize / pBlockSize;
     unsigned long long lFragsPerCpu = lFragsTotal / pNumThreads;
     unsigned long long lFragsPerCpuR = 0;
     unsigned long long lOffsetImg = 0;
@@ -75,6 +77,7 @@ int block_classify_nofs_mt(
         (lData + lCnt)->num_frags = lFragsPerCpu + (lFragsPerCpuR > 0 ? 1 : 0);
         (lData + lCnt)->offset_img = lOffsetImg;
         (lData + lCnt)->offset_fs = pOffset;
+        (lData + lCnt)->block_size = pBlockSize;
         lOffsetImg += (lData + lCnt)->num_frags;
         lFragsPerCpuR--;
 
@@ -99,7 +102,7 @@ int block_classify_nofs_mt(
 THREAD_FUNC(nofs_classify_thread, pData)
 {
     thread_data* lData = (thread_data*)pData; 
-    unsigned lLen = lData->handle_fc->mBlockSize;
+    unsigned lLen = lData->block_size;
     unsigned long long lCntBlock = lData->offset_img;
     OS_FH_TYPE lImage = NULL;
     char* lBuf = NULL;
@@ -121,7 +124,7 @@ THREAD_FUNC(nofs_classify_thread, pData)
     LOGGING_DEBUG(
             "Offset: %lld\n", lData->offset_img * lData->handle_fc->mBlockSize + lData->offset_fs);
 
-    lBuf = (char*)malloc(lData->handle_fc->mBlockSize);
+    lBuf = (char*)malloc(lData->block_size);
     lImage = OS_FOPEN_READ(lData->path_image);
 
     if (lImage == OS_FH_INVALID)
@@ -131,13 +134,13 @@ THREAD_FUNC(nofs_classify_thread, pData)
         return OS_THREAD_RETURN;
     }
     OS_FSEEK_SET(lImage,
-        lData->offset_img * lData->handle_fc->mBlockSize + lData->offset_fs);
+        lData->offset_img * lData->block_size + lData->offset_fs);
             
     /* classify fragments */
-    while (lLen == lData->handle_fc->mBlockSize && 
+    while (lLen == lData->block_size && 
             (lCntBlock - lData->offset_img) < lData->num_frags)
     {
-        OS_FREAD(lBuf, lData->handle_fc->mBlockSize, lLen, lImage); 
+        OS_FREAD(lBuf, lData->block_size, lLen, lImage); 
         block_classifier_classify_result(lData->handle_fc, lMagic, lBuf, lLen,
                 &lResult);
 
@@ -145,7 +148,7 @@ THREAD_FUNC(nofs_classify_thread, pData)
                 lData->callback,
                 lData->callback_data,
                 lCntBlock /* offset in blocks */,
-                lData->handle_fc->mBlockSize /* size range is one block */,
+                lData->block_size /* size range is one block */,
                 lResult);
 
         lCntBlock++;

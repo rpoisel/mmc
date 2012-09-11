@@ -14,8 +14,8 @@
 #include "entropy/entropy.h"
 
 BlockClassifier* block_classifier_new(ClassifyOptions* pOptions, 
-        unsigned pNumSo, 
-        unsigned pBlockSize)
+        unsigned pNumSo
+        )
 {
     UNUSED(pOptions);
     UNUSED(pNumSo);
@@ -23,8 +23,6 @@ BlockClassifier* block_classifier_new(ClassifyOptions* pOptions,
     /* initialize handle structure */
     struct _BlockClassifier* lHandle = 
         (struct _BlockClassifier*)malloc(sizeof(struct _BlockClassifier));
-
-    lHandle->mBlockSize = pBlockSize;
 
     /* initialize function pointers to the following functions (windows) */
     /* magic_open, magic_close, magic_load, magic_buffer, magic_error */
@@ -40,14 +38,12 @@ BlockClassifier* block_classifier_new(ClassifyOptions* pOptions,
 
 BlockClassifier* block_classifier_new_ct(ClassifyOptions* pOptions, 
         unsigned pNumSo, 
-        unsigned pBlockSize,
         ClassifyT* pTypes,
         unsigned pNumTypes)
 {
     struct _BlockClassifier* lHandle = block_classifier_new(
             pOptions,
-            pNumSo,
-            pBlockSize);
+            pNumSo);
 
     /* initialize additional fields */
     memcpy(lHandle->mFileTypes, pTypes, sizeof(ClassifyT) * pNumTypes);
@@ -65,14 +61,14 @@ void block_classifier_free(BlockClassifier* pBlockClassifier)
 int block_classifier_classify_result(BlockClassifier* pBlockClassifier, 
         magic_t pMagic, 
         const char* pFragment,
-        int pLen,
+        unsigned pLen,
         ClassifyT* pResult)
 {
     UNUSED(pBlockClassifier);
         
     const char* lMagicResult = NULL;
     float lEntropy = 0;
-    int lCnt = 0;
+    unsigned lCnt = 0;
     int lCntJpeg = 0;
     /* non-relevant fragment <= 0 > relevant fragment */
 

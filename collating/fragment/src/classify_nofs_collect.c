@@ -11,8 +11,8 @@
 /* TODO pNumBlocks is not relevant for fs based classifiers */
 fragment_collection_t* classify_nofs(
         unsigned long long pImageSize, 
-        int pBlockSize, 
-        int pNumBlocks, /* TODO only non-fs relevant */
+        unsigned pBlockSize, 
+        unsigned pNumBlocks, /* TODO only non-fs relevant */
         const char* pImage, 
         unsigned long long pOffset, 
         ClassifyT* pTypes, 
@@ -27,7 +27,7 @@ fragment_collection_t* classify_nofs(
     block_collection_t* lBlocks = NULL;
     fragment_collection_t* lFragments = NULL;
 
-    lHandle = block_classifier_new_ct(NULL, 0, pBlockSize, pTypes, pNumTypes);
+    lHandle = block_classifier_new_ct(NULL, 0, pTypes, pNumTypes);
     if (!lHandle)
     {
         return NULL;
@@ -37,8 +37,8 @@ fragment_collection_t* classify_nofs(
 
     /* start multithreaded classification process */
     block_classify_nofs_mt(lHandle, classify_collect, 
-            lBlocks /* callback data */, pImage, pOffset, pNumBlocks, 
-            /* colons do not work in windows; thus one file is used only */
+            lBlocks /* callback data */, pImage, pOffset, pBlockSize,
+            pNumBlocks, /* colons do not work in windows; thus one file is used only */
             pPathMagic,
             pNumThreads);
 

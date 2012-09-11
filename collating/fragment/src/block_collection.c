@@ -21,15 +21,19 @@ block_collection_t* block_collection_new(unsigned long long pMaxBlocks, unsigned
 
     block_collection_t* lHandle = (block_collection_t*)malloc(sizeof(block_collection_t));
 
-    LOGGING_DEBUG("Storage size: %llu, Max Blocks: %lld\n", STORAGE_SIZE(pMaxBlocks), pMaxBlocks);
+    LOGGING_INFO("Storage size: %llu, Max Blocks: %lld\n", STORAGE_SIZE(pMaxBlocks), pMaxBlocks);
 
     if (STORAGE_SIZE(pMaxBlocks) * sizeof(storage_t) > sizeof(storage_t))
     {
+        LOGGING_INFO("Allocating %llu bytes of memory. \n",
+                STORAGE_SIZE(pMaxBlocks) * sizeof(storage_t))
         lHandle->mBlockArray = (storage_t*)malloc(STORAGE_SIZE(pMaxBlocks) * sizeof(storage_t));
     }
     else
     {
         lHandle->mBlockArray = (storage_t*)malloc(sizeof(storage_t));
+        LOGGING_INFO("Allocating %lu bytes of memory. \n",
+                sizeof(storage_t))
     }
     lHandle->mBlockSize = pBlockSize;
     lHandle->mMaxBlocks = pMaxBlocks;
@@ -64,7 +68,6 @@ int block_collection_set(block_collection_t* pCollection,
     return 0;
 }
 
-/* TODO implement pRangeSize */
 int block_collection_set_range(block_collection_t* pCollection, 
         unsigned long long pOffset, int pIsHeader, unsigned pRangeSize)
 {
@@ -78,7 +81,6 @@ int block_collection_set_range(block_collection_t* pCollection,
                 pOffset + lCnt * pCollection->mBlockSize,
                 pIsHeader);
     }
-
     return 0;
 }
 
@@ -105,6 +107,8 @@ unsigned block_collection_get_bs(block_collection_t* pCollection)
 
 void block_collection_free(block_collection_t* pCollection)
 {
+    LOGGING_INFO("Freeing block collection memory. \n")
+
     free(pCollection->mBlockArray);
     free(pCollection);
 }

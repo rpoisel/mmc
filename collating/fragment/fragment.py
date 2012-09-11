@@ -134,7 +134,7 @@ class CFragmentClassifier(object):
         self._mClassify = self._mLH.classify_tsk
         self._mClassify.restype = CFragmentCollectionPointer
         self._mClassify.argtypes = \
-            [c_ulonglong, c_int, c_int, c_char_p, c_ulonglong,
+            [c_ulonglong, c_uint, c_int, c_char_p, c_ulonglong,
             ClassifyTArray, c_int, c_ulonglong, c_ulonglong,
             c_char_p, c_int]
 

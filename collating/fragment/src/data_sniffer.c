@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
         ++lImageNumBlocks;
     }
 
-    lHandle = block_classifier_new(lOptions, 0, lBlockSize);
+    lHandle = block_classifier_new(lOptions, 0);
     if (!lHandle)
     {
         return EXIT_FAILURE;
@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
     block_classify_nofs_mt(lHandle, callback_print, 
             (void *)&lData, lFilename, 
             0 /* filesystem offset */, 
+            lBlockSize,
             lImageNumBlocks,
             PATH_MAGIC_DB,
             lNumThreads);

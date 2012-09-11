@@ -177,10 +177,12 @@ int block_classify_tsk_mt(
     pipe_free(lPipeClassify);
     pipe_free(lPipeClassifyFree);
 
+#if 0
     free(lDataClassify);
     free(lThreadsClassify);
     free(lDataRead);
     free(lThreadRead);
+#endif
             
     return EXIT_SUCCESS;
 }
@@ -220,8 +222,10 @@ THREAD_FUNC(tsk_read_thread, pData)
             /* problem with FIFO */
             break;
         }
+#if 0
         free(lDataCurrent->mBuf);
         free(lDataCurrent);
+#endif
     }
 
     LOGGING_INFO("Sending kill-pills.\n")
@@ -247,7 +251,7 @@ THREAD_FUNC(tsk_classify_thread, pData)
     classify_data* lClassifyData = NULL;
     size_t lReturnPop = -1;
 
-    LOGGING_INFO("Classification thread started. \n");
+    LOGGING_INFO("Classification thread started. \n")
 
     lMagic = magic_open(MAGIC_NONE);
     if (!lMagic)
@@ -283,7 +287,7 @@ THREAD_FUNC(tsk_classify_thread, pData)
                 lData->callback,
                 lData->callback_data,
                 lClassifyData->mOffset, /* lCntBlock */ /* offset in blocks */
-                lData->handle_fc->mBlockSize,
+                lClassifyData->mLen,
                 lResult);
 
         pipe_push(lData->mPipeClassifyFreeProducer, &lClassifyData, 1);
@@ -475,6 +479,7 @@ static void data_act(
         lDataCurrent->mBuf = 
             (char* )malloc(sizeof(char) * MAX_BLOCK_SIZE);
             
+        /* TODO barrier */
         ++lTskCbData->mCntCirculating;
     }
     /* wait for free FIFO to receive elements for re-use */

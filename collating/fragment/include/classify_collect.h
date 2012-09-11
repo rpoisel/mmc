@@ -10,8 +10,8 @@
 
 __declspec(dllexport) fragment_collection_t* classify_nofs(
         unsigned long long pImageSize, 
-        int pBlockSize, 
-        int pNumBlocks, 
+        unsigned pBlockSize, 
+        unsigned pNumBlocks, 
         const char* pImage, 
         unsigned long long pOffset, 
         ClassifyT* pTypes, 
@@ -23,8 +23,8 @@ __declspec(dllexport) fragment_collection_t* classify_nofs(
 
 __declspec(dllexport) fragment_collection_t* classify_tsk(
         unsigned long long pImageSize, 
-        int pBlockSize, 
-        int pNumBlocks, 
+        unsigned pBlockSize, 
+        unsigned pNumBlocks, 
         const char* pImage, 
         unsigned long long pOffset, 
         ClassifyT* pTypes, 

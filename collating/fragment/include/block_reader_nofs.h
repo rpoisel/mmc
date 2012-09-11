@@ -11,6 +11,7 @@ int block_classify_nofs_mt(
         void* pCallbackData, 
         const char* pImage, 
         unsigned long long pOffset, 
+        unsigned pBlockSize, 
         unsigned long long pSizeReal, 
         const char* pPathMagic, 
         unsigned int pNumThreads);
