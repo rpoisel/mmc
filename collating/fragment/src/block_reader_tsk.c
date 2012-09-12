@@ -177,13 +177,11 @@ int block_classify_tsk_mt(
     pipe_free(lPipeClassify);
     pipe_free(lPipeClassifyFree);
 
-#if 0
     free(lDataClassify);
     free(lThreadsClassify);
     free(lDataRead);
     free(lThreadRead);
-#endif
-            
+
     return EXIT_SUCCESS;
 }
 
@@ -222,10 +220,8 @@ THREAD_FUNC(tsk_read_thread, pData)
             /* problem with FIFO */
             break;
         }
-#if 0
         free(lDataCurrent->mBuf);
         free(lDataCurrent);
-#endif
     }
 
     LOGGING_INFO("Sending kill-pills.\n")
@@ -305,6 +301,7 @@ void blocks_read_tsk(
     TSK_VS_INFO* lVsInfo = NULL;
     TSK_IMG_INFO* lImgInfo = OS_FH_INVALID;
     TSK_OFF_T lCnt = 0;
+    TSK_FS_INFO* lFsInfo = NULL;
     const char* lPathImageChar[1] = { pTskCbData->mPathImage };
     const TSK_TCHAR *const *lPathImage;
     /* TODO replace the following with buffer to be put into classification queue */
@@ -336,7 +333,7 @@ void blocks_read_tsk(
                     lVsInfo->part_count - 1, /* end */
                     TSK_VS_PART_FLAG_ALL, /* all partitions */
                     part_act, /* callback */
-                    (void*) pTskCbData /* data passed to the callback */
+                    pTskCbData /* data passed to the callback */
                     ) != 0)
             {
                 fprintf(stderr, "Problem when walking partitions. \n");
@@ -344,23 +341,50 @@ void blocks_read_tsk(
         }
         else
         {
-            LOGGING_DEBUG("Volume system cannot be opened.\n");
-            for (lCnt = 0; lCnt < lSizeSectors; lCnt++)
+#if 0
+            LOGGING_DEBUG("Volume system cannot be opened. Trying to open directly. \n");
+            lFsInfo = tsk_fs_open_img(
+                    lImgInfo, /* image handler */
+                    0, /* offset */
+                    TSK_FS_TYPE_DETECT /* Use autodetection methods */
+                    );
+            if (lFsInfo != NULL)
             {
-                lCntRead = lCnt == lSizeSectors - 1 ? 
-                                lImgInfo->size % lImgInfo->sector_size :
-                                lImgInfo->sector_size;
-
-				LOGGING_DEBUG("Reading %u bytes\n", lCntRead);
-
-				tsk_img_read(
-                        lImgInfo, /* handler */
-                        lCnt * lImgInfo->sector_size, /* start address */
-                        lBuf, /* buffer to store data in */
-                        lCntRead /* amount of data to read */
+                tsk_fs_block_walk(
+                        lFsInfo, /* file-system info */
+                        0, /* start */
+                        lFsInfo->block_count - 1, /* end */
+                        TSK_FS_BLOCK_WALK_FLAG_UNALLOC, /* only unallocated blocks */
+                        block_act, /* callback */
+                        pTskCbData /* file-handle */
                         );
-                data_act(lBuf, lCntRead, lCnt * lImgInfo->sector_size, pTskCbData);
+
+                /* close fs */
+                tsk_fs_close(lFsInfo);
             }
+            else
+            {
+#endif
+                LOGGING_DEBUG("No file-system detected. Iterating directly through blocks. \n")
+                for (lCnt = 0; lCnt < lSizeSectors; lCnt++)
+                {
+                    lCntRead = lCnt == lSizeSectors - 1 ? 
+                                    lImgInfo->size % lImgInfo->sector_size :
+                                    lImgInfo->sector_size;
+
+                                    LOGGING_DEBUG("Reading %u bytes\n", lCntRead);
+
+                                    tsk_img_read(
+                            lImgInfo, /* handler */
+                            lCnt * lImgInfo->sector_size, /* start address */
+                            lBuf, /* buffer to store data in */
+                            lCntRead /* amount of data to read */
+                            );
+                    data_act(lBuf, lCntRead, lCnt * lImgInfo->sector_size, pTskCbData);
+                }
+#if 0
+            }
+#endif
         }
     }
     else
@@ -446,12 +470,13 @@ TSK_WALK_RET_ENUM block_act(
 
     LOGGING_DEBUG(
             "FS-Offset (Bytes): %lu, Size: %u, "
-            "Block: %lu, Absolute address: %ld\n",
+            "Block: %lu, Absolute address: %ld, Buffer address: %p\n",
             a_block->fs_info->offset,
             a_block->fs_info->block_size,
             a_block->addr, 
-            a_block->fs_info->offset + a_block->addr * a_block->fs_info->block_size);
-
+            a_block->fs_info->offset + a_block->addr * a_block->fs_info->block_size,
+            a_block->buf
+            );
     data_act(
             a_block->buf, /* block data */
             a_block->fs_info->block_size, /* size in bytes */
@@ -493,7 +518,7 @@ static void data_act(
             return;
         }
     }
-    
+
     /* copy data to buffer */
     memcpy(lDataCurrent->mBuf, pBuf, pLen);
     lDataCurrent->mLen = pLen;
