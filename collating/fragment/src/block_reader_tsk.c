@@ -341,7 +341,6 @@ void blocks_read_tsk(
         }
         else
         {
-#if 0
             LOGGING_DEBUG("Volume system cannot be opened. Trying to open directly. \n");
             lFsInfo = tsk_fs_open_img(
                     lImgInfo, /* image handler */
@@ -364,7 +363,6 @@ void blocks_read_tsk(
             }
             else
             {
-#endif
                 LOGGING_DEBUG("No file-system detected. Iterating directly through blocks. \n")
                 for (lCnt = 0; lCnt < lSizeSectors; lCnt++)
                 {
@@ -382,9 +380,7 @@ void blocks_read_tsk(
                             );
                     data_act(lBuf, lCntRead, lCnt * lImgInfo->sector_size, pTskCbData);
                 }
-#if 0
             }
-#endif
         }
     }
     else

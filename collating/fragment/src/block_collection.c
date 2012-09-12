@@ -77,9 +77,18 @@ int block_collection_set_range(block_collection_t* pCollection,
             lCnt < (pRangeSize / pCollection->mBlockSize + (pRangeSize % pCollection->mBlockSize != 0 ? 1 : 0));
             lCnt++)
     {
-        block_collection_set(pCollection,
-                pOffset + lCnt,
-                pIsHeader);
+        if (lCnt == 0)
+        {
+            block_collection_set(pCollection,
+                    pOffset + lCnt,
+                    pIsHeader);
+        }
+        else
+        {
+            block_collection_set(pCollection,
+                    pOffset + lCnt,
+                    0);
+        }
     }
 
     LOGGING_DEBUG("Block size: %lld, Range size: %lld, Offset: %lld, Max Count size: %u\n",
