@@ -64,6 +64,9 @@
 #define OS_THREAD_RETURN NULL
 #define OS_MUTEX_INIT_VALUE PTHREAD_MUTEX_INITIALIZER
 
+/* others */
+#define __declspec(dllexport) 
+
 #elif defined _WIN32 || defined _WIN64
 
 /* includes */

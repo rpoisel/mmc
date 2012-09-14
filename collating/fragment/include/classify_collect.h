@@ -3,10 +3,7 @@
 
 #include "block_classifier.h"
 #include "fragment_collection.h"
-
-#ifndef _MSC_VER
-#define __declspec(dllexport) 
-#endif
+#include "os_def.h"
 
 __declspec(dllexport) fragment_collection_t* classify_nofs(
         unsigned long long pImageSize, 
