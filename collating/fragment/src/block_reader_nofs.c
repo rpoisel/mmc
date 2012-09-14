@@ -50,20 +50,20 @@ int block_classify_nofs_mt(
     unsigned lCnt = 0;
     thread_data* lData = NULL;
     unsigned long long lSize = pSizeReal * pBlockSize - pOffset;
-    unsigned long long lFragsTotal = lSize / pBlockSize;
-    unsigned long long lFragsPerCpu = lFragsTotal / pNumThreads;
-    unsigned long long lFragsPerCpuR = 0;
+    unsigned long long lBlocksTotal = lSize / pBlockSize;
+    unsigned long long lBlocksPerCpu = lBlocksTotal / pNumThreads;
+    unsigned long long lBlocksPerCpuR = 0;
     unsigned long long lOffsetImg = 0;
-    if (lFragsPerCpu > 0)
+    if (lBlocksPerCpu > 0)
     {
-        lFragsPerCpuR = lFragsTotal % lFragsPerCpu;
+        lBlocksPerCpuR = lBlocksTotal % lBlocksPerCpu;
     }
        
     /* TODO check return values */
     lThreads = (OS_THREAD_TYPE* )malloc(sizeof(OS_THREAD_TYPE) * pNumThreads);
     lData = (thread_data* )malloc(sizeof(thread_data) * pNumThreads);
 
-    LOGGING_DEBUG("Fragments range: %lld\n", lFragsTotal);
+    LOGGING_DEBUG("Fragments range: %lld\n", lBlocksTotal);
     LOGGING_DEBUG("Filesystem offset: %lld\n", pOffset);
 
     for (lCnt = 0; lCnt < pNumThreads; ++lCnt)
@@ -74,12 +74,12 @@ int block_classify_nofs_mt(
         (lData + lCnt)->callback_data = pCallbackData; 
         (lData + lCnt)->mPathMagic = pPathMagic;
 
-        (lData + lCnt)->num_frags = lFragsPerCpu + (lFragsPerCpuR > 0 ? 1 : 0);
+        (lData + lCnt)->num_frags = lBlocksPerCpu + (lBlocksPerCpuR > 0 ? 1 : 0);
         (lData + lCnt)->offset_img = lOffsetImg;
         (lData + lCnt)->offset_fs = pOffset;
         (lData + lCnt)->block_size = pBlockSize;
         lOffsetImg += (lData + lCnt)->num_frags;
-        lFragsPerCpuR--;
+        lBlocksPerCpuR--;
 
         LOGGING_DEBUG("Starting thread %d with block range %lld to %lld.\n",
                 lCnt, (lData + lCnt)->offset_img, (lData + lCnt)->offset_img + (lData + lCnt)->num_frags);
