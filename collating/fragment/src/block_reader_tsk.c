@@ -37,6 +37,7 @@ typedef struct
     unsigned long long offset_img;
     unsigned long long offset_fs;
     unsigned long long num_frags;
+    unsigned mBlockSize;
     const char* mPathMagic;
     pipe_producer_t* mPipeClassifyProducer;
     pipe_consumer_t* mPipeClassifyConsumer;
@@ -49,7 +50,11 @@ typedef struct
 {
     const char* mPathImage;
     unsigned mCntCirculating;
+#if 0
     unsigned mSectorSize;
+#else
+    unsigned mBlockSize;
+#endif
     pipe_producer_t* mPipeClassifyProducer;
     pipe_consumer_t* mPipeClassifyFreeConsumer;
 } tsk_cb_data;
@@ -92,6 +97,7 @@ int block_classify_tsk_mt(
         void* pCallbackData, 
         const char* pImage, 
         unsigned long long pOffset, /* ignored */
+        unsigned pBlockSize, 
         unsigned long long pSizeReal, /* ignored */
         const char* pPathMagic, 
         unsigned pNumThreads
@@ -155,6 +161,7 @@ int block_classify_tsk_mt(
     lDataRead->mPipeClassifyProducer = lPipeClassifyProducer;
     lDataRead->mPipeClassifyFreeConsumer = lPipeClassifyFreeConsumer;
     lDataRead->mNumThreads = pNumThreads;
+    lDataRead->mBlockSize = pBlockSize;
 
     /* create reader thread */
     OS_THREAD_CREATE(lThreadRead, lDataRead, tsk_read_thread);
@@ -202,6 +209,7 @@ THREAD_FUNC(tsk_read_thread, pData)
     lTskCbData.mCntCirculating = 0;
     lTskCbData.mPipeClassifyProducer = lData->mPipeClassifyProducer;
     lTskCbData.mPipeClassifyFreeConsumer = lData->mPipeClassifyFreeConsumer;
+    lTskCbData.mBlockSize = lData->mBlockSize;
 
     LOGGING_DEBUG("Path image: %s\n", lData->mPathImage)
 
@@ -317,13 +325,21 @@ void blocks_read_tsk(
             0); /* size of device sector in bytes */
     if (lImgInfo != NULL)
     {
+#if 0
         TSK_OFF_T lSizeSectors = lImgInfo->size / lImgInfo->sector_size + \
                                  (lImgInfo->size % lImgInfo->sector_size ? 1 : 0);
         LOGGING_INFO("Image size (Bytes): %lu, Image size (sectors): %lu\n",
                 lImgInfo->size,
                 lSizeSectors);
-
         pTskCbData->mSectorSize = lImgInfo->sector_size;
+#else
+        TSK_OFF_T lSizeBlocks = lImgInfo->size / pTskCbData->mBlockSize + \
+                                 (lImgInfo->size % pTskCbData->mBlockSize ? 1 : 0);
+        LOGGING_INFO("Image size (Bytes): %lu, Image size (blocks): %lu\n",
+                lImgInfo->size,
+                lSizeBlocks);
+#endif
+
 
         lVsInfo = tsk_vs_open(lImgInfo, 0, TSK_VS_TYPE_DETECT);
         if (lVsInfo != NULL)
@@ -364,6 +380,7 @@ void blocks_read_tsk(
             else
             {
                 LOGGING_DEBUG("No file-system detected. Iterating directly through blocks. \n")
+#if 0
                 for (lCnt = 0; lCnt < lSizeSectors; lCnt++)
                 {
                     lCntRead = lCnt == lSizeSectors - 1 ? 
@@ -379,6 +396,23 @@ void blocks_read_tsk(
                             lCntRead /* amount of data to read */
                             );
                     data_act(lBuf, lCntRead, lCnt * lImgInfo->sector_size, pTskCbData);
+#else
+                for (lCnt = 0; lCnt < lSizeBlocks; lCnt++)
+                {
+                    lCntRead = lCnt == lSizeBlocks - 1 ? 
+                                    lImgInfo->size % pTskCbData->mBlockSize :
+                                    pTskCbData->mBlockSize;
+
+                                    LOGGING_INFO("Reading %u bytes\n", lCntRead);
+
+                                    tsk_img_read(
+                            lImgInfo, /* handler */
+                            lCnt * pTskCbData->mBlockSize, /* start address */
+                            lBuf, /* buffer to store data in */
+                            lCntRead /* amount of data to read */
+                            );
+                    data_act(lBuf, lCntRead, lCnt * pTskCbData->mBlockSize, pTskCbData);
+#endif
                 }
             }
         }
@@ -481,6 +515,10 @@ TSK_WALK_RET_ENUM block_act(
     return TSK_WALK_CONT;
 }
 
+/**
+ * pOffset ... offset in bytes
+ */
+
 static void data_act(
         char* pBuf,
         const unsigned pLen,
@@ -518,7 +556,7 @@ static void data_act(
     /* copy data to buffer */
     memcpy(lDataCurrent->mBuf, pBuf, pLen);
     lDataCurrent->mLen = pLen;
-    lDataCurrent->mOffset = pOffset / lTskCbData->mSectorSize;
+    lDataCurrent->mOffset = pOffset / SECTOR_SIZE;
 
     /* enqueue lDataCurrent */
     pipe_push(lTskCbData->mPipeClassifyProducer,

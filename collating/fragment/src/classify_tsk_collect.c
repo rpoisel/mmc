@@ -50,6 +50,7 @@ fragment_collection_t* classify_tsk(
             lBlocks /* callback data */,
             pImage,
             pOffset,
+            pBlockSize,
             pNumBlocks, 
             pPathMagic, /* colons do not work in windows; thus one file is used only */
             pNumThreads);
