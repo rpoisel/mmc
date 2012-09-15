@@ -139,6 +139,8 @@ class CMain(object):
         self.customwidget.blockStatus.addItem("allocated")
         self.customwidget.blockStatus.addItem("unallocated")
 
+        self.customwidget.resultTable.setContextMenuPolicy(
+                QtCore.Qt.CustomContextMenu)
         self.customwidget.resultTable.setColumnCount(7)
         self.customwidget.resultTable.setHorizontalHeaderLabels((
                 "Header", "Fragment", "Start [Bytes]",
@@ -186,6 +188,8 @@ class CMain(object):
                 self.on_recoverFT_changed)
         self.customwidget.fileTable.cellDoubleClicked.connect(
                 self.on_fileTable_cellDoubleClicked)
+        self.customwidget.resultTable.customContextMenuRequested.connect(
+                self.on_result_contextMenuRequested)
 
         # init values
         self.customwidget.inputFile.setText(
@@ -326,6 +330,11 @@ class CMain(object):
             self.__clearFiles()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.CLASSIFY | Jobs.REASSEMBLE)
+
+    def on_result_contextMenuRequested(self, pPoint):
+        lMenu = QtGui.QMenu()
+        lAction = lMenu.addAction("One example")
+        lMenu.exec_(self.customwidget.resultTable.mapToGlobal(pPoint))
 
     def __outputDirProblem(self):
         lMsgBox = QtGui.QMessageBox()
