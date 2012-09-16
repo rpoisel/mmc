@@ -115,7 +115,8 @@ class CReassemblyPUP(CReassembly):
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
                     #Fragment has an error
-                    if pSortedFrags[lIdxFrag].mSize == 0:
+                    if (lFrag.mIsHeader == 0 and
+                          (lFrag.mPicBegin == "" or lFrag.mPicEnd == "")):
                         continue
 
                     lResult = self.mFileHandler.compareFrags(pSortedFrags,
@@ -283,7 +284,6 @@ class CVideoHandler(CAbstractFileTypeHandler):
                 lFiles.append(lFile)
             elif (lFrag.mIsHeader == 0 and
                   (lFrag.mPicBegin == "" or lFrag.mPicEnd == "")):
-                lFrag.mSize = 0
                 logging.debug("Fragment " + str(lFragIdx) +
                         " does not contain beginning or ending frame")
 
