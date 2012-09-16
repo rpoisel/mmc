@@ -109,6 +109,23 @@ int block_classifier_classify_result(BlockClassifier* pBlockClassifier,
             {
                 pResult->mType = FT_VIDEO;
                 pResult->mStrength = 1;
+#if 1
+                if (strstr(lMagicResult, "sequence") == NULL &&
+                        strstr(lMagicResult, "LOAS") == NULL && 
+#if 1
+                        (strstr(lMagicResult, "ADTS") != NULL && 
+                         strstr(lMagicResult, "layer II,") == NULL && 
+                         strstr(lMagicResult, "AAC") == NULL &&
+                         strstr(lMagicResult, "v1") == NULL &&
+                         strstr(lMagicResult, "v2,") == NULL)
+                        )
+#else
+                        strstr(lMagicResult, "ADTS") == NULL)
+#endif
+                {
+                    pResult->mIsHeader = 1;
+                }
+#endif
                 if (strstr(lMagicResult, "v4") != NULL &&
                         strstr(lMagicResult, "ADTS") == NULL)
                 {
