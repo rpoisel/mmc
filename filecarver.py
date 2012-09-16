@@ -2,7 +2,6 @@
 import os.path
 import multiprocessing
 import logging
-import pprint
 
 # import only if necessary
 from preprocessing import preprocessing
@@ -76,7 +75,8 @@ class CFileCarver:
                                                      pCaller)
         pCaller.finishedCallback()
 
-    def extractFragment(self, pOptions, pFragment, pFileName):
+    @staticmethod
+    def extractFragment(pOptions, pFragment, pFileName):
         # always copy decoder
         lDecoder = CDecoder.getDecoder(".dd")
         lRecoverFH = open(pOptions.imagefile, "rb")
