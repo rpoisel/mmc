@@ -502,82 +502,81 @@ class CMain(object):
         lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
-        if pFinishedJob == Jobs.CLASSIFY:
-            lNumRowsResult = 0
-            if self.mFileCarver.fragments is not None:
-                for lFrag in self.mFileCarver.fragments:
-                    self.customwidget.resultTable.insertRow(lNumRowsResult)
-                    if lFrag.mIsHeader is True:
-                        lItem = QtGui.QTableWidgetItem("H")
-                    else:
-                        lItem = QtGui.QTableWidgetItem("")
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.resultTable.setItem(lNumRowsResult, 0,
-                            lItem)
+        lNumRowsResult = 0
+        if self.mFileCarver.fragments is not None:
+            for lFrag in self.mFileCarver.fragments:
+                self.customwidget.resultTable.insertRow(lNumRowsResult)
+                if lFrag.mIsHeader is True:
+                    lItem = QtGui.QTableWidgetItem("H")
+                else:
+                    lItem = QtGui.QTableWidgetItem("")
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 0,
+                        lItem)
 
-                    lItem = QtGui.QTableWidgetItem("Fragment " +
-                            str(lNumRowsResult))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.resultTable.setItem(lNumRowsResult, 1,
-                            lItem)
-                    self.customwidget.resultTable.horizontalHeader().\
-                            resizeSection(1, 10)
+                lItem = QtGui.QTableWidgetItem("Fragment " +
+                        str(lNumRowsResult))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 1,
+                        lItem)
+                self.customwidget.resultTable.horizontalHeader().\
+                        resizeSection(1, 10)
 
-                    #Start Address in Bytes
-                    lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(
-                            QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                    self.customwidget.resultTable.setItem(lNumRowsResult, 2,
-                            lItem)
+                #Start Address in Bytes
+                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(
+                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 2,
+                        lItem)
 
-                    #End Address in Bytes
-                    lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset +
-                            lFrag.mSize))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(
-                            QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                    self.customwidget.resultTable.setItem(lNumRowsResult, 3,
-                            lItem)
+                #End Address in Bytes
+                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset +
+                        lFrag.mSize))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(
+                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult, 3,
+                        lItem)
 
-                    #Start Address in Sectors
-                    lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
-                    # TODO this assumes that one cluster contains four sectors
-                    lItem = QtGui.QTableWidgetItem(str(lSector))
-                            #"/" + str(lSector / 4))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignRight |
-                            QtCore.Qt.AlignVCenter)
-                    self.customwidget.resultTable.setItem(lNumRowsResult,
-                            4, lItem)
+                #Start Address in Sectors
+                lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
+                # TODO this assumes that one cluster contains four sectors
+                lItem = QtGui.QTableWidgetItem(str(lSector))
+                        #"/" + str(lSector / 4))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignRight |
+                        QtCore.Qt.AlignVCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult,
+                        4, lItem)
 
-                    #End Address in Sectors
-                    lSector = (lFrag.mOffset + lFrag.mSize) / \
-                            int(self.__mGeometry.sectorsize) - 1
-                    # TODO this assumes that one cluster contains four sectors
-                    lItem = QtGui.QTableWidgetItem(str(lSector))
-                            #"/" + str(lSector / 4))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignRight |
-                            QtCore.Qt.AlignVCenter)
-                    self.customwidget.resultTable.setItem(lNumRowsResult,
-                            5, lItem)
+                #End Address in Sectors
+                lSector = (lFrag.mOffset + lFrag.mSize) / \
+                        int(self.__mGeometry.sectorsize) - 1
+                # TODO this assumes that one cluster contains four sectors
+                lItem = QtGui.QTableWidgetItem(str(lSector))
+                        #"/" + str(lSector / 4))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignRight |
+                        QtCore.Qt.AlignVCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult,
+                        5, lItem)
 
-                    #Size in Bytes and Sectors
-                    lItem = QtGui.QTableWidgetItem(str(lFrag.mSize) +
-                            "/" +
-                            str(lFrag.mSize /
-                            int(self.__mGeometry.sectorsize)))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignRight |
-                            QtCore.Qt.AlignVCenter)
-                    self.customwidget.resultTable.setItem(lNumRowsResult,
-                            6, lItem)
+                #Size in Bytes and Sectors
+                lItem = QtGui.QTableWidgetItem(str(lFrag.mSize) +
+                        "/" +
+                        str(lFrag.mSize /
+                        int(self.__mGeometry.sectorsize)))
+                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                lItem.setTextAlignment(QtCore.Qt.AlignRight |
+                        QtCore.Qt.AlignVCenter)
+                self.customwidget.resultTable.setItem(lNumRowsResult,
+                        6, lItem)
 
-                    lNumRowsResult += 1
-            self.__mImgVisualizer.update()
+                lNumRowsResult += 1
+        self.__mImgVisualizer.update()
         if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
                 or (pFinishedJob == Jobs.REASSEMBLE):
             self.__enableElements(True)
