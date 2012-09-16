@@ -60,9 +60,8 @@ class CMain(object):
         # adjust widget elements
         self.customwidget.imageView.setMouseTracking(True)
 
-        for lPreprocessor in \
-                preprocessing.CPreprocessing.getPreprocessors():
-            self.customwidget.preprocessing.addItem(lPreprocessor['name'])
+        self.customwidget.preprocessing.addItem("Sleuthkit")
+        self.customwidget.preprocessing.addItem("Plain")
 
         self.mRecoverFiletypes = {"Video": ["MKV", "Copy", "JPEG", "PNG"],
                     "JPEG": ["JPEG", "PNG"],

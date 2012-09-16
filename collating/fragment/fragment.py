@@ -122,7 +122,7 @@ class CFragments(object):
 
 class CFragmentClassifier(object):
 
-    def __init__(self):
+    def __init__(self, pPreprocess):
         super(CFragmentClassifier, self).__init__()
 
         # load library (do not change)
@@ -131,7 +131,10 @@ class CFragmentClassifier(object):
         elif platform.system().lower() == "linux":
             self._mLH = cdll.LoadLibrary("libblock_classifier.so")
 
-        self._mClassify = self._mLH.classify_tsk
+        if pPreprocess == "Sleuthkit":
+            self._mClassify = self._mLH.classify_tsk
+        else:
+            self._mClassify = self._mLH.classify_nofs
         self._mClassify.restype = CFragmentCollectionPointer
         self._mClassify.argtypes = \
             [c_ulonglong, c_uint, c_int, c_char_p, c_ulonglong,
