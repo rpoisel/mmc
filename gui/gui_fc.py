@@ -162,7 +162,12 @@ class CMain(object):
 
         #self.on_recoverFT_changed(0)
 
-        # actions
+        self.__actionExtractFragment = QtGui.QAction("Extract fragment ...",
+                self.customwidget.resultTable,
+                statusTip="Extract this fragment",
+                triggered=self.on_fragmentExtract)
+
+        # signals and slots
         self.ui.actionExit.triggered.connect(self.on_actionExit_triggered)
         self.ui.actionAbout.triggered.connect(self.on_actionAbout_triggered)
         self.ui.actionChooseOutputDir.triggered.connect(
@@ -333,8 +338,11 @@ class CMain(object):
 
     def on_result_contextMenuRequested(self, pPoint):
         lMenu = QtGui.QMenu()
-        lAction = lMenu.addAction("One example")
+        lAction = lMenu.addAction(self.__actionExtractFragment)
         lMenu.exec_(self.customwidget.resultTable.mapToGlobal(pPoint))
+
+    def on_fragmentExtract(self):
+        print self.customwidget.resultTable.currentRow()
 
     def __outputDirProblem(self):
         lMsgBox = QtGui.QMessageBox()
