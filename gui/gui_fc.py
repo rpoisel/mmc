@@ -519,6 +519,7 @@ class CMain(object):
         lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
+        self.__clearFragments()
         lNumRowsResult = 0
         if self.mFileCarver.fragments is not None:
             for lFrag in self.mFileCarver.fragments:
