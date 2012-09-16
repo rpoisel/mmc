@@ -20,6 +20,7 @@ from PySide import QtUiTools
 import gui_resources
 import gui_options
 import gui_imgvisualizer
+import model_frags
 from filecarver import CFileCarver
 from preprocessing import preprocessing
 from preprocessing import fsstat
@@ -139,16 +140,24 @@ class CMain(object):
         self.customwidget.blockStatus.addItem("allocated")
         self.customwidget.blockStatus.addItem("unallocated")
 
+        self.customwidget.resultTable.setSelectionBehavior(
+                QtGui.QAbstractItemView.SelectRows)
+        self.customwidget.resultTable.setSelectionMode(
+                QtGui.QAbstractItemView.SingleSelection)
         self.customwidget.resultTable.setContextMenuPolicy(
                 QtCore.Qt.CustomContextMenu)
-        self.customwidget.resultTable.setColumnCount(7)
-        self.customwidget.resultTable.setHorizontalHeaderLabels((
-                "Header", "Fragment", "Start [Bytes]",
-                "End [Bytes]", "Start [Sector]",
-                "End [Sector]", "Size [Bytes/Sectors]"))
+#        self.customwidget.resultTable.setColumnCount(7)
+#        self.customwidget.resultTable.setHorizontalHeaderLabels((
+#                "Header", "Fragment", "Start [Bytes]",
+#                "End [Bytes]", "Start [Sector]",
+#                "End [Sector]", "Size [Bytes/Sectors]"))
         self.customwidget.resultTable.horizontalHeader().\
                 setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
+        self.__actionExtractFragment = QtGui.QAction("Extract fragment ...",
+                self.customwidget.resultTable,
+                statusTip="Extract this fragment",
+                triggered=self.on_fragmentExtract)
 
         self.customwidget.fileTable.setColumnCount(4)
         self.customwidget.fileTable.setHorizontalHeaderLabels(("File",
@@ -161,11 +170,6 @@ class CMain(object):
         self.customwidget.progressBar.setMinimum(0)
 
         #self.on_recoverFT_changed(0)
-
-        self.__actionExtractFragment = QtGui.QAction("Extract fragment ...",
-                self.customwidget.resultTable,
-                statusTip="Extract this fragment",
-                triggered=self.on_fragmentExtract)
 
         # signals and slots
         self.ui.actionExit.triggered.connect(self.on_actionExit_triggered)
@@ -342,7 +346,14 @@ class CMain(object):
         lMenu.exec_(self.customwidget.resultTable.mapToGlobal(pPoint))
 
     def on_fragmentExtract(self):
-        print self.customwidget.resultTable.currentRow()
+        if self.customwidget.resultTable.currentIndex().row() < 0:
+            return
+
+        # TODO call extractFragment method from FileCarver
+        QtGui.QMessageBox.information(self.ui,
+                "Fragment Information",
+                str(self.mFileCarver.fragments[
+                    self.customwidget.resultTable.currentIndex().row()]))
 
     def __outputDirProblem(self):
         lMsgBox = QtGui.QMessageBox()
@@ -392,12 +403,13 @@ class CMain(object):
             self.__startWorker(Jobs.CLASSIFY)
 
     def __clearFragments(self):
-        lCnt = self.customwidget.resultTable.rowCount() - 1
-        while (lCnt >= 0):
-            self.customwidget.resultTable.removeRow(lCnt)
-            lCnt -= 1
-        #self.numRowsResult = 0
-        self.customwidget.resultTable.update()
+        pass
+#        lCnt = self.customwidget.resultTable.rowCount() - 1
+#        while (lCnt >= 0):
+#            self.customwidget.resultTable.removeRow(lCnt)
+#            lCnt -= 1
+#        #self.numRowsResult = 0
+#        self.customwidget.resultTable.update()
 
     def __clearFiles(self):
         lCnt = self.customwidget.fileTable.rowCount() - 1
@@ -519,82 +531,84 @@ class CMain(object):
         lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
-        self.__clearFragments()
-        lNumRowsResult = 0
-        if self.mFileCarver.fragments is not None:
-            for lFrag in self.mFileCarver.fragments:
-                self.customwidget.resultTable.insertRow(lNumRowsResult)
-                if lFrag.mIsHeader is True:
-                    lItem = QtGui.QTableWidgetItem("H")
-                else:
-                    lItem = QtGui.QTableWidgetItem("")
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 0,
-                        lItem)
-
-                lItem = QtGui.QTableWidgetItem("Fragment " +
-                        str(lNumRowsResult))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 1,
-                        lItem)
-                self.customwidget.resultTable.horizontalHeader().\
-                        resizeSection(1, 10)
-
-                #Start Address in Bytes
-                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(
-                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 2,
-                        lItem)
-
-                #End Address in Bytes
-                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset +
-                        lFrag.mSize))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(
-                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult, 3,
-                        lItem)
-
-                #Start Address in Sectors
-                lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
-                # TODO this assumes that one cluster contains four sectors
-                lItem = QtGui.QTableWidgetItem(str(lSector))
-                        #"/" + str(lSector / 4))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignRight |
-                        QtCore.Qt.AlignVCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult,
-                        4, lItem)
-
-                #End Address in Sectors
-                lSector = (lFrag.mOffset + lFrag.mSize) / \
-                        int(self.__mGeometry.sectorsize) - 1
-                # TODO this assumes that one cluster contains four sectors
-                lItem = QtGui.QTableWidgetItem(str(lSector))
-                        #"/" + str(lSector / 4))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignRight |
-                        QtCore.Qt.AlignVCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult,
-                        5, lItem)
-
-                #Size in Bytes and Sectors
-                lItem = QtGui.QTableWidgetItem(str(lFrag.mSize) +
-                        "/" +
-                        str(lFrag.mSize /
-                        int(self.__mGeometry.sectorsize)))
-                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                lItem.setTextAlignment(QtCore.Qt.AlignRight |
-                        QtCore.Qt.AlignVCenter)
-                self.customwidget.resultTable.setItem(lNumRowsResult,
-                        6, lItem)
-
-                lNumRowsResult += 1
-        self.__mImgVisualizer.update()
+        lModel = model_frags.CModelFrags(self.mFileCarver.fragments)
+        lModel.setHeaderData(0, QtCore.Qt.Horizontal, "Header")
+        self.customwidget.resultTable.setModel(lModel)
+#        self.__clearFragments()
+#        lNumRowsResult = 0
+#        if self.mFileCarver.fragments is not None:
+#            for lFrag in self.mFileCarver.fragments:
+#                self.customwidget.resultTable.insertRow(lNumRowsResult)
+#                if lFrag.mIsHeader is True:
+#                    lItem = QtGui.QTableWidgetItem("H")
+#                else:
+#                    lItem = QtGui.QTableWidgetItem("")
+#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+#                self.customwidget.resultTable.setItem(lNumRowsResult, 0,
+#                        lItem)
+#
+#                lItem = QtGui.QTableWidgetItem("Fragment " +
+#                        str(lNumRowsResult))
+#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
+#                self.customwidget.resultTable.setItem(lNumRowsResult, 1,
+#                        lItem)
+#                self.customwidget.resultTable.horizontalHeader().\
+#                        resizeSection(1, 10)
+#
+#                #Start Address in Bytes
+#                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
+#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                lItem.setTextAlignment(
+#                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+#                self.customwidget.resultTable.setItem(lNumRowsResult, 2,
+#                        lItem)
+#
+#                #End Address in Bytes
+#                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset +
+#                        lFrag.mSize))
+#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                lItem.setTextAlignment(
+#                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+#                self.customwidget.resultTable.setItem(lNumRowsResult, 3,
+#                        lItem)
+#
+#                #Start Address in Sectors
+#                lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
+#                # TODO this assumes that one cluster contains four sectors
+#                lItem = QtGui.QTableWidgetItem(str(lSector))
+#                        #"/" + str(lSector / 4))
+#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                lItem.setTextAlignment(QtCore.Qt.AlignRight |
+#                        QtCore.Qt.AlignVCenter)
+#                self.customwidget.resultTable.setItem(lNumRowsResult,
+#                        4, lItem)
+#
+#                #End Address in Sectors
+#                lSector = (lFrag.mOffset + lFrag.mSize) / \
+#                        int(self.__mGeometry.sectorsize) - 1
+#                # TODO this assumes that one cluster contains four sectors
+#                lItem = QtGui.QTableWidgetItem(str(lSector))
+#                        #"/" + str(lSector / 4))
+#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                lItem.setTextAlignment(QtCore.Qt.AlignRight |
+#                        QtCore.Qt.AlignVCenter)
+#                self.customwidget.resultTable.setItem(lNumRowsResult,
+#                        5, lItem)
+#
+#                #Size in Bytes and Sectors
+#                lItem = QtGui.QTableWidgetItem(str(lFrag.mSize) +
+#                        "/" +
+#                        str(lFrag.mSize /
+#                        int(self.__mGeometry.sectorsize)))
+#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
+#                lItem.setTextAlignment(QtCore.Qt.AlignRight |
+#                        QtCore.Qt.AlignVCenter)
+#                self.customwidget.resultTable.setItem(lNumRowsResult,
+#                        6, lItem)
+#
+#                lNumRowsResult += 1
         if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
                 or (pFinishedJob == Jobs.REASSEMBLE):
             self.__enableElements(True)
@@ -636,6 +650,7 @@ class CMain(object):
                     self.customwidget.fileTable.setItem(lRowCount, 3, lItem)
 
                     lRowCount += 1
+        self.__mImgVisualizer.update()
 
     def on_error_callback(self, pError):
         QtGui.QMessageBox.about(self.ui, "Error",

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Thu Jun 21 10:59:56 2012
-#      by: pyside-uic 0.2.11 running on PySide 1.0.6
+# Created: Sun Sep 16 13:19:40 2012
+#      by: pyside-uic 0.2.13 running on PySide 1.1.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -207,10 +207,8 @@ class Ui_filecarvingWidget(object):
         self.label_12.setObjectName("label_12")
         self.gridLayout_2.addWidget(self.label_12, 1, 0, 1, 1)
         self.verticalLayout_3.addLayout(self.gridLayout_2)
-        self.resultTable = QtGui.QTableWidget(self.tab_preprocessing)
+        self.resultTable = QtGui.QTableView(self.tab_preprocessing)
         self.resultTable.setObjectName("resultTable")
-        self.resultTable.setColumnCount(0)
-        self.resultTable.setRowCount(0)
         self.verticalLayout_3.addWidget(self.resultTable)
         self.tabWidget.addTab(self.tab_preprocessing, "")
         self.tab_reassembly = QtGui.QWidget()

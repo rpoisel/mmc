@@ -386,7 +386,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableWidget" name="resultTable"/>
+        <widget class="QTableView" name="resultTable"/>
        </item>
       </layout>
      </widget>
