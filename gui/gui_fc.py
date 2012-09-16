@@ -6,8 +6,8 @@
 import os
 import sys
 import platform
-import datetime
 import logging
+import datetime
 import webbrowser
 
 # PyQt4, PySide stuff
@@ -18,76 +18,16 @@ from PySide import QtUiTools
 
 # Import the compiled UI module
 import gui_resources
-import gui_options
-import gui_imgvisualizer
-import model_frags
-from filecarver import CFileCarver
-from preprocessing import preprocessing
+
+from jobs import Jobs
+from worker import CThreadWorker
 from preprocessing import fsstat
-
-
-class Jobs(object):
-    NONE = 0x0
-    CLASSIFY = 0x1
-    REASSEMBLE = 0x2
-
-
-class CThreadWorker(QtCore.QThread):
-    sBegin = QtCore.Signal(int, long, int, str)
-    sProgress = QtCore.Signal(int)
-    # job, jobs, error
-    sFinished = QtCore.Signal(int, int, int)
-    sError = QtCore.Signal(str)
-
-    def __init__(self, pOptions, pFileCarver, pJobs):
-        super(CThreadWorker, self).__init__()
-        self.mOptions = pOptions
-        self.mFileCarver = pFileCarver
-        self.mJobs = pJobs
-        self.mRunningJob = Jobs.NONE
-        self.mLastTs = datetime.datetime.now()
-
-    def beginCallback(self, pSize, pOffset, pFsType):
-        self.sBegin.emit(self.mRunningJob, pSize, pOffset, pFsType)
-
-    def progressCallback(self, pProgress):
-        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY \
-                and \
-                self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
-                    if self.mRunningJob & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
-                        self.sProgress.emit(85 + pProgress * 0.15)
-                    else:
-                        self.sProgress.emit(pProgress * 0.85)
-        else:
-            self.sProgress.emit(pProgress)
-
-    def finishedCallback(self):
-        self.sFinished.emit(self.mRunningJob, self.mJobs, False)
-
-    def run(self):
-        if self.mJobs & Jobs.CLASSIFY == Jobs.CLASSIFY:
-            self.mRunningJob = Jobs.CLASSIFY
-            try:
-                self.mFileCarver.runClassify(self.mOptions, self)
-            except OSError, pExc:
-                logging.error(str(pExc) + ". Please make sure the "
-                        "classifier binaries are compiled. ")
-                self.sError.emit(str(pExc) + ". Please make sure the "
-                        "classifier binaries are compiled. ")
-                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
-#            except Exception, pExc:
-#                logging.error(str(pExc))
-#                self.sError.emit(str(pExc))
-
-        if self.mJobs & Jobs.REASSEMBLE == Jobs.REASSEMBLE:
-            self.mRunningJob = Jobs.REASSEMBLE
-            try:
-                self.mFileCarver.runReassembly(self.mOptions, self)
-            except TypeError, pExc:
-                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
-#            except Exception, pExc:
-#                logging.error(str(pExc))
-#                self.sFinished.emit(self.mRunningJob, self.mJobs, True)
+from filecarver import CFileCarver
+from gui_options import CGuiOptions
+from model_frags import CModelFrags
+from model_files import CModelFiles
+from preprocessing import preprocessing
+from gui_imgvisualizer import CImgVisualizer
 
 
 # Create a class for our main window
@@ -146,11 +86,6 @@ class CMain(object):
                 QtGui.QAbstractItemView.SingleSelection)
         self.customwidget.resultTable.setContextMenuPolicy(
                 QtCore.Qt.CustomContextMenu)
-#        self.customwidget.resultTable.setColumnCount(7)
-#        self.customwidget.resultTable.setHorizontalHeaderLabels((
-#                "Header", "Fragment", "Start [Bytes]",
-#                "End [Bytes]", "Start [Sector]",
-#                "End [Sector]", "Size [Bytes/Sectors]"))
         self.customwidget.resultTable.horizontalHeader().\
                 setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
@@ -159,17 +94,16 @@ class CMain(object):
                 statusTip="Extract this fragment",
                 triggered=self.on_fragmentExtract)
 
-        self.customwidget.fileTable.setColumnCount(4)
-        self.customwidget.fileTable.setHorizontalHeaderLabels(("File",
-                "Filetype", "Size", "Path"))
+        self.customwidget.fileTable.setSelectionBehavior(
+                QtGui.QAbstractItemView.SelectRows)
+        self.customwidget.fileTable.setSelectionMode(
+                QtGui.QAbstractItemView.SingleSelection)
         self.customwidget.fileTable.horizontalHeader().setResizeMode(
                 QtGui.QHeaderView.Stretch)
         self.customwidget.fileTable.verticalHeader().setVisible(False)
 
         self.customwidget.progressBar.setMaximum(100)
         self.customwidget.progressBar.setMinimum(0)
-
-        #self.on_recoverFT_changed(0)
 
         # signals and slots
         self.ui.actionExit.triggered.connect(self.on_actionExit_triggered)
@@ -195,8 +129,8 @@ class CMain(object):
         self.customwidget.recoverfiletypes.\
                 currentIndexChanged[unicode].connect(
                 self.on_recoverFT_changed)
-        self.customwidget.fileTable.cellDoubleClicked.connect(
-                self.on_fileTable_cellDoubleClicked)
+        self.customwidget.fileTable.doubleClicked.connect(
+                self.on_fileTable_doubleClicked)
         self.customwidget.resultTable.customContextMenuRequested.connect(
                 self.on_result_contextMenuRequested)
 
@@ -207,11 +141,9 @@ class CMain(object):
         self.customwidget.outputDir.setText(r"c:\temp"
                 if platform.system().lower() == "windows" else "/tmp/temp")
 
-    def on_fileTable_cellDoubleClicked(self, pRow, pColumn):
-        lFile = self.customwidget.fileTable.item(pRow, 3).text()
-        if lFile is not None:
-            webbrowser.open_new_tab(self.customwidget.fileTable.item(pRow,
-                    3).text())
+    def on_fileTable_doubleClicked(self, pIndex):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://" +
+            self.mFileCarver.files[pIndex.row()].mFilePath))
 
     def on_actionExit_triggered(self):
         self.ui.close()
@@ -244,12 +176,6 @@ class CMain(object):
         if lAssemblyMethods is not None:
             for lAssembly in lAssemblyMethods:
                 self.customwidget.assemblyMethod.addItem(lAssembly)
-#        for lCnt in xrange(self.customwidget.tabWidget.count() - 2):
-#            self.customwidget.tabWidget.setTabEnabled(lCnt + 2, False)
-#        if pIdx == 0:
-#            self.customwidget.tabWidget.setTabEnabled(2, True)
-#        elif 0 < pIdx < 3:
-#            self.customwidget.tabWidget.setTabEnabled(3, True)
 
     def on_inputFile_changed(self, pPath):
         if os.path.exists(pPath):
@@ -335,8 +261,6 @@ class CMain(object):
             if self.mFileCarver is not None:
                 self.mFileCarver.cleanup()
             self.mFileCarver = CFileCarver()
-            self.__clearFragments()
-            self.__clearFiles()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.CLASSIFY | Jobs.REASSEMBLE)
 
@@ -384,7 +308,6 @@ class CMain(object):
                 return
         if self.__mLock.tryLock() is True:
             self.mLastTs = datetime.datetime.now()
-            self.__clearFiles()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.REASSEMBLE)
 
@@ -398,25 +321,8 @@ class CMain(object):
             if self.mFileCarver is not None:
                 self.mFileCarver.cleanup()
             self.mFileCarver = CFileCarver()
-            self.__clearFragments()
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.CLASSIFY)
-
-    def __clearFragments(self):
-        pass
-#        lCnt = self.customwidget.resultTable.rowCount() - 1
-#        while (lCnt >= 0):
-#            self.customwidget.resultTable.removeRow(lCnt)
-#            lCnt -= 1
-#        #self.numRowsResult = 0
-#        self.customwidget.resultTable.update()
-
-    def __clearFiles(self):
-        lCnt = self.customwidget.fileTable.rowCount() - 1
-        while (lCnt >= 0):
-            self.customwidget.fileTable.removeRow(lCnt)
-            lCnt -= 1
-        self.customwidget.fileTable.update()
 
     def __enableElements(self, pEnabled):
         self.customwidget.classifyButton.setEnabled(pEnabled)
@@ -445,7 +351,7 @@ class CMain(object):
 
     def __getOptions(self):
         # TODO rename fragmentsize to blocksize
-        lOptions = gui_options.CGuiOptions()
+        lOptions = CGuiOptions()
         lOptions.preprocess = self.customwidget.preprocessing.currentText()
         if self.customwidget.outputformat.currentText() == "PNG":
             if self.customwidget.recoverfiletypes.currentText().upper() == \
@@ -514,7 +420,7 @@ class CMain(object):
         if pJob == Jobs.CLASSIFY:
             logging.info("Beginning classifying. Imagesize is " +
                     str(pSize) + " bytes.")
-            self.__mImgVisualizer = gui_imgvisualizer.CImgVisualizer(
+            self.__mImgVisualizer = CImgVisualizer(
                     self.mFileCarver, pSize, pOffset, pFsType,
                     self.customwidget.imageView)
             self.customwidget.imageView.setScene(self.__mImgVisualizer)
@@ -531,84 +437,11 @@ class CMain(object):
         lOptions = self.__getOptions()
         lDelta = datetime.datetime.now() - self.mLastTs
         self.customwidget.duration.setText(str(lDelta))
-        lModel = model_frags.CModelFrags(self.mFileCarver.fragments)
-        lModel.setHeaderData(0, QtCore.Qt.Horizontal, "Header")
-        self.customwidget.resultTable.setModel(lModel)
-#        self.__clearFragments()
-#        lNumRowsResult = 0
-#        if self.mFileCarver.fragments is not None:
-#            for lFrag in self.mFileCarver.fragments:
-#                self.customwidget.resultTable.insertRow(lNumRowsResult)
-#                if lFrag.mIsHeader is True:
-#                    lItem = QtGui.QTableWidgetItem("H")
-#                else:
-#                    lItem = QtGui.QTableWidgetItem("")
-#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-#                self.customwidget.resultTable.setItem(lNumRowsResult, 0,
-#                        lItem)
-#
-#                lItem = QtGui.QTableWidgetItem("Fragment " +
-#                        str(lNumRowsResult))
-#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-#                self.customwidget.resultTable.setItem(lNumRowsResult, 1,
-#                        lItem)
-#                self.customwidget.resultTable.horizontalHeader().\
-#                        resizeSection(1, 10)
-#
-#                #Start Address in Bytes
-#                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset))
-#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                lItem.setTextAlignment(
-#                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-#                self.customwidget.resultTable.setItem(lNumRowsResult, 2,
-#                        lItem)
-#
-#                #End Address in Bytes
-#                lItem = QtGui.QTableWidgetItem(str(lFrag.mOffset +
-#                        lFrag.mSize))
-#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                lItem.setTextAlignment(
-#                        QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-#                self.customwidget.resultTable.setItem(lNumRowsResult, 3,
-#                        lItem)
-#
-#                #Start Address in Sectors
-#                lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
-#                # TODO this assumes that one cluster contains four sectors
-#                lItem = QtGui.QTableWidgetItem(str(lSector))
-#                        #"/" + str(lSector / 4))
-#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                lItem.setTextAlignment(QtCore.Qt.AlignRight |
-#                        QtCore.Qt.AlignVCenter)
-#                self.customwidget.resultTable.setItem(lNumRowsResult,
-#                        4, lItem)
-#
-#                #End Address in Sectors
-#                lSector = (lFrag.mOffset + lFrag.mSize) / \
-#                        int(self.__mGeometry.sectorsize) - 1
-#                # TODO this assumes that one cluster contains four sectors
-#                lItem = QtGui.QTableWidgetItem(str(lSector))
-#                        #"/" + str(lSector / 4))
-#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                lItem.setTextAlignment(QtCore.Qt.AlignRight |
-#                        QtCore.Qt.AlignVCenter)
-#                self.customwidget.resultTable.setItem(lNumRowsResult,
-#                        5, lItem)
-#
-#                #Size in Bytes and Sectors
-#                lItem = QtGui.QTableWidgetItem(str(lFrag.mSize) +
-#                        "/" +
-#                        str(lFrag.mSize /
-#                        int(self.__mGeometry.sectorsize)))
-#                lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-#                lItem.setTextAlignment(QtCore.Qt.AlignRight |
-#                        QtCore.Qt.AlignVCenter)
-#                self.customwidget.resultTable.setItem(lNumRowsResult,
-#                        6, lItem)
-#
-#                lNumRowsResult += 1
+
+        # set model for fragments view
+        lModelFrags = CModelFrags(self.mFileCarver.fragments)
+        self.customwidget.resultTable.setModel(lModelFrags)
+
         if (pJobs & Jobs.REASSEMBLE == 0 and pFinishedJob == Jobs.CLASSIFY) \
                 or (pFinishedJob == Jobs.REASSEMBLE):
             self.__enableElements(True)
@@ -625,31 +458,10 @@ class CMain(object):
         elif pFinishedJob == Jobs.REASSEMBLE:
             logging.info("Reassembling finished. ")
 
-            lRowCount = 0
-            if self.mFileCarver.files is not None:
-                for lFile in self.mFileCarver.files:
-                    self.customwidget.fileTable.insertRow(lRowCount)
-                    lItem = QtGui.QTableWidgetItem("File " + str(lRowCount))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 0, lItem)
-                    #Filetype
-                    lItem = QtGui.QTableWidgetItem(lFile.mFileType)
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 1, lItem)
-                    #Size
-                    lItem = QtGui.QTableWidgetItem(str(0))
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 2, lItem)
-                    #Path
-                    lItem = QtGui.QTableWidgetItem(lFile.mFilePath)
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled)
-                    lItem.setTextAlignment(QtCore.Qt.AlignCenter)
-                    self.customwidget.fileTable.setItem(lRowCount, 3, lItem)
+            # set model for files view
+            lModelFiles = CModelFiles(self.mFileCarver.files)
+            self.customwidget.fileTable.setModel(lModelFiles)
 
-                    lRowCount += 1
         self.__mImgVisualizer.update()
 
     def on_error_callback(self, pError):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_carving_ui.ui'
 #
-# Created: Sun Sep 16 13:19:40 2012
+# Created: Sun Sep 16 18:34:21 2012
 #      by: pyside-uic 0.2.13 running on PySide 1.1.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -312,10 +312,8 @@ class Ui_filecarvingWidget(object):
         self.verticalLayout.addLayout(self.verticalLayout_5)
         self.horizontalLayout_11 = QtGui.QHBoxLayout()
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
-        self.fileTable = QtGui.QTableWidget(self.tab_reassembly)
+        self.fileTable = QtGui.QTableView(self.tab_reassembly)
         self.fileTable.setObjectName("fileTable")
-        self.fileTable.setColumnCount(0)
-        self.fileTable.setRowCount(0)
         self.horizontalLayout_11.addWidget(self.fileTable)
         self.verticalLayout.addLayout(self.horizontalLayout_11)
         self.tabWidget.addTab(self.tab_reassembly, "")

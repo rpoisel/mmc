@@ -30,26 +30,30 @@ class CModelFrags(QAbstractTableModel):
 
             if pIndex.column() == 0:
                 return "H" if lFrag.mIsHeader else ""
-            if pIndex.column() == 1:
+            elif pIndex.column() == 1:
                 return "Fragment " + str(pIndex.row())
-            if pIndex.column() == 2:
+            elif pIndex.column() == 2:
                 # start address in bytes
                 return str(lFrag.mOffset)
-            if pIndex.column() == 3:
+            elif pIndex.column() == 3:
                 # end address in bytes
                 return str(lFrag.mOffset + lFrag.mSize)
-            if pIndex.column() == 4:
+            elif pIndex.column() == 4:
                 # start address in sectors
+                #lSector = lFrag.mOffset / int(self.__mGeometry.sectorsize)
                 return ""
-            if pIndex.column() == 5:
+            elif pIndex.column() == 5:
                 # end address in sectors
+                #lSector = (lFrag.mOffset + lFrag.mSize) / \
+                #        int(self.__mGeometry.sectorsize) - 1
                 return ""
-            if pIndex.column() == 6:
+            elif pIndex.column() == 6:
                 # size in bytes and sectors
+                #lSizeSectors = lFrag.mSize / int(self.__mGeometry.sectorsize)
                 return str(lFrag.mSize)
             return None
 
-        if pRole == Qt.TextAlignmentRole:
+        elif pRole == Qt.TextAlignmentRole:
             return Qt.AlignCenter
 
     def headerData(self, pSection, pOrientation, pRole=Qt.DisplayRole):

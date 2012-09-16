@@ -625,7 +625,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_11">
          <item>
-          <widget class="QTableWidget" name="fileTable"/>
+          <widget class="QTableView" name="fileTable"/>
          </item>
         </layout>
        </item>
