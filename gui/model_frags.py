@@ -11,6 +11,8 @@ class CModelFrags(QAbstractTableModel):
         self.__mFrags = pFrags
 
     def rowCount(self, index=QModelIndex()):
+        if self.__mFrags is None:
+            return 0
         return len(self.__mFrags)
 
     def columnCount(self, pIndex=QModelIndex()):
