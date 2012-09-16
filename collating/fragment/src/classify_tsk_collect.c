@@ -57,8 +57,16 @@ fragment_collection_t* classify_tsk(
 
     /* factor 1/4 is just an empirical value */
     /* TODO perform this step on several CPU cores */
+    /* NOTE: pOffset should only be used in case there is a real offset 
+     *       used for the invocation of TSK itself
+     */
+#if 0
     lFragments = fragment_collection_new(lBlocks, 4, pOffset, 
             pBlockGap, pMinFragSize);
+#else
+    lFragments = fragment_collection_new(lBlocks, 4, 0,
+            pBlockGap, pMinFragSize);
+#endif
 
     /* destruct fragment classifier */
     block_collection_free(lBlocks);
