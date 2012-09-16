@@ -7,8 +7,6 @@ import time
 import Queue
 from ctypes import *
 
-from tsk import tsk
-from plain import plain
 try:
     from collating.fragment import fragment
 except ImportError, pExc:
