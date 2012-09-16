@@ -34,7 +34,7 @@ class CModelFiles(QAbstractTableModel):
                 return lFile.mFileType
             elif pIndex.column() == 2:
                 # len of file
-                return str(0)
+                return str(lFile.mFragments)
             elif pIndex.column() == 3:
                 # path to file
                 return lFile.mFilePath
@@ -55,7 +55,7 @@ class CModelFiles(QAbstractTableModel):
             elif pSection == 1:
                 return "Filetype"
             elif pSection == 2:
-                return "Size"
+                return "Path"
             elif pSection == 3:
                 return "Path"
         return None

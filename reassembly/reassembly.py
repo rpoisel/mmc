@@ -19,9 +19,8 @@ class CReassembly(object):
             if pFragments[lIdx].mIsHeader == 1:
                 lIdxNoHeader += 1
 
-        self.mFiles = self.mFileHandler.prepareFiles(pOptions,
-                                                      pFragments,
-                                                      lIdxNoHeader)
+        self.mFileHandler.prepareFiles(pOptions,
+                pFragments, lIdxNoHeader, self.mFiles)
         pCaller.progressCallback(50)
         self._assemble_impl(pOptions, pFragments, lIdxNoHeader)
         self._extractReassembledFragments(pFragments, pOptions)
@@ -38,11 +37,12 @@ class CReassembly(object):
         # extract determined files
         logging.info("Beginning extraction of reassembled files")
         for lFile in self.mFiles:
-            lFile.mFilePath = pOptions.output + os.sep + \
-                                str(lFile.getHeaderFragmentId())
+            lFile.mFilePath = os.path.join(pOptions.output,
+                                str(lFile.getHeaderFragmentId()))
             if not os.path.exists(lFile.mFilePath):
                 os.makedirs(lFile.mFilePath)
-            lFile.mFilePath = lFile.mFilePath + os.sep + pOptions.outputformat
+            lFile.mFilePath = os.path.join(lFile.mFilePath,
+                    pOptions.outputformat)
 
             lDecoder = decoder.CDecoder.getDecoder(pOptions.outputformat)
             lDecoder.open(lFile.mFilePath)
@@ -85,6 +85,11 @@ class CReassembly(object):
                     lDecoder.write(lRecoverFH.read(
                         pSortedFrags[lFragIdx].mSize))
                     lDecoder.close()
+                    lFile = CFileVideo(lFragIdx)
+                    lFile.mFilePath = lFilePath
+                    lFile.mFileType = "Video"
+                    self.mFiles.append(lFile)
+
         lRecoverFH.close()
 
 
@@ -114,9 +119,10 @@ class CReassemblyPUP(CReassembly):
                     continue
                 #Iterate all non-Header Fragments
                 for lIdxFrag in lRemainingFrags:
-                    #Fragment has an error
-                    if (lFrag.mIsHeader == 0 and
-                          (lFrag.mPicBegin == "" or lFrag.mPicEnd == "")):
+                    #Fragment could not be decoded successfully
+                    if (pSortedFrags[lIdxFrag].mIsHeader == 0 and
+                          (pSortedFrags[lIdxFrag].mPicBegin == "" or
+                              pSortedFrags[lIdxFrag].mPicEnd == "")):
                         continue
 
                     lResult = self.mFileHandler.compareFrags(pSortedFrags,
@@ -149,7 +155,8 @@ class CReassemblyPUP(CReassembly):
 
 
 class CAbstractFileTypeHandler(object):
-    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader):
+
+    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader, pFiles):
         pass
 
     def compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
@@ -175,7 +182,7 @@ class CVideoHandler(CAbstractFileTypeHandler):
     def __init__(self):
         logging.info("CVideoFileHandler constructor finished")
 
-    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader):
+    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader, pFiles):
         for lDir in [os.path.join(pOptions.output, "hdr"),
                 os.path.join(pOptions.output, "frg")]:
             if os.path.exists(lDir):
@@ -272,7 +279,6 @@ class CVideoHandler(CAbstractFileTypeHandler):
         # TODO check if del() is an alternative to creating a new array
         # answer: http://stackoverflow.com/questions/1207406/\
         #             remove-items-from-a-list-while-iterating-in-python
-        lFiles = []
         for lFragIdx in xrange(len(pSortedFrags)):
             lFrag = pSortedFrags[lFragIdx]
             if lFrag.mIsHeader == 1 and lFrag.mPicEnd != "":
@@ -281,13 +287,11 @@ class CVideoHandler(CAbstractFileTypeHandler):
                 lFile.mFileType = "Video"
                 lFile.mFileName = ("h%" +
                         CVideoHandler.PATTERN_PATH) % (lFragIdx)
-                lFiles.append(lFile)
+                pFiles.append(lFile)
             elif (lFrag.mIsHeader == 0 and
                   (lFrag.mPicBegin == "" or lFrag.mPicEnd == "")):
                 logging.debug("Fragment " + str(lFragIdx) +
                         " does not contain beginning or ending frame")
-
-        return lFiles
 
     def compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
         lFragment1 = pFragments[pPath.getLastFragmentId()]
@@ -379,9 +383,8 @@ class CJpegHandler(CAbstractFileTypeHandler):
     def __init__(self):
         logging.info("CJpegFileHandler constructor finished")
 
-    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader):
+    def prepareFiles(self, pOptions, pSortedFrags, pIdxNoHeader, pFiles):
 
-        lFiles = []
         for lDir in [pOptions.output + "/hdr", pOptions.output + "/frg",
                 pOptions.output + "/path"]:
             if os.path.exists(lDir):
@@ -395,7 +398,7 @@ class CJpegHandler(CAbstractFileTypeHandler):
             lFile = CFileJpeg(lFragHeaderIdx)
             lFile.mFileType = "JPEG"
             lFile.mFileName = "h%d" % (lFragHeaderIdx)
-            lFiles.append(lFile)
+            pFiles.append(lFile)
 
             lFragment = pSortedFrags[lFragHeaderIdx]
             lData = self.readFragment(lFragment, pOptions)
@@ -419,8 +422,6 @@ class CJpegHandler(CAbstractFileTypeHandler):
                 lFragment.mIsFooter = 1
             else:
                 lFragment.mIsFooter = 0
-
-        return lFiles
 
     def compareFrags(self, pFragments, pPath, pFragmentId, pOptions):
         #Terms:
@@ -725,7 +726,7 @@ class CFileJpeg(CFile):
     MRK_EOI = 0xD9
 
     def __init__(self, pFragmentId):
-        CFile.__init__(self, pFragmentId)
+        super(CFileJpeg, self).__init__(pFragmentId)
         self.mFileType = "JPEG"
         #All Markers have a relative Position
         self.mMarker = [-1] * 255
@@ -748,7 +749,7 @@ class CFileJpeg(CFile):
 class CFileVideo(CFile):
 
     def __init__(self, pFragmentId):
-        CFile.__init__(self, pFragmentId)
+        super(CFileVideo, self).__init__(pFragmentId)
         self.mFileType = "Video"
         self.mPicBegin = ""
         self.mPicEnd = ""

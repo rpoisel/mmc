@@ -178,7 +178,9 @@ class CImgVisualizer(QGraphicsScene):
                     lColor = QColor(255, 127, 127)
                 else:
                     lColor = QColor(127, 127, 255)
+                # determine width of frame representation in view
                 lFrameWidth = lWidth * lFrag.mSize
+                # draw the actual frame in the view
                 pPainter.fillRect(lSceneX + (lFrag.mOffset * lWidth) + 1,
                         lSceneY + 1, lFrameWidth, lHeight - 1, lColor)
         except TypeError, pExc:
