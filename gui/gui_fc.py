@@ -177,6 +177,7 @@ class CMain(object):
                 self.customwidget.assemblyMethod.addItem(lAssembly)
 
     def on_inputFile_changed(self, pPath):
+        # TODO clear data that has been determined so far
         if os.path.exists(pPath):
             lOptions = self.__getOptions()
             self.__mGeometry = \
@@ -272,17 +273,44 @@ class CMain(object):
         if self.customwidget.resultTable.currentIndex().row() < 0:
             return
 
-        # TODO call extractFragment method from FileCarver
-        QtGui.QMessageBox.information(self.ui,
-                "Fragment Information",
-                str(self.mFileCarver.fragments[
-                    self.customwidget.resultTable.currentIndex().row()]))
+        # determine filename for extracted fragment
+        lFilename = QtGui.QFileDialog.getOpenFileName(self.ui,
+                "Choose File",
+                os.path.dirname(self.customwidget.outputDir.text()),
+                "All Files (*)")
+        if lFilename[0] != "":
+            if os.path.exists(lFilename[0]) is True:
+                lMsgBox = QtGui.QMessageBox()
+                lMsgBox.setText(
+                        "<b>The file you want to write already exists!</b>")
+                lMsgBox.setInformativeText("Do you want to overwrite it?")
+                lButtonCancel = lMsgBox.addButton(
+                        self.ui.tr("Cancel"),
+                        QtGui.QMessageBox.ActionRole)
+                lButtonOverwrite = lMsgBox.addButton(
+                        self.ui.tr("Overwrite"),
+                        QtGui.QMessageBox.ActionRole)
+                lMsgBox.exec_()
+                if lMsgBox.clickedButton() == lButtonOverwrite:
+                    try:
+                        self.mFileCarver.extractFragment(self.__getOptions(),
+                                self.mFileCarver.fragments[
+                                    self.customwidget.
+                                            resultTable.currentIndex().row()],
+                                lFilename[0])
+                    except OSError, pExc:
+                        QtGui.QMessageBox.about(self.ui, "Error",
+                                "Could not write to file. \n" + str(pExc))
 
     def __outputDirProblem(self):
         lMsgBox = QtGui.QMessageBox()
-        lMsgBox.setText("The specified output directory does not exist. ")
+        lMsgBox.setText(
+                "<b>The specified output directory does not exist. </b>")
         lMsgBox.setInformativeText("Do you want to create it?")
         lCreateButton = lMsgBox.addButton(self.ui.tr("Create directory"),
+                QtGui.QMessageBox.ActionRole)
+        lButtonCancel = lMsgBox.addButton(
+                self.ui.tr("Cancel"),
                 QtGui.QMessageBox.ActionRole)
         lMsgBox.exec_()
         if lMsgBox.clickedButton() == lCreateButton:

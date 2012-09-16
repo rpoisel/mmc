@@ -5,8 +5,8 @@ import platform
 
 class CDecoder(object):
     @staticmethod
-    def getDecoder(pInputFormat, pOutputFormat=None):
-        if pOutputFormat is not None and pOutputFormat.find('.dd') != -1:
+    def getDecoder(pInputFormat):
+        if pInputFormat.find('.dd') != -1:
             return CCopyDecoder()
         elif pInputFormat.find("video") != -1 or \
                 pInputFormat.find(".mkv") != -1:

@@ -7,6 +7,7 @@ import pprint
 # import only if necessary
 from preprocessing import preprocessing
 from reassembly import reassembly
+from reassembly.decoder import CDecoder
 
 
 class CFileCarver:
@@ -74,6 +75,16 @@ class CFileCarver:
                                                      self.__mFragments,
                                                      pCaller)
         pCaller.finishedCallback()
+
+    def extractFragment(self, pOptions, pFragment, pFileName):
+        # always copy decoder
+        lDecoder = CDecoder.getDecoder(".dd")
+        lRecoverFH = open(pOptions.imagefile, "rb")
+        lDecoder.open(pFileName)
+        lRecoverFH.seek(pFragment.mOffset, os.SEEK_SET)
+        lDecoder.write(lRecoverFH.read(pFragment.mSize))
+        lDecoder.close()
+        lRecoverFH.close()
 
     def cleanup(self):
         del(self.__mFragments)
