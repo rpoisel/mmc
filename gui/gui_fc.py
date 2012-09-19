@@ -83,8 +83,8 @@ class CMain(object):
                 QtGui.QAbstractItemView.SelectRows)
         self.customwidget.resultTable.setSelectionMode(
                 QtGui.QAbstractItemView.SingleSelection)
-        self.customwidget.resultTable.setContextMenuPolicy(
-                QtCore.Qt.CustomContextMenu)
+        #self.customwidget.resultTable.setContextMenuPolicy(
+        #        QtCore.Qt.CustomContextMenu)
         self.customwidget.resultTable.horizontalHeader().\
                 setResizeMode(QtGui.QHeaderView.Stretch)
         self.customwidget.resultTable.verticalHeader().setVisible(False)
@@ -130,8 +130,10 @@ class CMain(object):
                 self.on_recoverFT_changed)
         self.customwidget.fileTable.doubleClicked.connect(
                 self.on_fileTable_doubleClicked)
-        self.customwidget.resultTable.customContextMenuRequested.connect(
-                self.on_result_contextMenuRequested)
+        #self.customwidget.resultTable.customContextMenuRequested.connect(
+        #        self.on_result_contextMenuRequested)
+        self.customwidget.resultTable.doubleClicked.connect(
+                self.on_resultTable_doubleClicked)
 
         # init values
         self.customwidget.inputFile.setText(
@@ -143,6 +145,20 @@ class CMain(object):
     def on_fileTable_doubleClicked(self, pIndex):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://" +
             self.mFileCarver.files[pIndex.row()].mFilePath))
+
+    def on_resultTable_doubleClicked(self, pIndex):
+        if self.customwidget.resultTable.currentIndex().row() < 0:
+            return
+        lFragment = self.mFileCarver.fragments[
+                self.customwidget.resultTable.currentIndex().row()
+                ]
+
+        self.on_fragmentExtract(lFragment)
+
+#    def on_result_contextMenuRequested(self, pPoint):
+#        lMenu = QtGui.QMenu()
+#        lAction = lMenu.addAction(self.__actionExtractFragment)
+#        lMenu.exec_(self.customwidget.resultTable.mapToGlobal(pPoint))
 
     def on_actionExit_triggered(self):
         self.ui.close()
@@ -264,15 +280,7 @@ class CMain(object):
             self.customwidget.progressBar.setValue(0)
             self.__startWorker(Jobs.CLASSIFY | Jobs.REASSEMBLE)
 
-    def on_result_contextMenuRequested(self, pPoint):
-        lMenu = QtGui.QMenu()
-        lAction = lMenu.addAction(self.__actionExtractFragment)
-        lMenu.exec_(self.customwidget.resultTable.mapToGlobal(pPoint))
-
-    def on_fragmentExtract(self):
-        if self.customwidget.resultTable.currentIndex().row() < 0:
-            return
-
+    def on_fragmentExtract(self, pFragment):
         # determine filename for extracted fragment
         lFilename = QtGui.QFileDialog.getOpenFileName(self.ui,
                 "Choose File",
@@ -291,16 +299,15 @@ class CMain(object):
                         self.ui.tr("Overwrite"),
                         QtGui.QMessageBox.ActionRole)
                 lMsgBox.exec_()
-                if lMsgBox.clickedButton() == lButtonOverwrite:
-                    try:
-                        self.mFileCarver.extractFragment(self.__getOptions(),
-                                self.mFileCarver.fragments[
-                                    self.customwidget.
-                                            resultTable.currentIndex().row()],
-                                lFilename[0])
-                    except OSError, pExc:
-                        QtGui.QMessageBox.about(self.ui, "Error",
-                                "Could not write to file. \n" + str(pExc))
+                if lMsgBox.clickedButton() != lButtonOverwrite:
+                    return
+            try:
+                self.mFileCarver.extractFragment(self.__getOptions(),
+                        pFragment,
+                        lFilename[0])
+            except OSError, pExc:
+                QtGui.QMessageBox.about(self.ui, "Error",
+                        "Could not write to file. \n" + str(pExc))
 
     def __outputDirProblem(self):
         lMsgBox = QtGui.QMessageBox()
