@@ -2,6 +2,7 @@
     <qresource prefix="/forms">
         <file>file_carving_ui.ui</file>
         <file>mainwindow.ui</file>
+        <file>dialog_partitions.ui</file>
     </qresource>
     <qresource prefix="/images">
         <file>icon_mm_carver.png</file>

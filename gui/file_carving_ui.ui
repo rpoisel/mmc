@@ -83,6 +83,13 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="buttonPartitionManager">
+           <property name="text">
+            <string>Partition&amp;Manager</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>

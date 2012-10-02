@@ -26,8 +26,8 @@ from filecarver import CFileCarver
 from gui_options import CGuiOptions
 from model_frags import CModelFrags
 from model_files import CModelFiles
-from preprocessing import preprocessing
 from gui_imgvisualizer import CImgVisualizer
+from partition_manager import CPartitionManager
 
 
 # Create a class for our main window
@@ -41,10 +41,10 @@ class CMain(object):
         self.__mImgVisualizer = None
         self.__mLock = QtCore.QMutex()
 
-        lLoader = QtUiTools.QUiLoader()
+        self.mLoader = QtUiTools.QUiLoader()
 
-        self.ui = lLoader.load(":/forms/mainwindow.ui")
-        self.customwidget = lLoader.load(":/forms/file_carving_ui.ui")
+        self.ui = self.mLoader.load(":/forms/mainwindow.ui")
+        self.customwidget = self.mLoader.load(":/forms/file_carving_ui.ui")
         self.mIcon = QtGui.QIcon(":/images/icon_mm_carver.png")
 
         self.ui.setWindowIcon(self.mIcon)
@@ -111,6 +111,8 @@ class CMain(object):
                 self.on_outputDirButton_clicked)
         self.ui.actionOpenImage.triggered.connect(
                 self.on_inputFileButton_clicked)
+        self.customwidget.buttonPartitionManager.clicked.connect(
+                self.on_buttonPartitionManager_clicked)
         self.customwidget.classifyButton.clicked.connect(
                 self.on_classifyButton_clicked)
         self.customwidget.reassembleButton.clicked.connect(
@@ -196,19 +198,21 @@ class CMain(object):
         # TODO clear data that has been determined so far
         if os.path.exists(pPath):
             lOptions = self.__getOptions()
-            self.__mGeometry = \
-                    fsstat.CFsStat.getFsGeometry(lOptions)
-            logging.info("FS Info: " + str(self.__mGeometry))
-            self.customwidget.offset.setText(str(self.__mGeometry.offset))
-            self.customwidget.fragmentSize.setText(
-                    str(self.__mGeometry.blocksize))
-            self.customwidget.fsInfo.setText(
-                    "FS Info: " + str(self.__mGeometry))
-            pass
+            self.customwidget.fsInfo.setText("Source exists.")
+            self.customwidget.buttonPartitionManager.setEnabled(True)
+#            self.__mGeometry = \
+#                    fsstat.CFsStat.getFsGeometry(lOptions)
+#            logging.info("FS Info: " + str(self.__mGeometry))
+#            self.customwidget.offset.setText(str(self.__mGeometry.offset))
+#            self.customwidget.fragmentSize.setText(
+#                    str(self.__mGeometry.blocksize))
+#            self.customwidget.fsInfo.setText(
+#                    "FS Info: " + str(self.__mGeometry))
         else:
+            self.customwidget.buttonPartitionManager.setEnabled(False)
             self.customwidget.fsInfo.setText(
                     "<html><font color=\"#FF0000\">"
-                    "Imagefile does not exist.</font></html>")
+                    "Source does not exist.</font></html>")
 
     def on_outputDir_changed(self, pPath):
         if os.path.isdir(pPath):
@@ -253,8 +257,10 @@ class CMain(object):
                 "All Files (*)")
         if lFilename[0] != "":
             self.customwidget.inputFile.setText(lFilename[0])
-#        Popen(["mmls", "/home/rpoisel/git/mmc/data/usbkey.dd"],
-#                stdout=PIPE).communicate()[0].split('\n')
+
+    def on_buttonPartitionManager_clicked(self):
+        lPartitionManager = CPartitionManager(self.mLoader)
+        lPartitionManager.run(self.customwidget.inputFile.text())
 
     def on_outputDirButton_clicked(self):
         lDialog = QtGui.QFileDialog()
