@@ -253,6 +253,8 @@ class CMain(object):
                 "All Files (*)")
         if lFilename[0] != "":
             self.customwidget.inputFile.setText(lFilename[0])
+#        Popen(["mmls", "/home/rpoisel/git/mmc/data/usbkey.dd"],
+#                stdout=PIPE).communicate()[0].split('\n')
 
     def on_outputDirButton_clicked(self):
         lDialog = QtGui.QFileDialog()
