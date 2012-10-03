@@ -259,8 +259,9 @@ class CMain(object):
             self.customwidget.inputFile.setText(lFilename[0])
 
     def on_buttonPartitionManager_clicked(self):
-        lPartitionManager = CPartitionManager(self.mLoader)
-        lPartitionManager.run(self.customwidget.inputFile.text())
+        lPartitionManager = CPartitionManager(self.mLoader,
+                self.customwidget.inputFile.text())
+        lPartitionManager.run()
 
     def on_outputDirButton_clicked(self):
         lDialog = QtGui.QFileDialog()
