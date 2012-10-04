@@ -1,6 +1,8 @@
-from preprocessing import mmls
 from PySide import QtCore
 from PySide import QtGui
+
+from preprocessing import mmls
+from model_partitions import CModelPartitions
 
 
 class CPartitionManager(object):
@@ -8,26 +10,33 @@ class CPartitionManager(object):
         super(CPartitionManager, self).__init__()
         self.mDialog = pLoader.load(":/forms/dialog_partitions.ui")
         self.mMmls = mmls.CMmls(pSource)
+        self.mPartitions = self.mMmls.getPartitions()
+
+        # check if partition table could be interpreted
+        if self.mMmls.getUnitsize() < 0:
+            # error
+            self.mDialog.fsInfo.setPlainText(self.mMmls.getOutput())
+        else:
+            # partitions exist
+            lModel = CModelPartitions(self.mPartitions)
+            self.mDialog.partInfo.setModel(lModel)
 
         # set up GUI elements
-        self.mDialog.partInfo.setColumnCount(4)
         self.mDialog.partInfo.setSelectionBehavior(
                 QtGui.QAbstractItemView.SelectRows)
         self.mDialog.partInfo.setSelectionMode(
                 QtGui.QAbstractItemView.SingleSelection)
-        self.mDialog.partInfo.setHorizontalHeaderLabels(
-                ["start", "end", "len", "type"]
-                )
+
         self.mDialog.partInfo.horizontalHeader().setResizeMode(
                 QtGui.QHeaderView.Stretch)
         self.mDialog.partInfo.horizontalHeader().setResizeMode(
-                3, QtGui.QHeaderView.ResizeToContents)
+                0, QtGui.QHeaderView.ResizeToContents)
 
         # set interactivity
         self.mDialog.buttonSelect.clicked.connect(
                 self.on_buttonSelect_clicked)
-        self.mDialog.partInfo.cellClicked.connect(
-                self.on_cell_clicked)
+        self.mDialog.partInfo.clicked.connect(
+                self.on_partition_clicked)
 
     def on_buttonSelect_clicked(self):
         # set offset parameters in gui
@@ -35,29 +44,10 @@ class CPartitionManager(object):
         # then close dialog
         self.mDialog.close()
 
-    def on_cell_clicked(self, pRow, pCol):
-        print "Offset: " + self.mDialog.partInfo.item(pRow, 0).text()
+    def on_partition_clicked(self, pIndex):
+        self.mDialog.fsInfo.setPlainText("Offset: " +
+                self.mPartitions[pIndex.row()][0])
 
     def run(self):
-        # check if partition table could be interpreted
-        if self.mMmls.getUnitsize() < 0:
-            # error
-            self.mDialog.fsInfo.setPlainText(self.mMmls.getOutput())
-        else:
-            # partitions exist
-            lPartitions = self.mMmls.getPartitions()
-            self.mDialog.partInfo.setRowCount(len(lPartitions))
-            for lCnt in range(len(lPartitions)):
-                for lCntElem in range(len(lPartitions[lCnt])):
-                    lItem = QtGui.QTableWidgetItem(
-                            lPartitions[lCnt][lCntElem])
-                    lItem.setFlags(QtCore.Qt.ItemIsEnabled |
-                            QtCore.Qt.ItemIsSelectable)
-                    if lCntElem < 3:
-                        lItem.setTextAlignment(QtCore.Qt.AlignRight |
-                                QtCore.Qt.AlignVCenter)
-                    self.mDialog.partInfo.setItem(lCnt, lCntElem,
-                            lItem)
-
         # show as modal dialog
         self.mDialog.exec_()
